@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from astropy.visualization import astropy_mpl_style
 from astropy.io import fits
 plt.style.use(astropy_mpl_style)
+# kadr_num  = 0 # номер кадра для отображения на графиках
 
 # трешхолд по Отцу для бинаризации
 def otsu_tresh(gray):
@@ -72,6 +73,7 @@ def cross_corr(img, D, latency, frames_per_sec):
         all_corr[i] = cross_corr_ft(img[i], img[i+latency])
     avr_cross = np.mean(all_corr, axis=0, dtype='float32')
     print('size of cross_corr image:', avr_cross.shape)
+    
     x = np.round(v(D, img, latency, frames_per_sec)*np.linspace(-avr_cross.shape[0]//2, avr_cross.shape[0]//2, 7), 2)
     fig = plt.figure()
     ax = plt.axes()
@@ -88,7 +90,7 @@ def cross_corr(img, D, latency, frames_per_sec):
     # plt.savefig(f'C:/astro/corr_with_latency_{latency}.png', bbox_inches='tight')
     
     
-def data_processing(file, file_bias, D, latency):
+def domecam(file, file_bias, D, latency):
     st = time.perf_counter()
     with fits.open(os.listdir(os.getcwd())[os.listdir(os.getcwd()).index(file_bias)]) as df:
         df.info()
