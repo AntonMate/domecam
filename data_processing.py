@@ -22,8 +22,8 @@ def otsu_tresh(gray):
         pcf = np.sum(his[t:])   
         Wb = pcb * mean_weight
         Wf = pcf * mean_weight
-        mub = np.sum(intensity_arr[:t]*his[:t]) / np.float(pcb)
-        muf = np.sum(intensity_arr[t:]*his[t:]) / np.float(pcf)
+        mub = np.sum(intensity_arr[:t]*his[:t]) / np.float32(pcb)
+        muf = np.sum(intensity_arr[t:]*his[t:]) / np.float32(pcf)
         value = Wb * Wf * (mub - muf) ** 2
         if value > final_value:
             final_thresh = t
@@ -92,10 +92,10 @@ def cross_corr(img, D, latency, frames_per_sec):
     
 def domecam(file, file_bias, D, latency):
     st = time.perf_counter()
-    with fits.open(os.listdir(os.getcwd())[os.listdir(os.getcwd()).index(file_bias)]) as df:
+    with fits.open(os.path.abspath(file_bias)) as df:
         df.info()
         avr_bias = np.mean(df[0].data, axis=0, dtype='float32')      
-    with fits.open(os.listdir(os.getcwd())[os.listdir(os.getcwd()).index(file)]) as df: 
+    with fits.open(os.path.abspath(file)) as df: 
         df.info()
         frames_per_sec = 1 / df[0].header['FRATE']
         cross_corr(sq_cropp(df[0].data - avr_bias), D, latency, frames_per_sec)   
