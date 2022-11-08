@@ -63,7 +63,7 @@ def v(D, img, latency, frames_per_sec):
     return (D / img.shape[2]) / (latency * frames_per_sec)
 
 def cross_corr_ft(img1, img2):
-    corr = np.fft.fftshift(np.real(np.fft.ifft2(np.fft.fft2(img1)*np.fft.fft2(img2).conjugate())))
+    corr = np.fft.fftshift(np.abs(np.fft.ifft2(np.fft.fft2(img1)*np.fft.fft2(img2).conjugate())))
     corr /= np.max(corr)
     return corr
 
