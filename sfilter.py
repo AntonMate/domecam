@@ -3,30 +3,30 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-df = pd.read_csv("C:/Users/miron/Downloads/KC19_d16t4_Safonov.csv", sep = ';')
-df['14.42.43'] = df['14.42.43'] / 100
+spectral_filter = pd.read_csv("C:/Users/miron/Downloads/KC19_d16t4_Safonov.csv", sep = ';')
+spectral_filter['14.42.43'] = spectral_filter['14.42.43'] / 100
 
-ccd = pd.read_csv("C:/Users/miron/Downloads/ccd_prosilica2.crv", sep = ' ')
-ccd['X'] = ccd['X'] * 1000
+ccd_QE = pd.read_csv("C:/Users/miron/Downloads/ccd_prosilica2.crv", sep = ' ')
+ccd_QE['X'] = ccd_QE['X'] * 1000
 
-a05 = pd.read_csv("C:/Users/miron/Downloads/a05.sp", sep = ' ')
+star = pd.read_csv("C:/Users/miron/Downloads/a05.sp", sep = ' ')
 
-def sfilter(df, ccd, a05, D=2.5, D_pix=228, z=2000):
+def sfilter(spectral_filter, ccd_QE, star, D=2.5, D_pix=228, z=2000):
     # на данном этапе мы обрезаем значения файлов так, чтобы они покрывались всеми тремя файлами
-    tmp_min = np.max([ccd['X'][0], a05['X'][0], df['WAVE_LENGTH'][0]])
-    tmp_max = np.min([ccd['X'].iat[-1], a05['X'].iat[-1], df['WAVE_LENGTH'].iat[-1]])
+    tmp_min = np.max([ccd_QE['X'][0], star['X'][0], spectral_filter['WAVE_LENGTH'][0]])
+    tmp_max = np.min([ccd_QE['X'].iat[-1], star['X'].iat[-1], spectral_filter['WAVE_LENGTH'].iat[-1]])
 
-    df = df[df['WAVE_LENGTH'] < tmp_max]
-    X1 = df['WAVE_LENGTH'] * pow(10, -9) # [м]
-    Y1 = df['14.42.43']
+    spectral_filter = spectral_filter[spectral_filter['WAVE_LENGTH'] < tmp_max]
+    X1 = spectral_filter['WAVE_LENGTH'] * pow(10, -9) # [м]
+    Y1 = spectral_filter['14.42.43']
 
-    ccd = ccd[ccd['X'] > tmp_min]
-    X2 = ccd['X'] * pow(10, -9) # [м]
-    Y2 = ccd['Y']
+    ccd_QE = ccd_QE[ccd_QE['X'] > tmp_min]
+    X2 = ccd_QE['X'] * pow(10, -9) # [м]
+    Y2 = ccd_QE['Y']
 
-    a05 = a05[a05['X'] > tmp_min]
-    X3 = a05['X'] * pow(10, -9) # [м]
-    Y3 = a05['Y'] 
+    star = star[star['X'] > tmp_min]
+    X3 = star['X'] * pow(10, -9) # [м]
+    Y3 = star['Y'] 
 
     coeff = 1
     k = 1000*coeff
