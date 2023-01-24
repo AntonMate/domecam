@@ -2,16 +2,15 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
+def sfilter(D=None, D_pix=None, z=None):
+    spectral_filter = pd.read_csv("C:/Users/miron/Downloads/KC19_d16t4_Safonov.csv", sep = ';')
+    spectral_filter['14.42.43'] = spectral_filter['14.42.43'] / 100
 
-spectral_filter = pd.read_csv("C:/Users/miron/Downloads/KC19_d16t4_Safonov.csv", sep = ';')
-spectral_filter['14.42.43'] = spectral_filter['14.42.43'] / 100
+    ccd_QE = pd.read_csv("C:/Users/miron/Downloads/ccd_prosilica2.crv", sep = ' ')
+    ccd_QE['X'] = ccd_QE['X'] * 1000
 
-ccd_QE = pd.read_csv("C:/Users/miron/Downloads/ccd_prosilica2.crv", sep = ' ')
-ccd_QE['X'] = ccd_QE['X'] * 1000
-
-star = pd.read_csv("C:/Users/miron/Downloads/a05.sp", sep = ' ')
-
-def sfilter(spectral_filter, ccd_QE, star, D=2.5, D_pix=228, z=2000):
+    star = pd.read_csv("C:/Users/miron/Downloads/a05.sp", sep = ' ')
+    
     # на данном этапе мы обрезаем значения файлов так, чтобы они покрывались всеми тремя файлами
     tmp_min = np.max([ccd_QE['X'][0], star['X'][0], spectral_filter['WAVE_LENGTH'][0]])
     tmp_max = np.min([ccd_QE['X'].iat[-1], star['X'].iat[-1], spectral_filter['WAVE_LENGTH'].iat[-1]])
