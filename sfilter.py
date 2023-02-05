@@ -43,7 +43,7 @@ def sfilter(D=None, Dpix=None, z=None):
     omega_lambdas_scale = 1 / (delta_lambdas) # максималльноешаг по частоте, [м^-1]
     res_fft = pow((np.imag(np.fft.fft(result/lambdas))), 2)
 
-    nx = 2 * Dpix + 2
+    nx = 2 * Dpix + 1
 
     delta = D/Dpix # шаг субапертуры, период дискретизации (то, насколько одно значение отстает от следующего) [м]
     
