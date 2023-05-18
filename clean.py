@@ -246,7 +246,7 @@ def one_speckle_fit(params=None, data=None):
     return fit, popt
 
 
-def curvef(file=None, file2=None, mode=None, D=None, latency=None, sec_per_frame=None, dist0=None, dist02=None, gain=None, thresh_manual=None, thresh_manual2=None, niter=None, window=None, run_clean=None, checkpointf=None, step=None, seeing_lambda=None, data_dir=None):
+def curvef(file=None, file2=None, mode=None, D=None, latency=None, sec_per_frame=None, dist0=None, dist02=None, gain=None, thresh_manual=None, thresh_manual2=None, niter=None, window=None, run_clean=None, checkpointf=None, step=None, seeing_lambda=None, data_dir=None, save_as=None):
     global cjk, t, a1, gammas, delta
     if mode == 'orig':
         data = np.loadtxt(f'{data_dir}/{file}')
@@ -320,8 +320,38 @@ def curvef(file=None, file2=None, mode=None, D=None, latency=None, sec_per_frame
             fig.colorbar(ax.imshow(data2, cmap='gray'), ax=ax) 
             fig.colorbar(ax2.imshow(clean2, cmap='gray'), ax=ax2) 
             fig.colorbar(ax3.imshow(residual2, cmap='gray'), ax=ax3) 
-            fig.savefig(f'{data_dir}/fit2.png', bbox_inches='tight')
+            
+            v = (D / pupil.shape[0]) / (latency * sec_per_frame)
+            x = np.round(v*np.linspace(-data.shape[0]//2+1, data.shape[0]//2, 5), 2)
+            y = np.round(v*np.linspace(-data.shape[0]//2+1, data.shape[0]//2, 5), 2)
+            y = np.flipud(y)
 
+            ax.set_xticks(np.linspace(0, data.shape[1], 5))
+            ax.set_yticks(np.linspace(0, data.shape[0], 5))
+            ax.set_xticklabels(x)
+            ax.set_yticklabels(y)
+            ax.set_ylabel('Vy, m/s')
+            ax.set_xlabel('Vx, m/s')
+            ax.grid(color='grey', linestyle='--', linewidth=0.7, alpha=0.4)
+
+            ax2.set_xticks(np.linspace(0, data.shape[1], 5))
+            ax2.set_yticks(np.linspace(0, data.shape[0], 5))
+            ax2.set_xticklabels(x)
+            ax2.set_yticklabels(y)
+            ax2.set_ylabel('Vy, m/s')
+            ax2.set_xlabel('Vx, m/s')
+            ax2.grid(color='grey', linestyle='--', linewidth=0.7, alpha=0.4)
+
+            ax3.set_xticks(np.linspace(0, data.shape[1], 5))
+            ax3.set_yticks(np.linspace(0, data.shape[0], 5))
+            ax3.set_xticklabels(x)
+            ax3.set_yticklabels(y)
+            ax3.set_ylabel('Vy, m/s')
+            ax3.set_xlabel('Vx, m/s')
+            ax3.grid(color='grey', linestyle='--', linewidth=0.7, alpha=0.4)
+
+            fig.savefig(f'{data_dir}/fit2_{save_as}.png', bbox_inches='tight')
+            
             ax.set_title(f'max: {np.max(data2):.4f}, min: {np.min(data2):.4f}') 
             ax2.set_title(f'max: {np.max(clean2):.4f}, min: {np.min(clean2):.4f}') 
             ax3.set_title(f'max: {np.max(residual2):.4f}, min: {np.min(residual2):.4f}')
@@ -349,7 +379,37 @@ def curvef(file=None, file2=None, mode=None, D=None, latency=None, sec_per_frame
         fig.colorbar(ax.imshow(data, cmap='gray'), ax=ax) 
         fig.colorbar(ax2.imshow(clean, cmap='gray'), ax=ax2) 
         fig.colorbar(ax3.imshow(residual, cmap='gray'), ax=ax3) 
-        fig.savefig(f'{data_dir}/fit.png', bbox_inches='tight')
+        
+        v = (D / pupil.shape[0]) / (latency * sec_per_frame)
+        x = np.round(v*np.linspace(-data.shape[0]//2+1, data.shape[0]//2, 5), 2)
+        y = np.round(v*np.linspace(-data.shape[0]//2+1, data.shape[0]//2, 5), 2)
+        y = np.flipud(y)
+        
+        ax.set_xticks(np.linspace(0, data.shape[1], 5))
+        ax.set_yticks(np.linspace(0, data.shape[0], 5))
+        ax.set_xticklabels(x)
+        ax.set_yticklabels(y)
+        ax.set_ylabel('Vy, m/s')
+        ax.set_xlabel('Vx, m/s')
+        ax.grid(color='grey', linestyle='--', linewidth=0.7, alpha=0.4)
+        
+        ax2.set_xticks(np.linspace(0, data.shape[1], 5))
+        ax2.set_yticks(np.linspace(0, data.shape[0], 5))
+        ax2.set_xticklabels(x)
+        ax2.set_yticklabels(y)
+        ax2.set_ylabel('Vy, m/s')
+        ax2.set_xlabel('Vx, m/s')
+        ax2.grid(color='grey', linestyle='--', linewidth=0.7, alpha=0.4)
+        
+        ax3.set_xticks(np.linspace(0, data.shape[1], 5))
+        ax3.set_yticks(np.linspace(0, data.shape[0], 5))
+        ax3.set_xticklabels(x)
+        ax3.set_yticklabels(y)
+        ax3.set_ylabel('Vy, m/s')
+        ax3.set_xlabel('Vx, m/s')
+        ax3.grid(color='grey', linestyle='--', linewidth=0.7, alpha=0.4)
+        
+        fig.savefig(f'{data_dir}/fit_{save_as}.png', bbox_inches='tight')
         
         ax.set_title(f'max: {np.max(data):.4f}, min: {np.min(data):.4f}') 
         ax2.set_title(f'max: {np.max(clean):.4f}, min: {np.min(clean):.4f}') 
@@ -415,7 +475,7 @@ def curvef(file=None, file2=None, mode=None, D=None, latency=None, sec_per_frame
         r0 = pow(0.423 * pow((2*np.pi/seeing_lambda), 2) * sum_cn2, -3/5)
         seeing = 206265 * 0.98 * seeing_lambda/r0
         print(f'seeing, arcsec: {seeing:.2f}')
-        
+             
         with open(f'{data_dir}/fitlog.txt', 'w') as f:
             print(f'file: {file}', file=f)
             print('\n-------- General settings -------', file=f)
