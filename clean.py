@@ -99,7 +99,6 @@ def CLEAN(dirty, gain=None, thresh=None, niter=None, window=None, checkpointf=No
         cl += psf*gain
         all_params.append(params)
         all_errors.append(errors)
-#         print('-residual value:', res[my, mx])
         
         if step is not None and checkpointf == 'yes':
             if (i+1)%step == 0:
@@ -107,15 +106,7 @@ def CLEAN(dirty, gain=None, thresh=None, niter=None, window=None, checkpointf=No
                 fit, params2 = one_speckle_fit(all_params[i-(step-1):i+1], res2)
                 res2 -= fit
                 cl2 += fit
-            
-#             plt.figure()
-#             plt.imshow(res2)
-#             plt.show()
-            
-#             plt.figure()
-#             plt.imshow(cl2)
-#             plt.show()
-        
+                 
         tmp = i
         if np.max(res) < thresh:
             reason = 'Done, thresh reached!'
@@ -162,11 +153,6 @@ def multi_speckle_fit(params, ydata=None, window=None, t=None, delta=None, X=Non
         fit = np.zeros(ydata.shape)
         ydata = ydata[Ypix1-k:Ypix1+k, Xpix1-k:Xpix1+k]
         
-#         plt.figure()
-#         plt.imshow(ydata, cmap='gray')
-#         plt.colorbar()
-#         plt.show()
-        
         x = np.linspace(-ydata.shape[1]//2, ydata.shape[1]//2-1, ydata.shape[1])
         y = np.linspace(-ydata.shape[0]//2, ydata.shape[0]//2-1, ydata.shape[0])
         X, Y = np.meshgrid(x, y)
@@ -183,14 +169,11 @@ def multi_speckle_fit(params, ydata=None, window=None, t=None, delta=None, X=Non
         return fit, popt[0], popt[1], popt[2], popt[3], np.sqrt(np.diag(pcov))
         
     res = np.zeros(ydata.shape)
-#     print(f'Speckle fitting: {params[0]} {params[1]} {1e-14*params[2]} {1000*params[3]}')
     fit, Vx, Vy, Cn2, z, errors = speckle_fit(params, ydata, window=window)
     
     xcoord = int(Vx*t/delta)
     ycoord = int(Vy*t/delta)
     res +=fit        
-#     print(f'Fitted parametrs: {Vx:.2f} {Vy:.2f} {1e-14*Cn2} {1000*z}')
-#     print('time:', time.perf_counter()-st)    
     return res, [Vx, Vy, Cn2, z], errors
 
 def one_speckle_fit(params=None, data=None): 
@@ -246,7 +229,7 @@ def one_speckle_fit(params=None, data=None):
     return fit, popt
 
 
-def curvef(file=None, file2=None, mode=None, D=None, latency=None, sec_per_frame=None, dist0=None, dist02=None, gain=None, thresh_manual=None, thresh_manual2=None, niter=None, window=None, run_clean=None, checkpointf=None, step=None, seeing_lambda=None, data_dir=None, save_as=None):
+def curvef(file=None, file2=None, mode=None, D=None, latency=None, sec_per_frame=None, dist0=None, dist02=None, gain=None, thresh_manual=None, thresh_manual2=None, niter=None, window=None, run_clean=None, checkpointf=None, step=None, seeing_lambda=None, data_dir=None):
     global cjk, t, a1, gammas, delta
     if mode == 'orig':
         data = np.loadtxt(f'{data_dir}/{file}')
@@ -273,14 +256,7 @@ def curvef(file=None, file2=None, mode=None, D=None, latency=None, sec_per_frame
     delta = D/(pupil.shape[0]) # шаг по пикселю
     t = latency * sec_per_frame
 
-#     if thresh_type == 'otsu':
-#         thresh = threshold_otsu(data)
-#         if file2 is not None:
-#             thresh2 = threshold_otsu(data2)
-#     if thresh_type == 'multiotsu':
-#         thresh = threshold_multiotsu(data)[0]
-#         if file2 is not None:
-#             thresh2 = threshold_multiotsu(data2)[0]
+
     thresh = threshold_multiotsu(data)[0]
     if file2 is not None:
         thresh2 = threshold_multiotsu(data2)[0]
@@ -350,7 +326,7 @@ def curvef(file=None, file2=None, mode=None, D=None, latency=None, sec_per_frame
             ax3.set_xlabel('Vx, m/s')
             ax3.grid(color='grey', linestyle='--', linewidth=0.7, alpha=0.4)
 
-            fig.savefig(f'{data_dir}/fit2_{save_as}.png', bbox_inches='tight')
+            fig.savefig(f'{data_dir}/fit2.png', bbox_inches='tight')
             
             ax.set_title(f'max: {np.max(data2):.4f}, min: {np.min(data2):.4f}') 
             ax2.set_title(f'max: {np.max(clean2):.4f}, min: {np.min(clean2):.4f}') 
@@ -409,7 +385,7 @@ def curvef(file=None, file2=None, mode=None, D=None, latency=None, sec_per_frame
         ax3.set_xlabel('Vx, m/s')
         ax3.grid(color='grey', linestyle='--', linewidth=0.7, alpha=0.4)
         
-        fig.savefig(f'{data_dir}/fit_{save_as}.png', bbox_inches='tight')
+        fig.savefig(f'{data_dir}/fit.png', bbox_inches='tight')
         
         ax.set_title(f'max: {np.max(data):.4f}, min: {np.min(data):.4f}') 
         ax2.set_title(f'max: {np.max(clean):.4f}, min: {np.min(clean):.4f}') 

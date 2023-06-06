@@ -5,14 +5,16 @@ import os
 
 from scipy.signal import correlate
 from skimage.filters import threshold_otsu
-from skimage.filters import gaussian
 from astropy.io import fits
+
 
 # ----------------------
 def correlate1(frames, image_binary, latency): 
 #   corr = np.fft.fftshift(np.real(np.fft.ifft2(np.fft.fft2(img1)*np.fft.fft2(img2).conjugate()))) # np.real; np.abs
     correlation = [correlate(frames[i], frames[i + latency], mode='full', method='fft') 
                    for i in range(frames.shape[0] - latency)]
+    
+    
     res = np.mean(correlation, axis=0, dtype=np.float32)
     res /= np.sum(image_binary)
     
@@ -22,6 +24,7 @@ def correlate1(frames, image_binary, latency):
     
 # ----------------------
 def pupil(images, latency): 
+    
     def image_square_cropp(images): 
         mask = images[np.random.randint(images.shape[0])] != 0
         rows = np.flatnonzero((mask.any(axis=1))) 
@@ -54,11 +57,22 @@ def pupil(images, latency):
     images_clean[np.isnan(images_clean)] = 0
     
     images_clean = image_square_cropp(images_clean) # обрезка зрачка в квадрат
-    images_clean = image_size(images_clean) # подгонка размера изображений зрачка под 226х226
+    images_clean = image_size(images_clean) # подгонка размера изображений зрачка под 226х226 
     
-    cross_corr = correlate1(images_clean, image_binary, latency)
+#     cross_corr = correlate1(images_clean, image_binary, latency)
+    cross_corr = np.ones((452, 452))
     res = images_clean[np.random.randint(images_clean.shape[0])]
+    
     return res, cross_corr  
+
+def c_jk(nx, frame):
+    I0c = (frame != 0) * int(1)
+    res = correlate(I0c, I0c, mode='full', method='fft')
+    res = res / np.sum(frame!=0)
+
+    tmp = np.zeros((res.shape[0]+1, res.shape[1]+1))
+    tmp[1:,1:] = res
+    return tmp
 
 def binning(image, factor=None):
     # https://stackoverflow.com/questions/36063658/how-to-bin-a-2d-array-in-numpy
@@ -69,58 +83,56 @@ def binning(image, factor=None):
     res = res.sum(1).sum(2)
     return res
 
-def start(file=None, file_bias=None, bin_factor=None, D=None, latency=None, data_dir=None, save_as=None):
+def one(file=None, file_bias=None, bin_factor=None, D=None, latency=None, sec_per_frame=None, data_dir=None):
     st = time.perf_counter() 
-   
+    print(f'{file}')
+    print('Collecting data...')
     with fits.open("".join([data_dir, '/', file])) as f:
-        f.info()
         header = f[0].header
-        sec_per_frame = 0.01
         data = np.float32(f[0].data)
-    
-        if bin_factor is not None:
-            data = np.array([binning(image, factor=bin_factor) for image in data])
-            print('binning done:', data.shape)
-    
-        if file_bias is not None:
-            with fits.open("".join([data_dir, '/', file_bias])) as f:
-                f.info()
-                bias = np.mean(f[0].data, axis=0, dtype=np.float32)
+        print(f' - Done! {data.shape[0]} pupil images shape: {data.shape[1]}x{data.shape[2]}')
         
-            data -= bias
-    
-        frame, data_corr = pupil(data, latency)
-    
-        print('cross corr latency:', latency)
-        print('pupil image shape:', frame.shape)
-        print('cross corr image shape:', data_corr.shape)
-        print('max cross corr value:', np.unravel_index(np.argmax(data_corr), data_corr.shape), np.max(data_corr))
-        print('min cross corr value:', np.unravel_index(np.argmin(data_corr), data_corr.shape), np.min(data_corr))
-    
-    np.savetxt(f'{data_dir}/{save_as}.gz', data_corr)
-    np.savetxt(f'{data_dir}/pupil.gz', frame)
-    np.savetxt(f'{data_dir}/{save_as}_blur.gz', gaussian(data_corr, sigma=1))
-    print('\nfiles saved!')
-    print('time:', time.perf_counter()-st)
-    
-    fig, (ax, ax2) = plt.subplots(1, 2, figsize=(20, 5)) 
-    ax.imshow(frame, cmap='gray')
-    ax2.imshow(data_corr, cmap='gray')
-    ax.set_title('random pupil image')
-    ax2.set_title('cross-corr')
-    
-    if D is not None:
-        v = (D / data_corr.shape[1]) / (latency * sec_per_frame)
-        x = np.round(v*np.linspace(-data_corr.shape[0]//2+1, data_corr.shape[0]//2, 5), 2)
-        y = np.round(v*np.linspace(-data_corr.shape[0]//2+1, data_corr.shape[0]//2, 5), 2)
-        y = np.flipud(y)
+        if data.shape[1] > 246:
+            print('WARNING: need binning')
+        
+        if file_bias is not None:
+            print('Collecting bias...')
+            with fits.open("".join([data_dir, '/', file_bias])) as f:
+                bias = np.mean(f[0].data, axis=0, dtype=np.float32)
+                print(f' - Done! bias shape: {bias.shape[0]}x{bias.shape[1]}')
+        
+        if bin_factor is not None:
+            print('Binning...')
+            data = np.array([binning(image, factor=bin_factor) for image in data])
+            if file_bias is not None:
+                bias = binning(bias, factor=bin_factor)
+            print(f' - Done! New shape: {data.shape[1]}x{data.shape[2]}')
 
-        ax2.set_xticks(np.linspace(0, data_corr.shape[1], 5))
-        ax2.set_yticks(np.linspace(0, data_corr.shape[0], 5))
-        ax2.set_xticklabels(x)
-        ax2.set_yticklabels(y)
-        ax2.set_ylabel('Vy, m/s')
-        ax2.set_xlabel('Vx, m/s')
+        if file_bias is not None:
+            data -= bias
+        
+        print('Cross correlating...')
+        frame, data_corr = pupil(data, latency)
+        cjk = c_jk(data_corr.shape[0], frame)
+        if cjk.shape != data_corr.shape:
+            print('WARNING: wrong cjk and corr shape')
+            
+        print(f' - Done! Cross-correlation image shape: {data_corr.shape[0]}x{data_corr.shape[1]}')
     
-    ax2.grid(color='grey', linestyle='--', linewidth=0.7, alpha=0.4)
-    plt.show()
+#     print('Creating output image...')    
+#     v = (D / data_corr.shape[0]) / (latency * sec_per_frame)
+#     x = np.round(v*np.linspace(-data_corr.shape[0]//2+1, data_corr.shape[0]//2, 5), 2)
+#     y = np.round(v*np.linspace(-data_corr.shape[0]//2+1, data_corr.shape[0]//2, 5), 2)
+#     y = np.flipud(y)
+   
+#     plt.imshow(data_corr, cmap='gray')
+#     plt.xticks(np.linspace(0, data_corr.shape[1], 5), labels=x)
+#     plt.yticks(np.linspace(0, data_corr.shape[0], 5), labels=y)
+#     plt.ylabel('Vy, m/s')
+#     plt.xlabel('Vx, m/s')
+#     plt.colorbar()
+#     plt.grid(color='grey', linestyle='--', linewidth=0.7, alpha=0.2)
+#     plt.savefig(f"{data_dir}/{file.replace('.fits', '')}.png", bbox_inches='tight')
+#     print(f' - Done! Files saved to {data_dir}')
+    print('time:', time.perf_counter()-st)
+    return data_corr, cjk
