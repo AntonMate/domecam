@@ -4,12 +4,14 @@ import matplotlib.pyplot as plt
 import os
 
 from scipy.signal import correlate
-from skimage.filters import threshold_otsu
+from skimage.filters import threshold_otsu, gaussian
 from astropy.io import fits
 
 
 # ----------------------
 def correlate1(frames, image_binary, latency): 
+    print('Cross correlating...')
+    st = time.perf_counter() 
 #   corr = np.fft.fftshift(np.real(np.fft.ifft2(np.fft.fft2(img1)*np.fft.fft2(img2).conjugate()))) # np.real; np.abs
     correlation = [correlate(frames[i], frames[i + latency], mode='full', method='fft') 
                    for i in range(frames.shape[0] - latency)]
@@ -20,11 +22,14 @@ def correlate1(frames, image_binary, latency):
     
     tmp = np.zeros((res.shape[0]+1, res.shape[1]+1), dtype=np.float32)
     tmp[1:,1:] = res
+    print(f' - Done! time: {time.perf_counter() - st:.4f}')
+    print(f' - cross-correlation image shape: {tmp.shape[0]}x{tmp.shape[1]}')
     return tmp 
     
 # ----------------------
 def pupil(images, latency): 
-    
+    print('Data reduction...')
+    st = time.perf_counter()
     def image_square_cropp(images): 
         mask = images[np.random.randint(images.shape[0])] != 0
         rows = np.flatnonzero((mask.any(axis=1))) 
@@ -59,9 +64,10 @@ def pupil(images, latency):
     images_clean = image_square_cropp(images_clean) # обрезка зрачка в квадрат
     images_clean = image_size(images_clean) # подгонка размера изображений зрачка под 226х226 
     
-#     cross_corr = correlate1(images_clean, image_binary, latency)
-    cross_corr = np.ones((452, 452))
     res = images_clean[np.random.randint(images_clean.shape[0])]
+    print(f' - Done! time: {time.perf_counter() - st:.4f}')
+    print(f' - pupil shape: {res.shape[0]}x{res.shape[1]}')
+    cross_corr = correlate1(images_clean, image_binary, latency)
     
     return res, cross_corr  
 
@@ -84,22 +90,25 @@ def binning(image, factor=None):
     return res
 
 def one(file=None, file_bias=None, bin_factor=None, D=None, latency=None, sec_per_frame=None, data_dir=None):
-    st = time.perf_counter() 
-    print(f'{file}')
+    print(f'{file}\n')
     print('Collecting data...')
+    st = time.perf_counter() 
     with fits.open("".join([data_dir, '/', file])) as f:
         header = f[0].header
         data = np.float32(f[0].data)
-        print(f' - Done! {data.shape[0]} pupil images shape: {data.shape[1]}x{data.shape[2]}')
+        print(f' - Done! time: {time.perf_counter() - st:.4f}')
+        print(f' - {data.shape[0]} pupil images shape: {data.shape[1]}x{data.shape[2]}')
         
         if data.shape[1] > 246:
             print('WARNING: need binning')
         
         if file_bias is not None:
             print('Collecting bias...')
+            st = time.perf_counter() 
             with fits.open("".join([data_dir, '/', file_bias])) as f:
                 bias = np.mean(f[0].data, axis=0, dtype=np.float32)
-                print(f' - Done! bias shape: {bias.shape[0]}x{bias.shape[1]}')
+                print(f' - Done! time: {time.perf_counter() - st:.4f}')
+                print(f' - bias shape: {bias.shape[0]}x{bias.shape[1]}')
         
         if bin_factor is not None:
             print('Binning...')
@@ -111,13 +120,11 @@ def one(file=None, file_bias=None, bin_factor=None, D=None, latency=None, sec_pe
         if file_bias is not None:
             data -= bias
         
-        print('Cross correlating...')
         frame, data_corr = pupil(data, latency)
         cjk = c_jk(data_corr.shape[0], frame)
+        data_corr = gaussian(data_corr, sigma=1)
         if cjk.shape != data_corr.shape:
             print('WARNING: wrong cjk and corr shape')
-            
-        print(f' - Done! Cross-correlation image shape: {data_corr.shape[0]}x{data_corr.shape[1]}')
     
 #     print('Creating output image...')    
 #     v = (D / data_corr.shape[0]) / (latency * sec_per_frame)
@@ -134,5 +141,4 @@ def one(file=None, file_bias=None, bin_factor=None, D=None, latency=None, sec_pe
 #     plt.grid(color='grey', linestyle='--', linewidth=0.7, alpha=0.2)
 #     plt.savefig(f"{data_dir}/{file.replace('.fits', '')}.png", bbox_inches='tight')
 #     print(f' - Done! Files saved to {data_dir}')
-    print('time:', time.perf_counter()-st)
     return data_corr, cjk
