@@ -58,7 +58,7 @@ def two(lambda_, cjk=None, D=None, sec_per_frame=None, latency=None):
     st = time.perf_counter()
     k=50
     a1 = np.linspace(0, 50000, k)
-    gammas1 = np.ndarray(shape=(k, cjk.shape[0], cjk.shape[1]))
+    gammas1 = np.ndarray(shape=(k, cjk.shape[0], cjk.shape[1]), dtype=np.float32)
     for i in range(k):
         tmp = gamma_mono(1e-13, a1[i], lambda_, cjk=cjk, D=D, sec_per_frame=sec_per_frame, latency=latency)
 #         gammas1[i] = tmp

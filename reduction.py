@@ -18,7 +18,7 @@ def correlate1(frames, image_binary, latency):
     
     
     res = np.mean(correlation, axis=0, dtype=np.float32)
-    res /= np.sum(image_binary)
+    res /= np.sum(image_binary, dtype=np.float32)
     
     tmp = np.zeros((res.shape[0]+1, res.shape[1]+1), dtype=np.float32)
     tmp[1:,1:] = res
@@ -53,7 +53,7 @@ def pupil(images, latency):
         else:
             return image
     
-    image_average = np.mean(images, axis=0) # средний кадр серии
+    image_average = np.mean(images, axis=0, dtype=np.float32) # средний кадр серии
     
     image_binary = (image_average > threshold_otsu(image_average)*int(1)) # маска среднего кадра
     
@@ -72,24 +72,19 @@ def pupil(images, latency):
     return res, cross_corr  
 
 def c_jk(nx, frame):
+    print('Creating auto-corr image for pupil...')
+    st = time.perf_counter()
     I0c = (frame != 0) * int(1)
     res = correlate(I0c, I0c, mode='full', method='fft')
-    res = res / np.sum(frame!=0)
+    res = res / np.sum(frame!=0, dtype=np.float32)
 
-    tmp = np.zeros((res.shape[0]+1, res.shape[1]+1))
+    tmp = np.zeros((res.shape[0]+1, res.shape[1]+1), dtype=np.float32)
     tmp[1:,1:] = res
+    print(f' - Done! time: {time.perf_counter() - st:.4f}')
+    print(f' - auto-corr pupil image shape: {tmp.shape[0]}x{tmp.shape[1]}')
     return tmp
 
-def binning(image, factor=None):
-    # https://stackoverflow.com/questions/36063658/how-to-bin-a-2d-array-in-numpy
-    # https://scipython.com/blog/binning-a-2d-array-in-numpy/
-    
-    image = image[:-(image.shape[0] - factor*(image.shape[0]//factor)), :-(image.shape[1] - factor*(image.shape[1]//factor))]
-    res = image.reshape(image.shape[0]//factor, factor, image.shape[1]//factor, factor)
-    res = res.sum(1).sum(2)
-    return res
-
-def one(file=None, file_bias=None, bin_factor=None, D=None, latency=None, sec_per_frame=None, data_dir=None):
+def one(file=None, file_bias=None, D=None, latency=None, sec_per_frame=None, data_dir=None):
     print(f'{file}\n')
     print('Collecting data...')
     st = time.perf_counter() 
@@ -109,15 +104,6 @@ def one(file=None, file_bias=None, bin_factor=None, D=None, latency=None, sec_pe
                 bias = np.mean(f[0].data, axis=0, dtype=np.float32)
                 print(f' - Done! time: {time.perf_counter() - st:.4f}')
                 print(f' - bias shape: {bias.shape[0]}x{bias.shape[1]}')
-        
-        if bin_factor is not None:
-            print('Binning...')
-            data = np.array([binning(image, factor=bin_factor) for image in data])
-            if file_bias is not None:
-                bias = binning(bias, factor=bin_factor)
-            print(f' - Done! New shape: {data.shape[1]}x{data.shape[2]}')
-
-        if file_bias is not None:
             data -= bias
         
         frame, data_corr = pupil(data, latency)
