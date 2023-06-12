@@ -37,36 +37,47 @@ def pupil(images, latency):
         res = images[:, rows.min():rows.max()+1, cols.min():cols.max()+1]
         return res    
     
-    def image_size(image):
-        if image.shape[1] != 226 or image.shape[2] != 226:
-            tmp = np.zeros((image.shape[0], image.shape[1] - (image.shape[1] - 226), image.shape[2] - (image.shape[2] - 226)), 
-                           dtype=np.float32)
-            image = image[:, 0:image.shape[1] - (image.shape[1] - 226), 0:image.shape[2] - (image.shape[2] - 226)]
-            if image.shape[1] < 226 and image.shape[2] == 226:
-                tmp[:, (226-image.shape[1]):, :] = image
-                return tmp
-            if image.shape[2] < 226 and image.shape[1] == 226:
-                tmp[:, :, (226-image.shape[2]):] = image
-                return tmp
-            else:
-                return image
-        else:
-            return image
+#     def image_size(image):
+#         if image.shape[1] != 226 or image.shape[2] != 226:
+#             tmp = np.zeros((image.shape[0], image.shape[1] - (image.shape[1] - 226), image.shape[2] - (image.shape[2] - 226)), 
+#                            dtype=np.float32)
+#             image = image[:, 0:image.shape[1] - (image.shape[1] - 226), 0:image.shape[2] - (image.shape[2] - 226)]
+#             if image.shape[1] < 226 and image.shape[2] == 226:
+#                 tmp[:, (226-image.shape[1]):, :] = image
+#                 return tmp
+#             if image.shape[2] < 226 and image.shape[1] == 226:
+#                 tmp[:, :, (226-image.shape[2]):] = image
+#                 return tmp
+#             else:
+#                 return image
+#         else:
+#             return image
+
+    def image_size(ar):
+        if ar.shape[1] > ar.shape[2]:
+            ar = ar[:, :-(ar.shape[1] - ar.shape[2]), :]
+            return ar
+        if ar.shape[2] > ar.shape[1]:
+            ar = ar[:, :, :-(ar.shape[2] - ar.shape[1])]
+            return ar
+        if ar.shape[1] == ar.shape[2]:
+            return ar
+    
     
     image_average = np.mean(images, axis=0, dtype=np.float32) # средний кадр серии
-    
-    image_binary = (image_average > threshold_otsu(image_average)*int(1)) # маска среднего кадра
+    image_binary = (image_average > threshold_otsu(image_average)) # маска среднего кадра
     
     images_norm = [(i/(image_average))*(np.sum(image_average)/np.sum(i)) - 1 for i in images] # нормировка изображений
     images_clean = images_norm * image_binary # отделение зрачка от фона
     images_clean[np.isnan(images_clean)] = 0
     
-    images_clean = image_square_cropp(images_clean) # обрезка зрачка в квадрат
-    images_clean = image_size(images_clean) # подгонка размера изображений зрачка под 226х226 
+    images_clean = image_square_cropp(images_clean) # обрезка зрачка по нулевым строкам и столбцам
+    images_clean = image_size(images_clean) # подгонка размера изображений под квадратное
     
     res = images_clean[np.random.randint(images_clean.shape[0])]
     print(f' - Done! time: {time.perf_counter() - st:.4f}')
     print(f' - pupil shape: {res.shape[0]}x{res.shape[1]}')
+#     cross_corr = np.ones((452, 452))
     cross_corr = correlate1(images_clean, image_binary, latency)
     
     return res, cross_corr  
