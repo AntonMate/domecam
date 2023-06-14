@@ -6,26 +6,123 @@ import os
 from scipy.signal import correlate
 from skimage.filters import threshold_otsu, gaussian
 from astropy.io import fits
-
+from numba import njit
 
 # ----------------------
 def correlate1(frames, image_binary, latency): 
     print('Cross correlating...')
     st = time.perf_counter() 
 #   corr = np.fft.fftshift(np.real(np.fft.ifft2(np.fft.fft2(img1)*np.fft.fft2(img2).conjugate()))) # np.real; np.abs
-    correlation = [correlate(frames[i], frames[i + latency], mode='full', method='fft') 
-                   for i in range(frames.shape[0] - latency)]
+    st1 = time.perf_counter()
+#     correlation = [correlate(frames[i], frames[i + latency], mode='full', method='fft') 
+#                    for i in range(frames.shape[0] - latency)]
     
+    iterable = (correlate(frames[i], frames[i + latency], mode='full', method='fft') 
+                   for i in range(frames.shape[0] - latency))
+    correlation = np.fromiter(iterable, dtype=np.dtype((np.float32, (2*frames.shape[1]-1, 2*frames.shape[2]-1))))
+    end1 = time.perf_counter()
+    print('time corr:', end1 - st1)
+   
+#     st15 = time.perf_counter()
+#     correlation = np.array(correlation)
+#     end15 = time.perf_counter()
+#     print('time convert to np:', end15 - st15)
     
+    st2 = time.perf_counter()
     res = np.mean(correlation, axis=0, dtype=np.float32)
-    res /= np.sum(image_binary, dtype=np.float32)
+    end2 = time.perf_counter()
+    print('time mean:', end2 - st2)
     
+    st3 = time.perf_counter()
+    res /= np.sum(image_binary, dtype=np.float32)
+    end3 = time.perf_counter()
+    print('time sum:', end3 - st3)
+    
+    st4 = time.perf_counter()
     tmp = np.zeros((res.shape[0]+1, res.shape[1]+1), dtype=np.float32)
     tmp[1:,1:] = res
+    end4 = time.perf_counter()
+    print('time zeros:', end4 - st4)
+    
     print(f' - Done! time: {time.perf_counter() - st:.4f}')
     print(f' - cross-correlation image shape: {tmp.shape[0]}x{tmp.shape[1]}')
     return tmp 
     
+# ----------------------
+def pupil2(images, latency): 
+    print('Data reduction...')
+    st = time.perf_counter()
+    def image_square_cropp2(image): 
+        mask = image != 0
+        rows = np.flatnonzero((mask.any(axis=1))) 
+        cols = np.flatnonzero((mask.any(axis=0)))
+        res = image[rows.min():rows.max()+1, cols.min():cols.max()+1]
+        return rows.min(), rows.max()+1, cols.min(), cols.max()+1
+    
+    def image_siz2(ar):
+        if ar.shape[0] > ar.shape[1]:
+            val = ar.shape[0] - ar.shape[1]
+            ar = ar[:-val, :]
+            return ar, val, 0
+        if ar.shape[1] > ar.shape[0]:
+            val = ar.shape[1] - ar.shape[0]
+            ar = ar[:, :-val]
+            return ar, 0, val
+        if ar.shape[0] == ar.shape[1]:
+            return ar, 0, 0
+        
+    def im_clean(images, mask):
+        res = images * mask
+        return res
+    
+    def im_norm(images, image_average):
+#         res = [(i/(image_average))*(np.sum(image_average)/np.sum(i)) - 1 for i in images]
+        iterable = ((i/(image_average))*(np.sum(image_average)/np.sum(i)) - 1 for i in images)
+        res = np.fromiter(iterable, dtype=np.dtype((np.float32, (images.shape[1], images.shape[2]))))
+        return res
+    
+    st1 = time.perf_counter()
+    image_average = np.mean(images, axis=0, dtype=np.float32) # средний кадр серии
+    end1 = time.perf_counter()
+    print('time mean:', end1 - st1)
+    
+    st2 = time.perf_counter()
+    image_binary = (image_average > threshold_otsu(image_average)) # маска среднего кадра
+    image_binary = np.array(image_binary, dtype=np.float32)
+    y1, y2, x1, x2 = image_square_cropp2(image_binary)
+    mask = image_binary[y1:y2, x1:x2]
+    mask, yn, xn = image_siz2(mask)
+    image_average=image_average[y1:y2-yn, x1:x2-xn]
+    images = images[:, y1:y2-yn, x1:x2-xn]
+    end2 = time.perf_counter()
+    print('time mask:', end2 - st2)
+    
+    st3 = time.perf_counter()
+    images_norm = im_norm(images, image_average)
+    end3 = time.perf_counter()
+    print('time norm:', end3 - st3)
+    
+    st4 = time.perf_counter()
+    images_clean = im_clean(images_norm, mask)
+    end4 = time.perf_counter()
+    print('time clean:', end4 - st4)
+    
+    st5 = time.perf_counter()
+    images_clean[np.isnan(images_clean)] = 0
+    end5 = time.perf_counter()
+    print('time isnan:', end5 - st5)
+    
+    st6 = time.perf_counter()
+    res = images_clean[np.random.randint(images_clean.shape[0])]
+    end6 = time.perf_counter()
+    print('time rnd im:', end6 - st6)
+    
+    print(f' - Done! time: {time.perf_counter() - st:.4f}')
+    print(f' - pupil shape: {res.shape[0]}x{res.shape[1]}')
+#     cross_corr = np.ones((452, 452))
+    cross_corr = correlate1(images_clean, image_binary, latency)
+    
+    return res, cross_corr  
 # ----------------------
 def pupil(images, latency): 
     print('Data reduction...')
@@ -36,22 +133,6 @@ def pupil(images, latency):
         cols = np.flatnonzero((mask.any(axis=0)))
         res = images[:, rows.min():rows.max()+1, cols.min():cols.max()+1]
         return res    
-    
-#     def image_size(image):
-#         if image.shape[1] != 226 or image.shape[2] != 226:
-#             tmp = np.zeros((image.shape[0], image.shape[1] - (image.shape[1] - 226), image.shape[2] - (image.shape[2] - 226)), 
-#                            dtype=np.float32)
-#             image = image[:, 0:image.shape[1] - (image.shape[1] - 226), 0:image.shape[2] - (image.shape[2] - 226)]
-#             if image.shape[1] < 226 and image.shape[2] == 226:
-#                 tmp[:, (226-image.shape[1]):, :] = image
-#                 return tmp
-#             if image.shape[2] < 226 and image.shape[1] == 226:
-#                 tmp[:, :, (226-image.shape[2]):] = image
-#                 return tmp
-#             else:
-#                 return image
-#         else:
-#             return image
 
     def image_size(ar):
         if ar.shape[1] > ar.shape[2]:
@@ -63,18 +144,58 @@ def pupil(images, latency):
         if ar.shape[1] == ar.shape[2]:
             return ar
     
+        
+    def im_clean(images, mask):
+        res = images * mask
+        return res
     
+    def im_norm(images, image_average):
+#         res = [(i/(image_average))*(np.sum(image_average)/np.sum(i)) - 1 for i in images]
+        iterable = ((i/(image_average))*(np.sum(image_average)/np.sum(i)) - 1 for i in images)
+        res = np.fromiter(iterable, dtype=np.dtype((np.float32, (images.shape[1], images.shape[2]))))
+        return res
+    
+    st1 = time.perf_counter()
     image_average = np.mean(images, axis=0, dtype=np.float32) # средний кадр серии
+    end1 = time.perf_counter()
+    print('time mean:', end1 - st1)
+    
+    st2 = time.perf_counter()
     image_binary = (image_average > threshold_otsu(image_average)) # маска среднего кадра
+    image_binary = np.array(image_binary, dtype=np.float32)
+    end2 = time.perf_counter()
+    print('time mask:', end2 - st2)
+  
+    st3 = time.perf_counter()
+    images_norm = im_norm(images, image_average) # нормировка изображений
+    end3 = time.perf_counter()
+    print('time norm:', end3 - st3)
     
-    images_norm = [(i/(image_average))*(np.sum(image_average)/np.sum(i)) - 1 for i in images] # нормировка изображений
-    images_clean = images_norm * image_binary # отделение зрачка от фона
+    st4 = time.perf_counter()
+    images_clean = im_clean(images_norm, image_binary) # отделение зрачка от фона
+    end4 = time.perf_counter()
+    print('time im clean:', end4 - st4)
+        
+    st5 = time.perf_counter()
     images_clean[np.isnan(images_clean)] = 0
+    end5 = time.perf_counter()
+    print('time isnan:', end5 - st5)
     
+    st6 = time.perf_counter()
     images_clean = image_square_cropp(images_clean) # обрезка зрачка по нулевым строкам и столбцам
-    images_clean = image_size(images_clean) # подгонка размера изображений под квадратное
+    end6 = time.perf_counter()
+    print('time crop:', end6 - st6)
     
+    st7 = time.perf_counter()
+    images_clean = image_size(images_clean) # подгонка размера изображений под квадратное
+    end7 = time.perf_counter()
+    print('time square:', end7 - st7)
+    
+    st8 = time.perf_counter()
     res = images_clean[np.random.randint(images_clean.shape[0])]
+    end8 = time.perf_counter()
+    print('time rnd im:', end8 - st8)
+    
     print(f' - Done! time: {time.perf_counter() - st:.4f}')
     print(f' - pupil shape: {res.shape[0]}x{res.shape[1]}')
 #     cross_corr = np.ones((452, 452))
@@ -117,7 +238,11 @@ def one(file=None, file_bias=None, D=None, latency=None, sec_per_frame=None, dat
                 print(f' - bias shape: {bias.shape[0]}x{bias.shape[1]}')
             data -= bias
         
-        frame, data_corr = pupil(data, latency)
+#         frame, data_corr = pupil(data, latency)
+        frame, data_corr = pupil2(data, latency)
+
+        print(np.min(data_corr), np.max(data_corr), np.mean(data_corr))
+        print(frame.shape, data_corr.shape)
         cjk = c_jk(data_corr.shape[0], frame)
         data_corr = gaussian(data_corr, sigma=1)
         if cjk.shape != data_corr.shape:
