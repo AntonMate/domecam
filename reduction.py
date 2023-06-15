@@ -6,7 +6,6 @@ import os
 from scipy.signal import correlate
 from skimage.filters import threshold_otsu, gaussian
 from astropy.io import fits
-from numba import njit
 
 # ----------------------
 def correlate1(frames, image_binary, latency): 
@@ -17,9 +16,13 @@ def correlate1(frames, image_binary, latency):
 #     correlation = [correlate(frames[i], frames[i + latency], mode='full', method='fft') 
 #                    for i in range(frames.shape[0] - latency)]
     
-    iterable = (correlate(frames[i], frames[i + latency], mode='full', method='fft') 
-                   for i in range(frames.shape[0] - latency))
-    correlation = np.fromiter(iterable, dtype=np.dtype((np.float32, (2*frames.shape[1]-1, 2*frames.shape[2]-1))))
+#     iterable = (correlate(frames[i], frames[i + latency], mode='full', method='fft') 
+#                    for i in range(frames.shape[0] - latency))
+#     correlation = np.fromiter(iterable, dtype=np.dtype((np.float32, (2*frames.shape[1]-1, 2*frames.shape[2]-1))))
+    
+    correlation = np.zeros((frames.shape[0] - latency, 2*frames.shape[1]-1, 2*frames.shape[2]-1), dtype=np.float32)
+    for i in range(frames.shape[0] - latency):
+        correlation[i] = correlate(frames[i], frames[i + latency], mode='full', method='fft')
     end1 = time.perf_counter()
     print('time corr:', end1 - st1)
    
@@ -76,9 +79,14 @@ def pupil2(images, latency):
         return res
     
     def im_norm(images, image_average):
+        res = np.zeros_like(images, dtype=np.float32)
+        for i in range(images.shape[0]):
+            res[i] = ((images[i]/(image_average))*(np.sum(image_average)/np.sum(images[i])) - 1)
+            
 #         res = [(i/(image_average))*(np.sum(image_average)/np.sum(i)) - 1 for i in images]
-        iterable = ((i/(image_average))*(np.sum(image_average)/np.sum(i)) - 1 for i in images)
-        res = np.fromiter(iterable, dtype=np.dtype((np.float32, (images.shape[1], images.shape[2]))))
+
+#         iterable = ((i/(image_average))*(np.sum(image_average)/np.sum(i)) - 1 for i in images)
+#         res = np.fromiter(iterable, dtype=np.dtype((np.float32, (images.shape[1], images.shape[2]))))
         return res
     
     st1 = time.perf_counter()
