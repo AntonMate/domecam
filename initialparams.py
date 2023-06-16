@@ -16,6 +16,7 @@ def best_thresh(img, acc=None):
     img_size = img.shape[0]*img.shape[1]
     one_percent = img_size/100
     final_thresh = []
+    
     for i in range(2, 5, 1):
         for j in range(len(threshold_multiotsu(img, classes=i))):
             thresh = threshold_multiotsu(img, classes=i)[j]
@@ -23,7 +24,9 @@ def best_thresh(img, acc=None):
             found_percent = found_values_size/one_percent
             if thresh>0 and found_percent<acc:
                 final_thresh.append(thresh)
-    final_thresh = np.min(final_thresh)    
+    
+    final_thresh = np.min(final_thresh)  
+    
     print(f' - Done! time: {time.perf_counter() - st:.4f}')
     print(f' - threshold: {final_thresh}')
     return final_thresh

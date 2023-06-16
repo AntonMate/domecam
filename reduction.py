@@ -32,6 +32,7 @@ def correlate1(frames, image_binary, latency):
 #     print('time convert to np:', end15 - st15)
     
     st2 = time.perf_counter()
+    lol = np.mean(correlation) # такое ощущение, что из за этого следующий np.mean работает быстрее
     res = np.mean(correlation, axis=0, dtype=np.float32)
     end2 = time.perf_counter()
     print('time mean:', end2 - st2)
@@ -250,7 +251,6 @@ def one(file=None, file_bias=None, D=None, latency=None, sec_per_frame=None, dat
         frame, data_corr = pupil2(data, latency)
 
         print(np.min(data_corr), np.max(data_corr), np.mean(data_corr))
-        print(frame.shape, data_corr.shape)
         cjk = c_jk(data_corr.shape[0], frame)
         data_corr = gaussian(data_corr, sigma=1)
         if cjk.shape != data_corr.shape:
