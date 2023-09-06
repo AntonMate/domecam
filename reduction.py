@@ -9,8 +9,9 @@ from astropy.io import fits
 
 # ----------------------
 def correlate1(frames, image_binary, latency): 
-    print('Cross correlating...')
+    print('cross correlating')
     st = time.perf_counter() 
+
 #   corr = np.fft.fftshift(np.real(np.fft.ifft2(np.fft.fft2(img1)*np.fft.fft2(img2).conjugate()))) # np.real; np.abs
 #     correlation = [correlate(frames[i], frames[i + latency], mode='full', method='fft') 
 #                    for i in range(frames.shape[0] - latency)]
@@ -21,34 +22,24 @@ def correlate1(frames, image_binary, latency):
     
     correlation = np.zeros((frames.shape[0] - latency, 2*frames.shape[1]-1, 2*frames.shape[2]-1), dtype=np.float32)
     for i in range(frames.shape[0] - latency):
-        correlation[i] = correlate(frames[i], frames[i + latency], mode='full', method='fft')
-   
-#     st15 = time.perf_counter()
-#     correlation = np.array(correlation)
-#     end15 = time.perf_counter()
-#     print('time convert to np:', end15 - st15)
-    
-    st2 = time.perf_counter()
+        correlation[i] = correlate(frames[i], frames[i + latency], mode='full', method='fft')   
+
+        
     lol = np.mean(correlation) # такое ощущение, что из за этого следующий np.mean работает быстрее
     res = np.mean(correlation, axis=0, dtype=np.float32)
-    end2 = time.perf_counter()
-    
-    st3 = time.perf_counter()
+
     res /= np.sum(image_binary, dtype=np.float32)
-    end3 = time.perf_counter()
-    
-    st4 = time.perf_counter()
+
     tmp = np.zeros((res.shape[0]+1, res.shape[1]+1), dtype=np.float32)
     tmp[1:,1:] = res
-    end4 = time.perf_counter()
     
-    print(f' - Done! time: {time.perf_counter() - st:.4f}')
-    print(f' - cross-correlation image shape: {tmp.shape[0]}x{tmp.shape[1]}')
-    return tmp 
+    print(f' - time: {time.perf_counter() - st:.4f}')
+    print(f' - cross-corr image shape: {tmp.shape[0]}x{tmp.shape[1]}')
+    return tmp
     
 # ----------------------
 def pupil2(images, latency): 
-    print('Data reduction...')
+    print('data reduction')
     st = time.perf_counter()
     def image_square_cropp2(image): 
         mask = image != 0
@@ -114,14 +105,14 @@ def pupil2(images, latency):
     res = images_clean[np.random.randint(images_clean.shape[0])]
     end6 = time.perf_counter()
     
-    print(f' - Done! time: {time.perf_counter() - st:.4f}')
-    print(f' - pupil shape: {res.shape[0]}x{res.shape[1]}')
+    print(f' - time: {time.perf_counter() - st:.4f}')
+    print(f' - pupil image shape: {res.shape[0]}x{res.shape[1]}')
     cross_corr = correlate1(images_clean, image_binary, latency)
     
     return res, cross_corr  
 # ----------------------
 def pupil(images, latency): 
-    print('Data reduction...')
+    print('data reduction')
     st = time.perf_counter()
     def image_square_cropp(images): 
         mask = images[np.random.randint(images.shape[0])] != 0
@@ -191,7 +182,7 @@ def pupil(images, latency):
     return res, cross_corr  
 
 def c_jk(nx, frame):
-    print('Creating auto-corr image for pupil...')
+    print('creating auto-corr pupil image')
     st = time.perf_counter()
     I0c = (frame != 0) * int(1)
     res = correlate(I0c, I0c, mode='full', method='fft')
@@ -199,39 +190,37 @@ def c_jk(nx, frame):
 
     tmp = np.zeros((res.shape[0]+1, res.shape[1]+1), dtype=np.float32)
     tmp[1:,1:] = res
-    print(f' - Done! time: {time.perf_counter() - st:.4f}')
+    print(f' - time: {time.perf_counter() - st:.4f}')
     print(f' - auto-corr pupil image shape: {tmp.shape[0]}x{tmp.shape[1]}')
     return tmp
 
-def one(file=None, file_bias=None, D=None, latency=None, data_dir=None):
+def processCorr(file=None, file_bias=None, D=None, latency=None, data_dir=None):
     print(f'{file}\n')
-    print('Collecting data...')
+    print('collecting data')
     st = time.perf_counter() 
     with fits.open("".join([data_dir, '/', file])) as f:
         header = f[0].header
         sec_per_frame = 1/header['FRATE']
         data = np.float32(f[0].data)
-        print(f' - Done! time: {time.perf_counter() - st:.4f}')
-        print(f' - {data.shape[0]} pupil images shape: {data.shape[1]}x{data.shape[2]}')
+        print(f' - time: {time.perf_counter() - st:.4f}')
+        print(f' - data shape: {data.shape[0]}x{data.shape[1]}x{data.shape[2]}')
         
         if data.shape[1] > 246:
             print('WARNING: need binning')
         
         if file_bias is not None:
-            print('Collecting bias...')
+            print('collecting bias')
             st = time.perf_counter() 
             with fits.open("".join([data_dir, '/', file_bias])) as f:
                 bias = np.mean(f[0].data, axis=0, dtype=np.float32)
-                print(f' - Done! time: {time.perf_counter() - st:.4f}')
-                print(f' - bias shape: {bias.shape[0]}x{bias.shape[1]}')
+                print(f' - time: {time.perf_counter() - st:.4f}')
+                print(f' - bias image shape: {bias.shape[0]}x{bias.shape[1]}')
             data -= bias
         
 #         frame, data_corr = pupil(data, latency)
         frame, data_corr = pupil2(data, latency)
         cjk = c_jk(data_corr.shape[0], frame)
         data_corr = gaussian(data_corr, sigma=1)
-        if cjk.shape != data_corr.shape:
-            print('WARNING: wrong cjk and corr shape')
     
 #     print('Creating output image...')    
 #     v = (D / data_corr.shape[0]) / (latency * sec_per_frame)

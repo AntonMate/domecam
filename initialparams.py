@@ -11,7 +11,7 @@ def best_thresh(img, acc=None):
     img - 2d изображение
     acc - макисмалньый процент полезного сигнала от всего изображения (по дефолту = 5)
     '''
-    print('Сounting the threshold...')
+    print('calculating threshold')
     st = time.perf_counter()
     img_size = img.shape[0]*img.shape[1]
     one_percent = img_size/100
@@ -27,7 +27,7 @@ def best_thresh(img, acc=None):
     
     final_thresh = np.min(final_thresh)  
     
-    print(f' - Done! time: {time.perf_counter() - st:.4f}')
+    print(f' - time: {time.perf_counter() - st:.4f}')
     print(f' - threshold: {final_thresh}')
     return final_thresh
 
@@ -38,7 +38,7 @@ def detect_peaks(image, size_of_neighborhood=None):
     Returns a boolean mask of the peaks (i.e. 1 when
     the pixel's value is the neighborhood maximum, 0 otherwise)
     """
-    print('Finding peaks...')
+    print('finding peaks')
     st = time.perf_counter()
     
     # define an 8-connected neighborhood
@@ -65,6 +65,6 @@ def detect_peaks(image, size_of_neighborhood=None):
     detected_peaks = local_max ^ eroded_background
     
     y, x =np.where(detected_peaks != 0)
-    print(f' - Done! time: {time.perf_counter() - st:.4f}')
+    print(f' - time: {time.perf_counter() - st:.4f}')
     print(f' - {len(y)} peaks found')
     return y, x
