@@ -34,7 +34,6 @@ def processGammaMono(z, lambda_, cjk=None, const2=None, nx=None, fx=None, fy=Non
     
     res[np.isnan(res)] = 0
     
-    # (!) занимает 0.02 времени, думаю, можно научить делать fft сразу для 3d массива, чтобы в цикле его не считать
     res = np.fft.fftshift(np.fft.irfft2(np.fft.fftshift(res), s=res.shape, norm='backward'))
     
     res = res * const2
@@ -121,33 +120,15 @@ def processF_lamda(file_star=None, file_filter=None, file_ccd=None):
     return f_lambda
 
 # --- спектральный фильтр
-def processSpectralFilter(f_lambda=None, z=None, D=None, D_pix=None, f_abs=None):
-#     z - дистанция распространения, [м]
-#     D - диаметр телескопа, [м]
-#     D_pix - диаметр телескопа в пикселях, [n_pix]
-    coeff=100
-    k = 1000*coeff
-    lambda_max = len(f_lambda) - 1
-    lambda_max_new = int(lambda_max*coeff)
-    lambdas = np.linspace(0, lambda_max_new, k) * pow(10, -9) # [м]
-
-    tail = np.zeros((len(lambdas) - len(f_lambda)))
-    f_lambda_new = np.append(f_lambda, tail)
-    with np.errstate(invalid='ignore'):
-        res_fft = pow((np.imag(np.fft.fft(f_lambda_new/lambdas))), 2)
-
-    delta_lambdas = (lambda_max_new / len(lambdas)) * pow(10, -9) # период дискретизации, шаг по частоте [м]
-    omega_lambdas_scale = 1 / (delta_lambdas) # максимальное значение по частоте, [м^-1]
-    
-
+def processSpectralFilter(f_lambda=None, z=None, omega_lambdas_scale=None, k=None, res_fft=None, cjk=None, f_abs=None):
     omega = f_abs * z
     omega = np.ravel(omega)
     omega_new = np.interp(omega, np.linspace(0, omega_lambdas_scale, k), res_fft)
-    omega_new = np.resize(omega_new, (2*D_pix, 2*D_pix))    
+    omega_new = np.resize(omega_new, (cjk.shape[0], cjk.shape[1]))    
     return omega_new
 
-def processGammaPoly(z, f_lambda=None, cjk=None, D=None, const2=None, Aff113=None, f_abs=None):
-    omega_new = processSpectralFilter(f_lambda=f_lambda, z=z, D=D, D_pix=cjk.shape[0]//2, f_abs=f_abs)
+def processGammaPoly(z, f_lambda=None, cjk=None, D=None, const2=None, Aff113=None, omega_lambdas_scale=None, k=None, res_fft=None, f_abs=None):
+    omega_new = processSpectralFilter(f_lambda=f_lambda, z=z, omega_lambdas_scale=omega_lambdas_scale, k=k, res_fft=res_fft, cjk=cjk, f_abs=f_abs)
  
     with np.errstate(invalid='ignore'):
         res = Aff113 * omega_new
@@ -180,29 +161,39 @@ def processGamma(lambda_, GammaType=None, cjk=None, D=None, sec_per_frame=None, 
     const = 9.69*pow(10, -3)*16*pow(np.pi, 2)
     const2 = const * Cn2 * pow(f_scale*nx, 2)
     
-    # выкладки для спектрального фильтра, чтобы в цикле не считать каждый раз
-    f_abs = np.sqrt(pow(fx, 2) + pow(fy, 2))
-    f_abs = 0.5 * pow(f_abs, 2)    
-    
     # разбивка по высоте
-    k=50
-    a1 = np.linspace(0, 50000, k)
+    num_of_layers=50
+    a1 = np.linspace(0, 50000, num_of_layers)
     
     # выкладки для 3м массива гамм
-    gammas1 = np.zeros((k, cjk.shape[0], cjk.shape[1]), dtype=np.float32)
+    gammas1 = np.zeros((num_of_layers, cjk.shape[0], cjk.shape[1]), dtype=np.float32)
     
     if GammaType == 'mono':
-        for i in range(k):
+        for i in range(num_of_layers):
             tmp = processGammaMono(a1[i], lambda_, cjk=cjk, const2=const2, nx=nx, fx=fx, fy=fy, Aff113=Aff113)
-        #         tmp = tmp * cjk
             gammas1[i] = gaussian(tmp, sigma=1)
     
     if GammaType == 'poly': 
         f_lambda=processF_lamda(file_star=file_star, file_filter=file_filter, file_ccd=file_ccd)
-        for i in range(k):
-            tmp = processGammaPoly(a1[i], f_lambda=f_lambda, cjk=cjk, D=D, const2=const2, Aff113=Aff113, f_abs=f_abs)
+        coeff=100
+        k = 1000*coeff
+        lambda_max = len(f_lambda) - 1
+        lambda_max_new = int(lambda_max*coeff)
+        lambdas = np.linspace(0, lambda_max_new, k) * pow(10, -9) # [м]
+        tail = np.zeros((len(lambdas) - len(f_lambda)))
+        f_lambda_new = np.append(f_lambda, tail)
+
+        with np.errstate(invalid='ignore'):
+            res_fft = pow((np.imag(np.fft.fft(f_lambda_new/lambdas))), 2)
+
+        delta_lambdas = (lambda_max_new / len(lambdas)) * pow(10, -9) # период дискретизации, шаг по частоте [м]
+        omega_lambdas_scale = 1 / (delta_lambdas) # максимальное значение по частоте, [м^-1]
+        f_abs = np.sqrt(pow(fx, 2) + pow(fy, 2))
+        f_abs = 0.5 * pow(f_abs, 2)    
+        for i in range(num_of_layers):
+            tmp = processGammaPoly(a1[i], f_lambda=f_lambda, cjk=cjk, D=D, const2=const2, Aff113=Aff113, omega_lambdas_scale=omega_lambdas_scale, k=k, res_fft=res_fft, f_abs=f_abs)
             gammas1[i] = gaussian(tmp, sigma=1)
     
     print(f' - time: {time.perf_counter() - st:.4f}')
-    print(f' - {k} {GammaType}chromatic turbulence layers from 0 to 50 km')
+    print(f' - {num_of_layers} {GammaType}chromatic turbulence layers from 0 to 50 km')
     return gammas1
