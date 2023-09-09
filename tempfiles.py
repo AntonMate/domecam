@@ -141,11 +141,11 @@ def processGammaPoly(z, f_lambda=None, cjk=None, D=None, const2=None, Aff113=Non
     res = res * cjk
     return res
 
-def processGamma(lambda_, GammaType=None, cjk=None, D=None, sec_per_frame=None, latency=None, file_star=None, file_filter=None, file_ccd=None):  
+def processGamma(lambda_, GammaType=None, cjk=None, D=None, file_star=None, file_filter=None, file_ccd=None):  
     print('creating gammas')
     st = time.perf_counter()
     
-    # интенисвность гамм
+    # интенисвность теор гамм
     Cn2 = 1e-13
     
     # частотный движ, фильтры и прочее, чтобы в цикле не считать каждый раз

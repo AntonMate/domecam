@@ -38,7 +38,7 @@ def correlate1(frames, image_binary, latency):
     return tmp
     
 # ----------------------
-def pupil2(images, latency): 
+def processPupilWithCorr(images, latency): 
     print('data reduction')
     st = time.perf_counter()
     def image_square_cropp2(image): 
@@ -68,42 +68,25 @@ def pupil2(images, latency):
         res = np.zeros_like(images, dtype=np.float32)
         for i in range(images.shape[0]):
             res[i] = ((images[i]/(image_average))*(np.sum(image_average)/np.sum(images[i])) - 1)
-            
-#         res = [(i/(image_average))*(np.sum(image_average)/np.sum(i)) - 1 for i in images]
-
-#         iterable = ((i/(image_average))*(np.sum(image_average)/np.sum(i)) - 1 for i in images)
-#         res = np.fromiter(iterable, dtype=np.dtype((np.float32, (images.shape[1], images.shape[2]))))
+           
         return res
     
-    st1 = time.perf_counter()
     image_average = np.mean(images, axis=0, dtype=np.float32) # средний кадр серии
-    end1 = time.perf_counter()
     
-    st2 = time.perf_counter()
     image_binary = (image_average > threshold_otsu(image_average)) # маска среднего кадра
-    image_binary = np.array(image_binary, dtype=np.float32)
+    image_binary = np.array(image_binary, dtype=np.float32) # перевод в numpy
     y1, y2, x1, x2 = image_square_cropp2(image_binary)
     mask = image_binary[y1:y2, x1:x2]
     mask, yn, xn = image_siz2(mask)
     image_average=image_average[y1:y2-yn, x1:x2-xn]
     images = images[:, y1:y2-yn, x1:x2-xn]
-    end2 = time.perf_counter()
     
-    st3 = time.perf_counter()
-    images_norm = im_norm(images, image_average)
-    end3 = time.perf_counter()
+    images_norm = im_norm(images, image_average) # нормировка изображений
     
-    st4 = time.perf_counter()
-    images_clean = im_clean(images_norm, mask)
-    end4 = time.perf_counter()
-    
-    st5 = time.perf_counter()
+    images_clean = im_clean(images_norm, mask) # отделение зрачка от фона
     images_clean[np.isnan(images_clean)] = 0
-    end5 = time.perf_counter()
-    
-    st6 = time.perf_counter()
+
     res = images_clean[np.random.randint(images_clean.shape[0])]
-    end6 = time.perf_counter()
     
     print(f' - time: {time.perf_counter() - st:.4f}')
     print(f' - pupil image shape: {res.shape[0]}x{res.shape[1]}')
@@ -175,13 +158,13 @@ def pupil(images, latency):
     res = images_clean[np.random.randint(images_clean.shape[0])]
     end8 = time.perf_counter()
     
-#     print(f' - Done! time: {time.perf_counter() - st:.4f}')
-#     print(f' - pupil shape: {res.shape[0]}x{res.shape[1]}')
+    print(f' - Done! time: {time.perf_counter() - st:.4f}')
+    print(f' - pupil shape: {res.shape[0]}x{res.shape[1]}')
     cross_corr = correlate1(images_clean, image_binary, latency)
     
     return res, cross_corr  
 
-def c_jk(nx, frame):
+def processAutoCorr(nx, frame):
     print('creating auto-corr pupil image')
     st = time.perf_counter()
     I0c = (frame != 0) * int(1)
@@ -217,10 +200,9 @@ def processCorr(file=None, file_bias=None, D=None, latency=None, data_dir=None):
                 print(f' - bias image shape: {bias.shape[0]}x{bias.shape[1]}')
             data -= bias
         
-#         frame, data_corr = pupil(data, latency)
-        frame, data_corr = pupil2(data, latency)
-        cjk = c_jk(data_corr.shape[0], frame)
-        data_corr = gaussian(data_corr, sigma=1)
+        frame, data_corr = processPupilWithCorr(data, latency) # получение случайного изображения зрачка и изображения кросс-корреляции
+        cjk = processAutoCorr(data_corr.shape[0], frame) # автокорреляция зрачка
+        data_corr = gaussian(data_corr, sigma=1) # сглаживание изображения кросс-корреляции
     
 #     print('Creating output image...')    
 #     v = (D / data_corr.shape[0]) / (latency * sec_per_frame)
