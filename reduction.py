@@ -12,26 +12,28 @@ def correlate1(frames, image_binary, latency):
     print('cross correlating')
     st = time.perf_counter() 
 
-#   corr = np.fft.fftshift(np.real(np.fft.ifft2(np.fft.fft2(img1)*np.fft.fft2(img2).conjugate()))) # np.real; np.abs
-#     correlation = [correlate(frames[i], frames[i + latency], mode='full', method='fft') 
-#                    for i in range(frames.shape[0] - latency)]
+# #   corr = np.fft.fftshift(np.real(np.fft.ifft2(np.fft.fft2(img1)*np.fft.fft2(img2).conjugate()))) # np.real; np.abs
+# #     correlation = [correlate(frames[i], frames[i + latency], mode='full', method='fft') 
+# #                    for i in range(frames.shape[0] - latency)]
     
-#     iterable = (correlate(frames[i], frames[i + latency], mode='full', method='fft') 
-#                    for i in range(frames.shape[0] - latency))
-#     correlation = np.fromiter(iterable, dtype=np.dtype((np.float32, (2*frames.shape[1]-1, 2*frames.shape[2]-1))))
+# #     iterable = (correlate(frames[i], frames[i + latency], mode='full', method='fft') 
+# #                    for i in range(frames.shape[0] - latency))
+# #     correlation = np.fromiter(iterable, dtype=np.dtype((np.float32, (2*frames.shape[1]-1, 2*frames.shape[2]-1))))
     
-    correlation = np.zeros((frames.shape[0] - latency, 2*frames.shape[1]-1, 2*frames.shape[2]-1), dtype=np.float32)
-    for i in range(frames.shape[0] - latency):
-        correlation[i] = correlate(frames[i], frames[i + latency], mode='full', method='fft')   
+#     correlation = np.zeros((frames.shape[0] - latency, 2*frames.shape[1]-1, 2*frames.shape[2]-1), dtype=np.float32)
+#     for i in range(frames.shape[0] - latency):
+#         correlation[i] = correlate(frames[i], frames[i + latency], mode='full', method='fft')   
 
         
-    lol = np.mean(correlation) # такое ощущение, что из за этого следующий np.mean работает быстрее
-    res = np.mean(correlation, axis=0, dtype=np.float32)
+#     lol = np.mean(correlation) # такое ощущение, что из за этого следующий np.mean работает быстрее
+#     res = np.mean(correlation, axis=0, dtype=np.float32)
 
-    res /= np.sum(image_binary, dtype=np.float32)
+#     res /= np.sum(image_binary, dtype=np.float32)
 
-    tmp = np.zeros((res.shape[0]+1, res.shape[1]+1), dtype=np.float32)
-    tmp[1:,1:] = res
+#     tmp = np.zeros((res.shape[0]+1, res.shape[1]+1), dtype=np.float32)
+#     tmp[1:,1:] = res
+    
+    tmp = np.loadtxt('test_cross_corr.gz')
     
     print(f' - time: {time.perf_counter() - st:.4f}')
     print(f' - cross-corr image shape: {tmp.shape[0]}x{tmp.shape[1]}')

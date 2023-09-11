@@ -8,7 +8,7 @@ from scipy.optimize import curve_fit
 from skimage.filters import threshold_multiotsu, threshold_otsu
 from astropy.io import fits
 
-def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_per_frame=None, gain=None, cjk=None, i_p=None, all_Vx=None, all_Vy=None, conjugated_distance=None):
+def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_per_frame=None, cjk=None, i_p=None, all_Vx=None, all_Vy=None, conjugated_distance=None):
     k=50
     a1 = np.linspace(0, 50000, k)
     t = latency * sec_per_frame
@@ -29,6 +29,7 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
                 return idx+1, idx
 
     def gamma_se(X, Y, Vx, Vy, Cn2, z): 
+#         print(Cn2)
         Cn2=Cn2*1e-13
         z=z*1000
 
@@ -42,7 +43,7 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
 
         res = gammas[lv] + (z - a1[lv])*((gammas[uv] - gammas[lv])/(a1[uv] - a1[lv]))
 
-        res = (res/(1e-13))*Cn2
+#         res = (res/(1e-13))*Cn2
         res = shift(res, (-Ypix, Xpix), order=1)  
 
         res = res * cjk
@@ -68,21 +69,20 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
         xdata = np.vstack((X.ravel(), Y.ravel())) 
         ydata = data.ravel()
         
-        lb, ub = [], []
-        # в целом Cn2 можно тоже ограничить для каждого пика по диапазону высот: от 2км до 50км например
-        for i in range(len(all_Vx)):
-            lb.append([all_Vx[i]-0.5, all_Vy[i]-0.5, 0, conjugated_distance])
-            ub.append([all_Vx[i]+0.5, all_Vy[i]+0.5, np.inf, 50])
+#         lb, ub = [], []
+#         for i in range(len(all_Vx)):
+#             lb.append([all_Vx[i]-0.5, all_Vy[i]-0.5, 0, conjugated_distance])
+#             ub.append([all_Vx[i]+0.5, all_Vy[i]+0.5, np.inf, 50])
         
-        lb = np.array(lb)
-        ub = np.array(ub)
+#         lb = np.array(lb)
+#         ub = np.array(ub)
         
         lb_old = [-np.inf, -np.inf, 0, conjugated_distance]
-        lb_old = np.tile(lb, len(p0)//4)
-#         ub = [np.inf, np.inf, np.inf, 50]
-#         ub = np.tile(ub, len(p0)//4)
+        lb_old = np.tile(lb_old, len(p0)//4)
+        ub = [np.inf, np.inf, np.inf, 50]
+        ub = np.tile(ub, len(p0)//4)
 
-        popt, pcov = curve_fit(_g, xdata, ydata, p0, bounds=[lb, ub])
+        popt, pcov = curve_fit(_g, xdata, ydata, p0, bounds=[lb_old, ub])
 
         for i in range(len(popt)//4):
             fit += gamma_se(X, Y, *popt[i*4:i*4+4])
@@ -91,20 +91,21 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
 
         popt = popt.reshape(len(popt)//4, 4)
 
-        df = pd.DataFrame(popt, columns = ['Vx, m/s','Vy, m/s','Cn2, 1e-13', 'z, km'])
-        df = df.sort_values(by=['z, km'])
+        df = pd.DataFrame(popt, columns = ['Vx, m/s','Vy, m/s','Cn2', 'z, m'])
+        df = df.sort_values(by=['z, m'])
         df = df.reset_index()
+        df['Cn2'] = df['Cn2']*1e-13
+        df['z, m'] = df['z, m']*1000
         df.drop(columns=['index'], inplace=True)
 
-        sum_cn2 = np.sum(df['Cn2, 1e-13']*1e-13)        
-        lambda_ = 500 * pow(10, -9)
+        sum_cn2 = np.sum(df['Cn2'])        
         r0 = pow(0.423 * pow((2*np.pi/lambda_), 2) * sum_cn2, -3/5)
         seeing = 206265 * 0.98 * lambda_/r0
         
         print(f' - time: {time.perf_counter() - st:.4f}')
+        print(df.to_string(index=False))
         print(' - total Cn2:', sum_cn2)
         print(f' - seeing, {lambda_/1e-9:.0f} nm: {seeing:.2f}')
-        print(df.to_string(index=False))
         
         return fit
     

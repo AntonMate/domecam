@@ -175,7 +175,7 @@ def processGamma(lambda_, GammaType=None, cjk=None, D=None, file_star=None, file
     
     if GammaType == 'poly': 
         f_lambda=processF_lamda(file_star=file_star, file_filter=file_filter, file_ccd=file_ccd)
-        coeff=100
+        coeff=1000 #!!!
         k = 1000*coeff
         lambda_max = len(f_lambda) - 1
         lambda_max_new = int(lambda_max*coeff)
@@ -196,4 +196,5 @@ def processGamma(lambda_, GammaType=None, cjk=None, D=None, file_star=None, file
     
     print(f' - time: {time.perf_counter() - st:.4f}')
     print(f' - {num_of_layers} {GammaType}chromatic turbulence layers from 0 to 50 km')
+    
     return gammas1

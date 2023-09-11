@@ -4,12 +4,13 @@ from scipy.ndimage.morphology import binary_erosion
 from scipy.ndimage.filters import maximum_filter
 from skimage.filters import threshold_multiotsu
 
-def best_thresh(img, acc=None):
+def processBestThresh(img, acc=None):
     '''
     Функция для нахождения наилучшего значения threshold с помощью разных конфигураций алгоритма Оцу
     
     img - 2d изображение
-    acc - макисмалньый процент полезного сигнала от всего изображения (по дефолту = 5)
+    acc - макисмалньый процент полезного сигнала от всего изображения (по дефолту = 5%)
+        это нужно, чтобы трешхолд не захватывал часть шума, который так же есть на изображении
     '''
     print('calculating threshold')
     st = time.perf_counter()
@@ -31,12 +32,14 @@ def best_thresh(img, acc=None):
     print(f' - threshold: {final_thresh}')
     return final_thresh
 
-def detect_peaks(image, size_of_neighborhood=None):
+def processPeakDetect(image, size_of_neighborhood=None):
     st = time.perf_counter()
     """
     Takes an image and detect the peaks usingthe local maximum filter.
     Returns a boolean mask of the peaks (i.e. 1 when
     the pixel's value is the neighborhood maximum, 0 otherwise)
+    
+    size_of_neighborhood - размер области для поиска максимума
     """
     print('finding peaks')
     st = time.perf_counter()
@@ -68,3 +71,40 @@ def detect_peaks(image, size_of_neighborhood=None):
     print(f' - time: {time.perf_counter() - st:.4f}')
     print(f' - {len(y)} peaks found')
     return y, x
+
+def processCoordsToSpeed(y, x, lat=None, sec_per_frame=None, D=None, cc=None):
+    t = lat * sec_per_frame
+    delta = D/(cc.shape[0]//2)
+    all_Vy = np.zeros((len(x)), dtype=np.float32)
+    all_Vx = np.zeros((len(x)), dtype=np.float32)
+    for i in range(len(x)):
+        all_Vy[i] = (cc.shape[0]//2-y[i])*delta/t
+        all_Vx[i] = -(cc.shape[1]//2-x[i])*delta/t
+    return all_Vy, all_Vx
+
+def processCn2(cc, y, x, gammas, conjugated_distance=None):
+    def find_nearest(array, value):
+        array = np.asarray(array)
+        idx = (np.abs(array - value)).argmin()
+        if idx == (len(array) - 1):
+            return idx, idx-1
+        if idx == 0:
+            return 1, 0
+        else:
+            if array[idx] > value:
+                return idx, idx-1 
+            if array[idx] < value:
+                return idx+1, idx
+            
+    p0_Cn2 = np.zeros((len(x), 2), dtype=np.float32)
+    
+    num_of_layers=50
+    a1 = np.linspace(0, 50000, num_of_layers)
+    tmp = find_nearest(a1, conjugated_distance*1000)
+    # возвращаются два индекса, я всегда беру наименьший из двух
+    
+    for i in range(len(x)):
+        p0_Cn2_min = (cc[y[i], x[i]]/np.max(gammas[tmp[1]])) 
+        p0_Cn2_max = (cc[y[i], x[i]]/np.max(gammas[num_of_layers-1]))
+        p0_Cn2[i] = [p0_Cn2_min, p0_Cn2_max]
+    return p0_Cn2, np.mean(p0_Cn2, axis=(1))

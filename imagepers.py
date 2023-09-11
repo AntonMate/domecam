@@ -1,6 +1,9 @@
 #!/usr/bin/python2
 
-"""A simple implementation of persistent homology on 2D images."""
+"""A simple implementation of persistent homology on 2D images.
+
+https://www.sthu.org/code/codesnippets/imagepers.html - туториал
+"""
 
 __author__ = "Stefan Huber <shuber@sthu.org>"
 
@@ -18,7 +21,7 @@ def iter_neighbors(p, w, h):
     # 8-neighborship
     neigh = [(y+j, x+i) for i in [-1, 0, 1] for j in [-1, 0, 1]]
     # 4-neighborship
-    # neigh = [(y-1, x), (y+1, x), (y, x-1), (y, x+1)]
+#     neigh = [(y-1, x), (y+1, x), (y, x-1), (y, x+1)]
 
     for j, i in neigh:
         if j < 0 or j >= h:
