@@ -55,13 +55,13 @@ def processDomecam(file=None, file_bias=None, data_dir=None, D=None, conjugated_
         ax3.set_title('Автокорреляция зрачка')
         fig.suptitle('Вспомогательные картинки')
   
-        fit = processApprox(cc=cc, gammas=gammas, lambda_=lambda_, D=D, latency=lat, sec_per_frame=sec_per_frame, cjk=cjk, i_p=i_p, all_Vx=Vx, all_Vy=Vy, conjugated_distance=conjugated_distance)
+#         fit = processApprox(cc=cc, gammas=gammas, lambda_=lambda_, D=D, latency=lat, sec_per_frame=sec_per_frame, cjk=cjk, i_p=i_p, all_Vx=Vx, all_Vy=Vy, conjugated_distance=conjugated_distance)
     
-        fig, (ax, ax2, ax3) = plt.subplots(1, 3, figsize=(25, 5))
-        fig.colorbar(ax.imshow(cc), ax=ax)
-        fig.colorbar(ax2.imshow(fit), ax=ax2)
-        fig.colorbar(ax3.imshow(cc-fit), ax=ax3)
-        ax.set_title('orig')
-        ax2.set_title('model')
-        ax3.set_title('resid')
+#         fig, (ax, ax2, ax3) = plt.subplots(1, 3, figsize=(25, 5))
+#         fig.colorbar(ax.imshow(cc), ax=ax)
+#         fig.colorbar(ax2.imshow(fit), ax=ax2)
+#         fig.colorbar(ax3.imshow(cc-fit), ax=ax3)
+#         ax.set_title('orig')
+#         ax2.set_title('model')
+#         ax3.set_title('resid')
   

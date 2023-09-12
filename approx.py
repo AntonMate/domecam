@@ -29,7 +29,6 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
                 return idx+1, idx
 
     def gamma_se(X, Y, Vx, Vy, Cn2, z): 
-#         print(Cn2)
         Cn2=Cn2*1e-13
         z=z*1000
 

@@ -4,6 +4,7 @@ from skimage.filters import gaussian
 import matplotlib.pyplot as plt
 import xlrd
 import csv
+import os
 
 np.seterr(divide='ignore')
 
@@ -124,7 +125,7 @@ def processSpectralFilter(f_lambda=None, z=None, omega_lambdas_scale=None, k=Non
     omega = f_abs * z
     omega = np.ravel(omega)
     omega_new = np.interp(omega, np.linspace(0, omega_lambdas_scale, k), res_fft)
-    omega_new = np.resize(omega_new, (cjk.shape[0], cjk.shape[1]))    
+    omega_new = np.resize(omega_new, (cjk.shape[0], cjk.shape[1]))        
     return omega_new
 
 def processGammaPoly(z, f_lambda=None, cjk=None, D=None, const2=None, Aff113=None, omega_lambdas_scale=None, k=None, res_fft=None, f_abs=None):
@@ -146,12 +147,15 @@ def processGamma(lambda_, GammaType=None, cjk=None, D=None, file_star=None, file
     st = time.perf_counter()
     
     # интенисвность теор гамм
-    Cn2 = 1e-13
+#     Cn2 = 1e-13
+    Cn2=1
     
     # частотный движ, фильтры и прочее, чтобы в цикле не считать каждый раз
     nx=cjk.shape[0]
     f_scale = 1/(2*D) # шаг по частоте, [м^-1]
-    delta = D/(cjk.shape[0]//2) # шаг субапертуры, период дискретизации (то, насколько одно значение отстает от следующего) [м]
+#     delta = D/(cjk.shape[0]//2) # шаг субапертуры, период дискретизации (то, насколько одно значение отстает от следующего) [м]
+    delta = D/(cjk.shape[0])
+    print('delta:', delta)
     fx, fy = f_scale * np.asarray(np.meshgrid(np.linspace(-nx//2, nx//2-1, nx), np.linspace(-nx//2, nx//2-1, nx)))
     f_11_3 = processF_113(nx, fx, fy)
     A_f = processApertureFilter(nx, fx, fy, delta) 
@@ -174,12 +178,20 @@ def processGamma(lambda_, GammaType=None, cjk=None, D=None, file_star=None, file
             gammas1[i] = gaussian(tmp, sigma=1)
     
     if GammaType == 'poly': 
-        f_lambda=processF_lamda(file_star=file_star, file_filter=file_filter, file_ccd=file_ccd)
-        coeff=1000 #!!!
-        k = 1000*coeff
-        lambda_max = len(f_lambda) - 1
-        lambda_max_new = int(lambda_max*coeff)
+        f_lambda = np.zeros((1071), dtype=np.float32)
+        f_lambda[650] = 1
+        plt.figure()
+        plt.plot(f_lambda)
+        plt.xlim(630, 660)
+#         f_lambda=processF_lamda(file_star=file_star, file_filter=file_filter, file_ccd=file_ccd)
+        
+        coeff=1000 
+        k = (len(f_lambda)-1)*coeff
+        lambda_max = len(f_lambda) - 1 # максимальное значение длины волны в функции отлклика, [нанометр]
+        lambda_max_new = int(lambda_max*coeff) # 
         lambdas = np.linspace(0, lambda_max_new, k) * pow(10, -9) # [м]
+        
+        # заполнение 0 функции отклика за ее пределами
         tail = np.zeros((len(lambdas) - len(f_lambda)))
         f_lambda_new = np.append(f_lambda, tail)
 
@@ -189,11 +201,13 @@ def processGamma(lambda_, GammaType=None, cjk=None, D=None, file_star=None, file
         delta_lambdas = (lambda_max_new / len(lambdas)) * pow(10, -9) # период дискретизации, шаг по частоте [м]
         omega_lambdas_scale = 1 / (delta_lambdas) # максимальное значение по частоте, [м^-1]
         f_abs = np.sqrt(pow(fx, 2) + pow(fy, 2))
-        f_abs = 0.5 * pow(f_abs, 2)    
-        for i in range(num_of_layers):
-            tmp = processGammaPoly(a1[i], f_lambda=f_lambda, cjk=cjk, D=D, const2=const2, Aff113=Aff113, omega_lambdas_scale=omega_lambdas_scale, k=k, res_fft=res_fft, f_abs=f_abs)
-            gammas1[i] = gaussian(tmp, sigma=1)
-    
+        f_abs = 0.5 * pow(f_abs, 2)   
+      
+#         for i in range(num_of_layers):
+#             tmp = processGammaPoly(a1[i], f_lambda=f_lambda, cjk=cjk, D=D, const2=const2, Aff113=Aff113, omega_lambdas_scale=omega_lambdas_scale, k=k, res_fft=res_fft, f_abs=f_abs)
+#             gammas1[i] = gaussian(tmp, sigma=1)
+        
+#         os.remove('filter.csv')
     print(f' - time: {time.perf_counter() - st:.4f}')
     print(f' - {num_of_layers} {GammaType}chromatic turbulence layers from 0 to 50 km')
     
