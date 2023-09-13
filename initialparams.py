@@ -27,7 +27,6 @@ def processBestThresh(img, acc=None):
                 final_thresh.append(thresh)
     
     final_thresh = np.min(final_thresh)  
-    
     print(f' - time: {time.perf_counter() - st:.4f}')
     print(f' - threshold: {final_thresh}')
     return final_thresh
@@ -46,7 +45,7 @@ def processPeakDetect(image, size_of_neighborhood=None):
     
     # define an 8-connected neighborhood
 #     neighborhood = generate_binary_structure(2,2)
-    neighborhood = np.ones((size_of_neighborhood, size_of_neighborhood))
+    neighborhood = np.ones((size_of_neighborhood, size_of_neighborhood), dtype=np.float32)
 
     #apply the local maximum filter; all pixel of maximal value 
     #in their neighborhood are set to 1
@@ -82,7 +81,7 @@ def processCoordsToSpeed(y, x, lat=None, sec_per_frame=None, D=None, cc=None):
         all_Vx[i] = -(cc.shape[1]//2-x[i])*delta/t
     return all_Vy, all_Vx
 
-def processCn2(cc, y, x, gammas, conjugated_distance=None):
+def processCn2(cc, y, x, gammas, conjugated_distance=None, num_of_layers=None, a1=None):
     def find_nearest(array, value):
         array = np.asarray(array)
         idx = (np.abs(array - value)).argmin()
@@ -97,14 +96,12 @@ def processCn2(cc, y, x, gammas, conjugated_distance=None):
                 return idx+1, idx
             
     p0_Cn2 = np.zeros((len(x), 2), dtype=np.float32)
-    
-    num_of_layers=50
-    a1 = np.linspace(0, 50000, num_of_layers)
     tmp = find_nearest(a1, conjugated_distance*1000)
     # возвращаются два индекса, я всегда беру наименьший из двух
     
     for i in range(len(x)):
+        # вообще эта темка мутная, потому что я тут не учел, что еще есть cjk
         p0_Cn2_min = (cc[y[i], x[i]]/np.max(gammas[tmp[1]])) 
         p0_Cn2_max = (cc[y[i], x[i]]/np.max(gammas[num_of_layers-1]))
         p0_Cn2[i] = [p0_Cn2_min, p0_Cn2_max]
-    return p0_Cn2, np.mean(p0_Cn2, axis=(1))
+    return p0_Cn2, np.mean(p0_Cn2, axis=(1), dtype=np.float32)
