@@ -101,7 +101,7 @@ def processCn2(cc, y, x, gammas, conjugated_distance=None, num_of_layers=None, a
     
     for i in range(len(x)):
         # вообще эта темка мутная, потому что я тут не учел, что еще есть cjk
-        p0_Cn2_min = (cc[y[i], x[i]]/np.max(gammas[tmp[1]])) 
-        p0_Cn2_max = (cc[y[i], x[i]]/np.max(gammas[num_of_layers-1]))
+        p0_Cn2_max = (cc[y[i], x[i]]/np.max(gammas[tmp[1]])) 
+        p0_Cn2_min = (cc[y[i], x[i]]/np.max(gammas[num_of_layers-1]))
         p0_Cn2[i] = [p0_Cn2_min, p0_Cn2_max]
     return p0_Cn2, np.mean(p0_Cn2, axis=(1), dtype=np.float32)

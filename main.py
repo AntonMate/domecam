@@ -29,7 +29,8 @@ def processDomecam(file=None, file_bias=None, data_dir=None, D=None, conjugated_
         i_p = np.zeros((len(x), 4), dtype=np.float32)
         for i in range(len(x)):
             if int(Vx[i])==0 and int(Vy[i])==0:
-                i_p[i] = [Vx[i], Vy[i], p0_Cn2_mean[i], conjugated_distance]
+                # тут можно для Cn2 брать значение Cn2 для conjugated_distance, а не Cn2_mean
+                i_p[i] = [Vx[i], Vy[i], p0_Cn2[i][1], conjugated_distance]
             else:
                 i_p[i] = [Vx[i], Vy[i], p0_Cn2_mean[i], 10]
         print('\nInitial guess for the parameters:')
@@ -57,7 +58,7 @@ def processDomecam(file=None, file_bias=None, data_dir=None, D=None, conjugated_
         ax3.set_title('Автокорреляция зрачка')
         fig.suptitle('Вспомогательные картинки')
   
-        fit = processApprox(cc=cc, gammas=gammas, lambda_=lambda_, D=D, latency=lat, sec_per_frame=sec_per_frame, cjk=cjk, i_p=i_p, all_Vx=Vx, all_Vy=Vy, conjugated_distance=conjugated_distance, num_of_layers=num_of_layers, a1=a1)
+        fit = processApprox(cc=cc, gammas=gammas, lambda_=lambda_, D=D, latency=lat, sec_per_frame=sec_per_frame, cjk=cjk, i_p=i_p, all_Vx=Vx, all_Vy=Vy, p0_Cn2=p0_Cn2, conjugated_distance=conjugated_distance, num_of_layers=num_of_layers, a1=a1)
     
         fig, (ax, ax2, ax3) = plt.subplots(1, 3, figsize=(25, 5))
         fig.colorbar(ax.imshow(cc), ax=ax)

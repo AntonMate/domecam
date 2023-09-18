@@ -8,7 +8,7 @@ from scipy.optimize import curve_fit
 from skimage.filters import threshold_multiotsu, threshold_otsu
 from astropy.io import fits
 
-def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_per_frame=None, cjk=None, i_p=None, all_Vx=None, all_Vy=None, conjugated_distance=None, num_of_layers=None, a1=None):
+def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_per_frame=None, cjk=None, i_p=None, all_Vx=None, all_Vy=None, p0_Cn2=None, conjugated_distance=None, num_of_layers=None, a1=None):
     t = latency * sec_per_frame
     delta = D/(cc.shape[0]//2)
     
@@ -42,7 +42,7 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
         res = shift(res, (-Ypix, Xpix), order=1)  
         return res
 
-    def one_speckle_fit(params=None, data=None, lambda_=None, all_Vx=None, all_Vy=None, conjugated_distance=None): 
+    def one_speckle_fit(params=None, data=None, lambda_=None, all_Vx=None, all_Vy=None, p0_Cn2=None, conjugated_distance=None): 
         def _g(M, *args): 
             x, y = M
             arr = np.zeros(x.shape)
@@ -62,23 +62,21 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
         xdata = np.vstack((X.ravel(), Y.ravel())) 
         ydata = data.ravel()
         
-        ub2 = []
-        ub3 = np.zeros((4*len(p0)//4), dtype=np.float32)
-        print(len(all_Vx))
+        # более точные баунсы для начальных параметров
+        lb2 = np.zeros((len(p0)//4, 4), dtype=np.float32)
+        ub2 = np.zeros((len(p0)//4, 4), dtype=np.float32)
         for i in range(len(all_Vx)):
-            ub2.append([all_Vx[i]+0.5, all_Vy[i]+0.5, np.inf, 50])
-        print(len(ub2))
+            lb2[i] = [all_Vx[i]-0.5, all_Vy[i]-0.5, p0_Cn2[i][0]-0.005, conjugated_distance]
+            ub2[i] = [all_Vx[i]+0.5, all_Vy[i]+0.5, p0_Cn2[i][1]+0.005, 50]
+        lb2 = np.ravel(lb2)
+        ub2 = np.ravel(ub2)
         
-#         lb = np.array(lb)
-#         ub = np.array(ub)
-        
-        lb = [-np.inf, -np.inf, 0, conjugated_distance] # длина 4
-        lb = np.tile(lb, len(p0)//4) # длина 5 раз по 4, то есть 20
+        lb = [-np.inf, -np.inf, 0, conjugated_distance]
+        lb = np.tile(lb, len(p0)//4) 
         ub = [np.inf, np.inf, np.inf, 50]
         ub = np.tile(ub, len(p0)//4)
-        print('ub:', ub.shape)
      
-        popt, pcov = curve_fit(_g, xdata, ydata, p0, bounds=[lb, ub])
+        popt, pcov = curve_fit(_g, xdata, ydata, p0, bounds=[lb2, ub2])
 
         for i in range(len(popt)//4):
             fit += gamma_se(X, Y, *popt[i*4:i*4+4])
@@ -92,6 +90,9 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
         df = df.reset_index()
         df['Cn2'] = df['Cn2']*1e-13
         df['z, m'] = df['z, m']*1000
+        df = df.round({'Vx, m/s': 2})
+        df = df.round({'Vy, m/s': 2})
+        df = df.round({'z, m': 2})
         df.drop(columns=['index'], inplace=True)
 
         sum_cn2 = np.sum(df['Cn2'])        
@@ -114,7 +115,7 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
     plt.figure()
     plt.imshow(cc)
     plt.title('cc/cjk')
-    fit = one_speckle_fit(params=i_p, data=cc, lambda_=lambda_, all_Vx=all_Vx, all_Vy=all_Vy, conjugated_distance=conjugated_distance)
+    fit = one_speckle_fit(params=i_p, data=cc, lambda_=lambda_, all_Vx=all_Vx, all_Vy=all_Vy, p0_Cn2=p0_Cn2, conjugated_distance=conjugated_distance)
     return fit
 #         print()
 #         return fit, popt
