@@ -42,11 +42,11 @@ def processGammaMono(z, lambda_, cjk=None, const2=None, nx=None, fx=None, fy=Non
     return res
 
 # --- получение кривой пропускания фильтра
-def filter_values(file):  
-    def xls_to_csv(file):
-        x =  xlrd.open_workbook(file)
+def filter_values(file, data_dir=None):  
+    def xls_to_csv(file, data_dir=None):
+        x =  xlrd.open_workbook(f'{data_dir}/{file}')
         x1 = x.sheet_by_name('Измерение')
-        csvfile = open('filter.csv', 'w')
+        csvfile = open(f'{data_dir}/filter.csv', 'w')
         writecsv = csv.writer(csvfile, quoting=csv.QUOTE_ALL)
 
         for rownum in range(1, x1.nrows): # пропускаю первую сртоку в файле, тк. там текст
@@ -54,10 +54,10 @@ def filter_values(file):
 
         csvfile.close()
         
-    xls_to_csv(file)
+    xls_to_csv(file, data_dir=data_dir)
     
     x_filter, y_filter = [], []
-    with open('filter.csv') as f1:
+    with open(f'{data_dir}/filter.csv') as f1:
         for line in f1:
             line = line.replace('"', '').strip().split(sep=',')
             if len(line) == 2:
@@ -67,8 +67,8 @@ def filter_values(file):
     return x_filter, y_filter
 
 # --- кривая квантовой эффективности детектора
-def ccd_values(file):
-    with open(file) as f1, open(file) as f2:
+def ccd_values(file, data_dir=None):
+    with open(f'{data_dir}/{file}') as f1, open(f'{data_dir}/{file}') as f2:
         x_ccd = [int(np.array(line.strip().split(' '), float)[0]*1000) for line in f1]
         x_ccd = x_ccd[:len(x_ccd)-1] # последнее значение по длине волны почему-то 0, тут я его удаляю
     
@@ -80,8 +80,8 @@ def ccd_values(file):
     return x_ccd, y_ccd
 
 # --- излучение звезды
-def star_values(file):
-    with open(file) as f1, open(file) as f2:
+def star_values(file, data_dir=None):
+    with open(f'{data_dir}/{file}') as f1, open(f'{data_dir}/{file}') as f2:
         x_star, y_star = [], []
         for line in f1:
             line = line.strip().split(' ')
@@ -91,10 +91,10 @@ def star_values(file):
     return x_star, y_star
 
 # --- функция спектрального отклика
-def processF_lamda(file_star=None, file_filter=None, file_ccd=None):
-    x_filter, y_filter = filter_values(file_filter)
-    x_ccd, y_ccd = ccd_values(file_ccd)
-    x_star, y_star = star_values(file_star)
+def processF_lamda(file_star=None, file_filter=None, file_ccd=None, data_dir=None):
+    x_filter, y_filter = filter_values(file_filter, data_dir=data_dir)
+    x_ccd, y_ccd = ccd_values(file_ccd, data_dir=data_dir)
+    x_star, y_star = star_values(file_star, data_dir=data_dir)
 
     x_max = int(np.min([x_ccd[-1], x_filter[-1], x_star[-1]]))
     x_min = np.max([x_ccd[0], x_filter[0], x_star[0]])
@@ -142,7 +142,7 @@ def processGammaPoly(z, f_lambda=None, cjk=None, D=None, const2=None, Aff113=Non
     res = res * cjk
     return res
 
-def processGamma(lambda_, GammaType=None, cjk=None, D=None, file_star=None, file_filter=None, file_ccd=None, num_of_layers=None, a1=None):  
+def processGamma(lambda_, GammaType=None, cjk=None, D=None, file_star=None, file_filter=None, file_ccd=None, num_of_layers=None, a1=None, data_dir=None):  
     print('creating gammas')
     st = time.perf_counter()
     
@@ -174,7 +174,7 @@ def processGamma(lambda_, GammaType=None, cjk=None, D=None, file_star=None, file
 #         проверка весовой функции:
 #         f_lambda = np.zeros((1071), dtype=np.float32)
 #         f_lambda[650] = 1
-        f_lambda=processF_lamda(file_star=file_star, file_filter=file_filter, file_ccd=file_ccd)
+        f_lambda=processF_lamda(file_star=file_star, file_filter=file_filter, file_ccd=file_ccd, data_dir=data_dir)
         
         coeff=1000 
         k = (len(f_lambda)-1)*coeff
@@ -198,7 +198,7 @@ def processGamma(lambda_, GammaType=None, cjk=None, D=None, file_star=None, file
             tmp = processGammaPoly(a1[i], f_lambda=f_lambda, cjk=cjk, D=D, const2=const2, Aff113=Aff113, omega_lambdas_scale=omega_lambdas_scale, k=k, res_fft=res_fft, f_abs=f_abs)
             gammas1[i] = gaussian(tmp, sigma=1)
         
-        os.remove('filter.csv')
+        os.remove(f'{data_dir}/filter.csv')
     print(f' - time: {time.perf_counter() - st:.4f}')
     print(f' - {num_of_layers} {GammaType}chromatic turbulence layers from 0 to 50 km')
     

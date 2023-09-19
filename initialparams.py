@@ -3,6 +3,8 @@ import numpy as np
 from scipy.ndimage.morphology import binary_erosion
 from scipy.ndimage.filters import maximum_filter
 from skimage.filters import threshold_multiotsu
+import matplotlib.pyplot as plt
+
 
 def processBestThresh(img, acc=None):
     '''
@@ -42,11 +44,9 @@ def processPeakDetect(image, size_of_neighborhood=None):
     """
     print('finding peaks')
     st = time.perf_counter()
-    
     # define an 8-connected neighborhood
-#     neighborhood = generate_binary_structure(2,2)
+    # neighborhood = generate_binary_structure(2,2)
     neighborhood = np.ones((size_of_neighborhood, size_of_neighborhood), dtype=np.float32)
-
     #apply the local maximum filter; all pixel of maximal value 
     #in their neighborhood are set to 1
     local_max = maximum_filter(image, footprint=neighborhood)==image
@@ -56,16 +56,13 @@ def processPeakDetect(image, size_of_neighborhood=None):
 
     #we create the mask of the background
     background = (image==0)
-
     #a little technicality: we must erode the background in order to 
     #successfully subtract it form local_max, otherwise a line will 
     #appear along the background border (artifact of the local maximum filter)
     eroded_background = binary_erosion(background, structure=neighborhood, border_value=1)
-
     #we obtain the final mask, containing only peaks, 
     #by removing the background from the local_max mask (xor operation)
-    detected_peaks = local_max ^ eroded_background
-    
+    detected_peaks = local_max ^ eroded_background 
     y, x =np.where(detected_peaks != 0)
     print(f' - time: {time.perf_counter() - st:.4f}')
     print(f' - {len(y)} peaks found')
@@ -100,7 +97,6 @@ def processCn2(cc, y, x, gammas, conjugated_distance=None, num_of_layers=None, a
     # возвращаются два индекса, я всегда беру наименьший из двух
     
     for i in range(len(x)):
-        # вообще эта темка мутная, потому что я тут не учел, что еще есть cjk
         p0_Cn2_max = (cc[y[i], x[i]]/np.max(gammas[tmp[1]])) 
         p0_Cn2_min = (cc[y[i], x[i]]/np.max(gammas[num_of_layers-1]))
         p0_Cn2[i] = [p0_Cn2_min, p0_Cn2_max]
