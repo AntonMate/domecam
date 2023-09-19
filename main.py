@@ -12,7 +12,6 @@ def processDomecam(file=None, file_bias=None, data_dir=None, D=None, conjugated_
     # создание папки, где будут храниться изображения кросс-корр
     if not os.path.isdir("crosscorr"):
         os.mkdir("crosscorr")
-        print('lol')
     for lat in latency:
         if os.path.isfile(f'crosscorr/{file[:-5]}_crosscorr_{lat}.gz'):
             cc, cjk, sec_per_frame = processCorr(run='no', file=file, file_bias=file_bias, D=D, latency=lat, data_dir=data_dir)
