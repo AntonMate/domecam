@@ -12,14 +12,19 @@ def processDomecam(file=None, file_bias=None, data_dir=None, D=None, conjugated_
     # создание папки, где будут храниться изображения кросс-корр
     if not os.path.isdir("crosscorr"):
         os.mkdir("crosscorr")
-        #
         print('lol')
     for lat in latency:
-        # считывание данных, получение кросс-корр и автокорреляции зрачка 
-        cc, cjk, sec_per_frame = processCorr(file=file, file_bias=file_bias, D=D, latency=lat, data_dir=data_dir)
-        # cc - картина кросс-корреляции
-        # cjk - картина автокорреляции зрачка 
-        # sec_per_frame - период между кадрами, [секунда]
+        if os.path.isfile(f'crosscorr/{file[:-5]}_crosscorr_{lat}.gz'):
+            cc, cjk, sec_per_frame = processCorr(run='no', file=file, file_bias=file_bias, D=D, latency=lat, data_dir=data_dir)
+            cc = np.loadtxt(f'crosscorr/{file[:-5]}_crosscorr_{lat}.gz')
+            # cjk = ?
+            # sec_per_frame = ?
+        else:
+            # считывание данных, получение кросс-корр и автокорреляции зрачка 
+            cc, cjk, sec_per_frame = processCorr(run='yes', file=file, file_bias=file_bias, D=D, latency=lat, data_dir=data_dir)
+            # cc - картина кросс-корреляции
+            # cjk - картина автокорреляции зрачка 
+            # sec_per_frame - период между кадрами, [секунда]
 
         # создание теор. гамм 
         num_of_layers=50

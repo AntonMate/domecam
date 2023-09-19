@@ -35,8 +35,8 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
         Xpix = Lx/delta
         Ypix = Ly/delta
 
-        lv = find_nearest(a1, z)[1]
-        uv = find_nearest(a1, z)[0]
+        uv, lv = find_nearest(a1, z) # lv - [1], ub - [0]
+#         uv = find_nearest(a1, z)[0]
         res = gammas[lv] + (z - a1[lv])*((gammas[uv] - gammas[lv])/(a1[uv] - a1[lv]))
         
         res = shift(res, (-Ypix, Xpix), order=1)  
