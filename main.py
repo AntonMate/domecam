@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import time
+import os
 
 from reduction import processCorr 
 from tempfiles import processGamma 
@@ -8,6 +9,10 @@ from initialparams import processBestThresh, processPeakDetect, processCoordsToS
 from approx import processApprox 
 
 def processDomecam(file=None, file_bias=None, data_dir=None, D=None, conjugated_distance=None, latency=None, spectrum=None, lambda_=None, file_star=None, file_filter=None, file_ccd=None):
+    # создание папки, где будут храниться изображения кросс-корр
+    if not os.path.isdir("crosscorr"):
+        os.mkdir("crosscorr")
+        
     for lat in latency:
         # считывание данных, получение кросс-корр и автокорреляции зрачка 
         cc, cjk, sec_per_frame = processCorr(file=file, file_bias=file_bias, D=D, latency=lat, data_dir=data_dir)
