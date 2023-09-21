@@ -23,24 +23,25 @@ def processDomecam(file=None, file_bias=None, data_dir=None, D=None, conjugated_
             # sec_per_frame - период между кадрами, [секунда]
 
         # создание теор. гамм 
+        # конфигурация на 30 слоев до 30км работает быстрее, точность вроде бы та же
         num_of_layers=50
-        a1 = np.geomspace(100, 50000, num_of_layers)
-        gammas = processGamma(lambda_, GammaType=spectrum, cjk=cjk, D=D, file_star=file_star, file_filter=file_filter, file_ccd=file_ccd, num_of_layers=num_of_layers, a1=a1, data_dir=data_dir) 
+        heights_of_layers = np.geomspace(100, 50000, num_of_layers, dtype=np.float32)
+        gammas = processGamma(lambda_, GammaType=spectrum, cjk=cjk, D=D, file_star=file_star, file_filter=file_filter, file_ccd=file_ccd, num_of_layers=num_of_layers, heights_of_layers=heights_of_layers, data_dir=data_dir) 
     
         # подсчет начальных параметров для аппроксимации 
         thresh = processBestThresh(cc, acc=5)
         y, x = processPeakDetect(cc * (cc>thresh), size_of_neighborhood=7)
-        Vy, Vx = processCoordsToSpeed(y, x, lat=lat, sec_per_frame=sec_per_frame, D=D, cc=cc)
-        p0_Cn2, p0_Cn2_mean = processCn2(cc/cjk, y, x, gammas, conjugated_distance=conjugated_distance, num_of_layers=num_of_layers, a1=a1)
+        all_Vy, all_Vx = processCoordsToSpeed(y, x, lat=lat, sec_per_frame=sec_per_frame, D=D, cc=cc)
+        all_Cn2_bounds, all_Cn2_mean = processCn2(cc/cjk, y, x, gammas, conjugated_distance=conjugated_distance, heights_of_layers=heights_of_layers)
         
-        i_p = np.zeros((len(x), 4), dtype=np.float32)
+        initial_params = np.zeros((len(x), 4), dtype=np.float32)
         for i in range(len(x)):
-            if int(Vx[i])==0 and int(Vy[i])==0:
+            if int(all_Vx[i])==0 and int(all_Vy[i])==0:
                 # тут можно для Cn2 брать значение Cn2 для conjugated_distance, а не Cn2_mean
-                i_p[i] = [Vx[i], Vy[i], p0_Cn2[i][1], conjugated_distance]
-                dome_num = i
+                initial_params[i] = [all_Vx[i], all_Vy[i], all_Cn2_bounds[i][1], conjugated_distance]
+                dome_index = i
             else:
-                i_p[i] = [Vx[i], Vy[i], p0_Cn2_mean[i], 10]
+                initial_params[i] = [all_Vx[i], all_Vy[i], all_Cn2_mean[i], 10]
       
         # thresh - оптимальный трешхолд картины кросс-корреляции 
         # y, x - координаты целевых пиков
@@ -49,7 +50,7 @@ def processDomecam(file=None, file_bias=None, data_dir=None, D=None, conjugated_
         # i_p - начальные параметры для каждого пика
         
         fig, (ax, ax2, ax3) = plt.subplots(1, 3, figsize=(25, 5))
-        ax.scatter(x, y, c='red', s=1)
+        ax.scatter(x, y, c='red', marker='x', s=1)
         fig.colorbar(ax.imshow(cc), ax=ax)
         fig.colorbar(ax2.imshow(cc * (cc>thresh)), ax=ax2)
         fig.colorbar(ax3.imshow(cjk), ax=ax3)
@@ -58,7 +59,7 @@ def processDomecam(file=None, file_bias=None, data_dir=None, D=None, conjugated_
         ax3.set_title('Автокорреляция зрачка')
         fig.suptitle('Вспомогательные картинки')
   
-        fit = processApprox(cc=cc, gammas=gammas, lambda_=lambda_, D=D, latency=lat, sec_per_frame=sec_per_frame, cjk=cjk, i_p=i_p, all_Vx=Vx, all_Vy=Vy, p0_Cn2=p0_Cn2, conjugated_distance=conjugated_distance, num_of_layers=num_of_layers, a1=a1, dome_num=dome_num)
+        fit = processApprox(cc=cc, gammas=gammas, lambda_=lambda_, D=D, latency=lat, sec_per_frame=sec_per_frame, cjk=cjk, initial_params=initial_params, all_Vx=all_Vx, all_Vy=all_Vy, all_Cn2_bounds=all_Cn2_bounds, conjugated_distance=conjugated_distance, num_of_layers=num_of_layers, heights_of_layers=heights_of_layers, dome_index=dome_index)
     
         fig, (ax, ax2, ax3) = plt.subplots(1, 3, figsize=(25, 5))
         fig.colorbar(ax.imshow(cc), ax=ax)

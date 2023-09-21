@@ -25,7 +25,7 @@ def correlate1(frames, image_binary, latency):
         correlation[i] = correlate(frames[i], frames[i + latency], mode='full', method='fft')   
 
         
-    lol = np.mean(correlation) # такое ощущение, что из за этого следующий np.mean работает быстрее
+    # lol = np.mean(correlation) # такое ощущение, что из за этого следующий np.mean работает быстрее
     res = np.mean(correlation, axis=0, dtype=np.float32)
 
     res /= np.sum(image_binary, dtype=np.float32)
@@ -33,7 +33,7 @@ def correlate1(frames, image_binary, latency):
     tmp = np.zeros((res.shape[0]+1, res.shape[1]+1), dtype=np.float32)
     tmp[1:,1:] = res
    
-    print(f' - time: {time.perf_counter() - st:.4f}')
+    print(f' - time: {time.perf_counter() - st:.2f}')
     print(f' - cross-corr image shape: {tmp.shape[0]}x{tmp.shape[1]}')
     return tmp
     
@@ -88,7 +88,7 @@ def processPupilWithCorr(images, latency):
 
     res = images_clean[np.random.randint(images_clean.shape[0])]
     
-    print(f' - time: {time.perf_counter() - st:.4f}')
+    print(f' - time: {time.perf_counter() - st:.2f}')
     print(f' - pupil image shape: {res.shape[0]}x{res.shape[1]}')
     cross_corr = correlate1(images_clean, image_binary, latency)
     return res, cross_corr  
@@ -145,7 +145,7 @@ def processAutoCorr(nx, frame):
     res = res / np.sum(frame!=0, dtype=np.float32)
     tmp = np.zeros((res.shape[0]+1, res.shape[1]+1), dtype=np.float32)
     tmp[1:,1:] = res
-    print(f' - time: {time.perf_counter() - st:.4f}')
+    print(f' - time: {time.perf_counter() - st:.2f}')
     print(f' - auto-corr pupil image shape: {tmp.shape[0]}x{tmp.shape[1]}')
     return tmp
 
@@ -158,7 +158,8 @@ def processCorr(run_cc=None, file=None, file_bias=None, D=None, latency=None, da
             header = f[0].header
             sec_per_frame = 1/header['FRATE']
             data = np.float32(f[0].data)
-            print(f' - time: {time.perf_counter() - st:.4f}')
+#             data = f[0].data
+            print(f' - time: {time.perf_counter() - st:.2f}')
             print(f' - data shape: {data.shape[0]}x{data.shape[1]}x{data.shape[2]}')
 
             if data.shape[1] > 246:
@@ -168,8 +169,9 @@ def processCorr(run_cc=None, file=None, file_bias=None, D=None, latency=None, da
                 print('collecting bias')
                 st = time.perf_counter() 
                 with fits.open("".join([data_dir, '/', file_bias])) as f:
-                    bias = np.mean(f[0].data, axis=0, dtype=np.float32)
-                    print(f' - time: {time.perf_counter() - st:.4f}')
+                    bias = np.mean(np.float32(f[0].data), axis=0, dtype=np.float32)
+#                     bias = np.mean(f[0].data, axis=0, dtype=np.uint16)
+                    print(f' - time: {time.perf_counter() - st:.2f}')
                     print(f' - bias image shape: {bias.shape[0]}x{bias.shape[1]}')
                 data -= bias
 

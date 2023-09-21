@@ -38,7 +38,7 @@ def processGammaMono(z, lambda_, cjk=None, const2=None, nx=None, fx=None, fy=Non
     res = np.fft.fftshift(np.fft.irfft2(np.fft.fftshift(res), s=res.shape, norm='backward'))
     
     res = res * const2
-    res = res * cjk
+    # res = res * cjk
     return res
 
 # --- получение кривой пропускания фильтра
@@ -139,10 +139,10 @@ def processGammaPoly(z, f_lambda=None, cjk=None, D=None, const2=None, Aff113=Non
     res = np.fft.fftshift(np.fft.irfft2(np.fft.fftshift(res), s=res.shape, norm='backward'))
     
     res = res * const2   
-    res = res * cjk
+    # res = res * cjk
     return res
 
-def processGamma(lambda_, GammaType=None, cjk=None, D=None, file_star=None, file_filter=None, file_ccd=None, num_of_layers=None, a1=None, data_dir=None):  
+def processGamma(lambda_, GammaType=None, cjk=None, D=None, file_star=None, file_filter=None, file_ccd=None, num_of_layers=None, heights_of_layers=None, data_dir=None):  
     print('creating gammas')
     st = time.perf_counter()
     
@@ -167,7 +167,7 @@ def processGamma(lambda_, GammaType=None, cjk=None, D=None, file_star=None, file
     
     if GammaType == 'mono':
         for i in range(num_of_layers):
-            tmp = processGammaMono(a1[i], lambda_, cjk=cjk, const2=const2, nx=nx, fx=fx, fy=fy, Aff113=Aff113)
+            tmp = processGammaMono(heights_of_layers[i], lambda_, cjk=cjk, const2=const2, nx=nx, fx=fx, fy=fy, Aff113=Aff113)
             gammas1[i] = gaussian(tmp, sigma=1)
     
     if GammaType == 'poly': 
@@ -193,12 +193,13 @@ def processGamma(lambda_, GammaType=None, cjk=None, D=None, file_star=None, file
         omega_lambdas_scale = 1 / (delta_lambdas) # максимальное значение по частоте, [м^-1]
         f_abs = np.sqrt(pow(fx, 2) + pow(fy, 2))
         f_abs = 0.5 * pow(f_abs, 2)   
-      
+          
         for i in range(num_of_layers):
-            tmp = processGammaPoly(a1[i], f_lambda=f_lambda, cjk=cjk, D=D, const2=const2, Aff113=Aff113, omega_lambdas_scale=omega_lambdas_scale, k=k, res_fft=res_fft, f_abs=f_abs)
+            tmp = processGammaPoly(heights_of_layers[i], f_lambda=f_lambda, cjk=cjk, D=D, const2=const2, Aff113=Aff113, omega_lambdas_scale=omega_lambdas_scale, k=k, res_fft=res_fft, f_abs=f_abs)
             gammas1[i] = gaussian(tmp, sigma=1)
         
-        os.remove(f'{data_dir}/filter.csv')
+        if os.path.isfile(f'{data_dir}/filter.csv'):
+            os.remove(f'{data_dir}/filter.csv')
     print(f' - time: {time.perf_counter() - st:.4f}')
     print(f' - {num_of_layers} {GammaType}chromatic turbulence layers from 0 to 50 km')
     
