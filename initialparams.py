@@ -12,8 +12,6 @@ def processBestThresh(img, acc=None):
     img - 2d изображение
     acc - макисмалньый процент полезного сигнала, обнаруженный с Оцу, от всего изображения. Это нужно, чтобы трешхолд не захватывал часть шума, который так же есть на изображении
     '''
-    print('calculating threshold')
-    st = time.perf_counter()
     img_size = img.shape[0]*img.shape[1]
     one_percent = img_size/100
     final_thresh = []
@@ -28,8 +26,6 @@ def processBestThresh(img, acc=None):
                 final_thresh.append(thresh)
     
     final_thresh = np.min(final_thresh)  
-    print(f' - time: {time.perf_counter() - st:.2f}')
-    print(f' - threshold: {final_thresh}')
     return final_thresh
 
 def processPeakDetect(image, size_of_neighborhood=None):
@@ -40,8 +36,6 @@ def processPeakDetect(image, size_of_neighborhood=None):
     
     size_of_neighborhood - размер области для поиска максимума
     """
-    print('finding peaks')
-    st = time.perf_counter()
     # define an 8-connected neighborhood
     # neighborhood = generate_binary_structure(2,2)
     neighborhood = np.ones((size_of_neighborhood, size_of_neighborhood), dtype=np.float32)
@@ -62,12 +56,10 @@ def processPeakDetect(image, size_of_neighborhood=None):
     #by removing the background from the local_max mask (xor operation)
     detected_peaks = local_max ^ eroded_background 
     y, x =np.where(detected_peaks != 0)
-    print(f' - time: {time.perf_counter() - st:.2f}')
-    print(f' - {len(y)} peaks found')
     return y, x
 
-def processCoordsToSpeed(y, x, lat=None, sec_per_frame=None, D=None, cc=None):
-    t = lat * sec_per_frame
+def processCoordsToSpeed(y, x, latency=None, sec_per_frame=None, D=None, cc=None):
+    t = latency * sec_per_frame
     delta = D/(cc.shape[0]//2)
     all_Vy = np.zeros((len(x)), dtype=np.float32)
     all_Vx = np.zeros((len(x)), dtype=np.float32)

@@ -9,9 +9,6 @@ from astropy.io import fits
 
 # ----------------------
 def correlate1(frames, image_binary, latency): 
-    print('cross correlating')
-    st = time.perf_counter() 
-
 #   corr = np.fft.fftshift(np.real(np.fft.ifft2(np.fft.fft2(img1)*np.fft.fft2(img2).conjugate()))) # np.real; np.abs
 #     correlation = [correlate(frames[i], frames[i + latency], mode='full', method='fft') 
 #                    for i in range(frames.shape[0] - latency)]
@@ -19,52 +16,50 @@ def correlate1(frames, image_binary, latency):
 #     iterable = (correlate(frames[i], frames[i + latency], mode='full', method='fft') 
 #                    for i in range(frames.shape[0] - latency))
 #     correlation = np.fromiter(iterable, dtype=np.dtype((np.float32, (2*frames.shape[1]-1, 2*frames.shape[2]-1))))
+    tmp = np.zeros((len(latency), 2*frames.shape[1], 2*frames.shape[2]), dtype=np.float32)
+    for latency_i in range(len(latency)):
     
-    correlation = np.zeros((frames.shape[0] - latency, 2*frames.shape[1]-1, 2*frames.shape[2]-1), dtype=np.float32)
-    for i in range(frames.shape[0] - latency):
-        correlation[i] = correlate(frames[i], frames[i + latency], mode='full', method='fft')   
-
+        correlation = np.zeros((frames.shape[0] - latency[latency_i], 2*frames.shape[1]-1, 2*frames.shape[2]-1), dtype=np.float32)
+        for i in range(frames.shape[0] - latency[latency_i]):
+            correlation[i] = correlate(frames[i], frames[i + latency[latency_i]], mode='full', method='fft')   
         
-    # lol = np.mean(correlation) # такое ощущение, что из за этого следующий np.mean работает быстрее
-    res = np.mean(correlation, axis=0, dtype=np.float32)
-
-    res /= np.sum(image_binary, dtype=np.float32)
-
-    tmp = np.zeros((res.shape[0]+1, res.shape[1]+1), dtype=np.float32)
-    tmp[1:,1:] = res
-   
-    print(f' - time: {time.perf_counter() - st:.2f}')
-    print(f' - cross-corr image shape: {tmp.shape[0]}x{tmp.shape[1]}')
+        res = np.mean(correlation, axis=0, dtype=np.float32)
+        res /= np.sum(image_binary, dtype=np.float32)
+        
+        tmp[latency_i, 1:, 1:] = res
+        tmp[latency_i] = gaussian(tmp[latency_i], sigma=1) # сглаживание изображения кросс-корреляции  
+        print(f' - latency {latency[latency_i]} done')
+    
     return tmp
     
 # ----------------------
 def processPupilWithCorr(images, latency): 
     print('data reduction')
     st = time.perf_counter()
-    def image_square_cropp2(image): 
+    def image_cropp(image): 
         mask = image != 0
         rows = np.flatnonzero((mask.any(axis=1))) 
         cols = np.flatnonzero((mask.any(axis=0)))
         res = image[rows.min():rows.max()+1, cols.min():cols.max()+1]
         return rows.min(), rows.max()+1, cols.min(), cols.max()+1
     
-    def image_siz2(ar):
-        if ar.shape[0] > ar.shape[1]:
-            val = ar.shape[0] - ar.shape[1]
-            ar = ar[:-val, :]
-            return ar, val, 0
-        if ar.shape[1] > ar.shape[0]:
-            val = ar.shape[1] - ar.shape[0]
-            ar = ar[:, :-val]
-            return ar, 0, val
-        if ar.shape[0] == ar.shape[1]:
-            return ar, 0, 0
+    def image_resize(image):
+        if image.shape[0] > image.shape[1]:
+            val = image.shape[0] - image.shape[1]
+            image = image[:-val, :]
+            return image, val, 0
+        if image.shape[1] > image.shape[0]:
+            val = image.shape[1] - image.shape[0]
+            image = image[:, :-val]
+            return image, 0, val
+        if image.shape[0] == image.shape[1]:
+            return image, 0, 0
         
-    def im_clean(images, mask):
+    def image_clean(images, mask):
         res = images * mask
         return res
     
-    def im_norm(images, image_average):
+    def image_norm(images, image_average):
         res = np.zeros_like(images, dtype=np.float32)
         for i in range(images.shape[0]):
             res[i] = ((images[i]/(image_average))*(np.sum(image_average)/np.sum(images[i])) - 1)
@@ -72,26 +67,30 @@ def processPupilWithCorr(images, latency):
         return res
     
     image_average = np.mean(images, axis=0, dtype=np.float32) # средний кадр серии
-    
     image_binary = (image_average > threshold_otsu(image_average)) # маска среднего кадра
     image_binary = np.array(image_binary, dtype=np.float32) # перевод в numpy
-    y1, y2, x1, x2 = image_square_cropp2(image_binary)
+    y1, y2, x1, x2 = image_cropp(image_binary) # обрезка нулевых строк и столбцов 
     mask = image_binary[y1:y2, x1:x2]
-    mask, yn, xn = image_siz2(mask)
+    mask, yn, xn = image_resize(mask) # обрезка изображения под квадратное
     image_average=image_average[y1:y2-yn, x1:x2-xn]
     images = images[:, y1:y2-yn, x1:x2-xn]
     
-    images_norm = im_norm(images, image_average) # нормировка изображений
-    
-    images_clean = im_clean(images_norm, mask) # отделение зрачка от фона
+    images_norm = image_norm(images, image_average) # нормировка изображений
+    images_clean = image_clean(images_norm, mask) # отделение зрачка от фона
     images_clean[np.isnan(images_clean)] = 0
 
-    res = images_clean[np.random.randint(images_clean.shape[0])]
+    random_pupil_image = images_clean[np.random.randint(images_clean.shape[0])]
     
+    print(f' - pupil image shape: {random_pupil_image.shape}')
     print(f' - time: {time.perf_counter() - st:.2f}')
-    print(f' - pupil image shape: {res.shape[0]}x{res.shape[1]}')
-    cross_corr = correlate1(images_clean, image_binary, latency)
-    return res, cross_corr  
+    
+    print('cross correlating')
+    st = time.perf_counter() 
+    cc = correlate1(images_clean, image_binary, latency) # кросс-корреляция
+    cjk = processAutoCorr(cc.shape[1], random_pupil_image) # автокорреляция зрачка
+    print(f' - cross-corr image shape: {cc.shape}; auto-corr pupil image shape: {cjk.shape}')
+    print(f' - time: {time.perf_counter() - st:.2f}')
+    return random_pupil_image, cc, cjk
 # ----------------------
 def pupil(images, latency): 
     print('data reduction')
@@ -138,15 +137,12 @@ def pupil(images, latency):
     return res, cross_corr  
 
 def processAutoCorr(nx, frame):
-    print('creating auto-corr pupil image')
     st = time.perf_counter()
     I0c = (frame != 0) * int(1)
     res = correlate(I0c, I0c, mode='full', method='fft')
     res = res / np.sum(frame!=0, dtype=np.float32)
     tmp = np.zeros((res.shape[0]+1, res.shape[1]+1), dtype=np.float32)
     tmp[1:,1:] = res
-    print(f' - time: {time.perf_counter() - st:.2f}')
-    print(f' - auto-corr pupil image shape: {tmp.shape[0]}x{tmp.shape[1]}')
     return tmp
 
 def processCorr(run_cc=None, file=None, file_bias=None, D=None, latency=None, data_dir=None):
@@ -158,40 +154,29 @@ def processCorr(run_cc=None, file=None, file_bias=None, D=None, latency=None, da
             header = f[0].header
             sec_per_frame = 1/header['FRATE']
             data = np.float32(f[0].data)
-#             data = f[0].data
-            print(f' - time: {time.perf_counter() - st:.2f}')
-            print(f' - data shape: {data.shape[0]}x{data.shape[1]}x{data.shape[2]}')
-
-            if data.shape[1] > 246:
-                print('WARNING: need binning')
-
             if file_bias is not None:
-                print('collecting bias')
-                st = time.perf_counter() 
                 with fits.open("".join([data_dir, '/', file_bias])) as f:
                     bias = np.mean(np.float32(f[0].data), axis=0, dtype=np.float32)
-#                     bias = np.mean(f[0].data, axis=0, dtype=np.uint16)
-                    print(f' - time: {time.perf_counter() - st:.2f}')
-                    print(f' - bias image shape: {bias.shape[0]}x{bias.shape[1]}')
+                print(f' - data shape: {data.shape}; bias shape: {bias.shape}')
                 data -= bias
+            else:
+                print(f' - data shape: {data.shape}')
+            print(f' - time: {time.perf_counter() - st:.2f}')
+            
+            
+            frame, data_corr, cjk = processPupilWithCorr(data, latency)
 
-            frame, data_corr = processPupilWithCorr(data, latency) # получение случайного изображения зрачка и изображения кросс-корреляции
-            cjk = processAutoCorr(data_corr.shape[0], frame) # автокорреляция зрачка
-            data_corr = gaussian(data_corr, sigma=1) # сглаживание изображения кросс-корреляции  
-            np.save(f'{data_dir}/crosscorr/{file[:-5]}_crosscorr_{latency}.npy', data_corr)
+            for latency_i in range(len(latency)):
+                np.save(f'{data_dir}/crosscorr/{file[:-5]}_crosscorr_{latency[latency_i]}.npy', data_corr[latency_i])
             np.save(f'{data_dir}/crosscorr/{file[:-5]}_cjk.npy', cjk)
     
     if run_cc == 'no':
         print('WARNING: cross correlation is loaded from old file')
-        data_corr = np.load(f'{data_dir}/crosscorr/{file[:-5]}_crosscorr_{latency}.npy')
-#         data_corr2 = np.loadtxt(f'{data_dir}/crosscorr/test_cross_corr.gz')
-#         data_corr2 = gaussian(data_corr2, sigma=1)
-#         print('eq:', np.array_equal(data_corr1, data_corr2))
-#         fig, (ax, ax2) = plt.subplots(1, 2, figsize=(20, 5))
-#         fig.colorbar(ax.imshow(data_corr), ax=ax)
-#         fig.colorbar(ax2.imshow(data_corr2-data_corr), ax=ax2)
-        
         cjk = np.load(f'{data_dir}/crosscorr/{file[:-5]}_cjk.npy')
+        data_corr = np.zeros((len(latency), cjk.shape[0], cjk.shape[1]), dtype=np.float32)
+        for latency_i in range(len(latency)):
+            data_corr[latency_i] = np.load(f'{data_dir}/crosscorr/{file[:-5]}_crosscorr_{latency[latency_i]}.npy')        
+        
         with fits.open("".join([data_dir, '/', file])) as f:
             header = f[0].header
             sec_per_frame = 1/header['FRATE']

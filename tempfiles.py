@@ -64,6 +64,8 @@ def filter_values(file, data_dir=None):
                 line = np.array(line, dtype=np.float32)
                 x_filter.append(line[0])
                 y_filter.append(line[1]/100)
+    
+    os.remove(f'{data_dir}/filter.csv')
     return x_filter, y_filter
 
 # --- кривая квантовой эффективности детектора
@@ -143,9 +145,6 @@ def processGammaPoly(z, f_lambda=None, cjk=None, D=None, const2=None, Aff113=Non
     return res
 
 def processGamma(lambda_, GammaType=None, cjk=None, D=None, file_star=None, file_filter=None, file_ccd=None, num_of_layers=None, heights_of_layers=None, data_dir=None):  
-    print('creating gammas')
-    st = time.perf_counter()
-    
     # интенисвность теор гамм
     Cn2 = 1e-13
     
@@ -197,10 +196,5 @@ def processGamma(lambda_, GammaType=None, cjk=None, D=None, file_star=None, file
         for i in range(num_of_layers):
             tmp = processGammaPoly(heights_of_layers[i], f_lambda=f_lambda, cjk=cjk, D=D, const2=const2, Aff113=Aff113, omega_lambdas_scale=omega_lambdas_scale, k=k, res_fft=res_fft, f_abs=f_abs)
             gammas1[i] = gaussian(tmp, sigma=1)
-        
-        if os.path.isfile(f'{data_dir}/filter.csv'):
-            os.remove(f'{data_dir}/filter.csv')
-    print(f' - time: {time.perf_counter() - st:.4f}')
-    print(f' - {num_of_layers} {GammaType}chromatic turbulence layers from 0 to 50 km')
-    
+            
     return gammas1

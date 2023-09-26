@@ -94,7 +94,6 @@ def circle(radius, size, circle_centre=(0, 0), origin="middle"):
     return C
 
 def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_per_frame=None, cjk=None, initial_params=None, all_Vx=None, all_Vy=None, all_Cn2_bounds=None, conjugated_distance=None, num_of_layers=None, heights_of_layers=None, dome_index=None):
-    print('approxing')
     print(' - initial guess for the parameters:')
     df_ip = pd.DataFrame(initial_params, columns = ['Vx, m/s','Vy, m/s','Cn2', 'z, m']) 
     df_ip = df_ip.sort_values(by=['z, m'])
@@ -107,7 +106,6 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
     df_ip.drop(columns=['index'], inplace=True)
     print(df_ip.to_string(index=False))
     
-    st=time.perf_counter()
     t = latency * sec_per_frame
     delta = D/(cc.shape[0]//2)
     t_delta = t/delta
@@ -224,7 +222,6 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
     
     fit = one_speckle_fit(initial_params=initial_params, data=cc, lambda_=lambda_, all_Vx=all_Vx, all_Vy=all_Vy, all_Cn2_bounds=all_Cn2_bounds, conjugated_distance=conjugated_distance, dome_index=dome_index)
     
-    print(f' - time: {time.perf_counter() - st:.2f}')
     return fit
 #         print()
 #         return fit, popt
