@@ -125,7 +125,7 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
                 return idx+1, idx
 
     def gamma_se(X, Y, Vx, Vy, Cn2, z): 
-        Cn2=Cn2*1e-13
+#        Cn2=Cn2*1e-13 # БС: это не обязательно делать, см. комментарий в конце этой функции
         z=z*1000
         
         uv, lv = find_nearest(heights_of_layers, z)
@@ -139,7 +139,8 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
         Xpix = Vx*t_delta
         Ypix = Vy*t_delta
         res = shift(res, (-Ypix, Xpix), order=1)  
-        return res
+# БС: здесь был баг - не было умножения на Cn2, из-за чего Cn2 вообще не подбиралось
+        return res*Cn2 
 
     def one_speckle_fit(initial_params=None, data=None, lambda_=None, all_Vx=None, all_Vy=None, all_Cn2_bounds=None, conjugated_distance=None, dome_index=None): 
         def _g(M, *args): 
@@ -148,6 +149,23 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
             for i in range(len(args)//4):
                 arr += gamma_se(x, y, *args[i*4:i*4+4]).ravel()
             return arr
+
+# БС: Модификация функции _g, моделирующая градиенты между турбулентными слоями
+# путем кусочной линейной интерполяции 
+        def _g_grad(M, *args): 
+            x, y = M
+            arr = np.zeros(x.shape, dtype=np.float32)
+            Nsublayer = 15
+            arr += gamma_se(x, y, *args[0:4]).ravel()
+            for i in range(1,len(args)//4-1):
+                Vx_range  = np.linspace(args[i*4],  args[i*4+4],Nsublayer)
+                Vy_range  = np.linspace(args[i*4+1],args[i*4+5],Nsublayer)
+                Cn2_range = np.linspace(args[i*4+2],args[i*4+6],Nsublayer)
+                z_range   = np.linspace(args[i*4+3],args[i*4+7],Nsublayer)
+                for j in range(Nsublayer):
+                    arr += gamma_se(x, y, Vx_range[j], Vy_range[j], Cn2_range[j]/Nsublayer, z_range[j]).ravel()
+            return arr
+
 
         p0 = [p for prms in initial_params for p in prms]
 
@@ -177,10 +195,20 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
 #         ub = [np.inf, np.inf, np.inf, 50]
 #         ub = np.tile(ub, len(p0)//4)
      
-        popt, pcov = curve_fit(_g, xdata, ydata, p0, bounds=[lb2, ub2])
+        use_gradient = False
 
-        for i in range(len(popt)//4):
-            fit += gamma_se(X, Y, *popt[i*4:i*4+4])
+        if use_gradient:
+            popt, pcov = curve_fit(_g_grad, xdata, ydata, p0, bounds=[lb2, ub2])   # БС: градиенты между турбулентными слоями
+        else:
+            popt, pcov = curve_fit(_g, xdata, ydata, p0, bounds=[lb2, ub2])       # дискретные турбулентные слои
+
+# БС: Такая реализация лучше, поскольку мы концентрируем сложение слоев в одной функции _g
+        if use_gradient:
+            fit = _g_grad(xdata,*popt).reshape(X.shape)
+        else:
+            fit = _g(xdata,*popt).reshape(X.shape)
+#        for i in range(len(popt)//4):
+#            fit += gamma_se(X, Y, *popt[i*4:i*4+4])
 
 #     #     errors = np.sqrt(np.diag(pcov))
 
