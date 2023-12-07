@@ -28,7 +28,8 @@ def correlate1(frames, image_binary, latency):
         
         tmp[latency_i, 1:, 1:] = res
         tmp[latency_i] = gaussian(tmp[latency_i], sigma=1) # сглаживание изображения кросс-корреляции  
-        print(f' - latency {latency[latency_i]} done')
+    if len(latency) > 1:
+            print(f' - latency {latency[latency_i]} done')
     
     return tmp
     
@@ -87,7 +88,7 @@ def processPupilWithCorr(images, latency):
     print('cross correlating')
     st = time.perf_counter() 
     cc = correlate1(images_clean, image_binary, latency) # кросс-корреляция
-    cjk = processAutoCorr(cc.shape[1], random_pupil_image) # автокорреляция зрачка
+    cjk = processAutoCorr(random_pupil_image) # автокорреляция зрачка
     print(f' - cross-corr image shape: {cc.shape}; auto-corr pupil image shape: {cjk.shape}')
     print(f' - time: {time.perf_counter() - st:.2f}')
     return random_pupil_image, cc, cjk
@@ -136,7 +137,7 @@ def pupil(images, latency):
     cross_corr = correlate1(images_clean, image_binary, latency)
     return res, cross_corr  
 
-def processAutoCorr(nx, frame):
+def processAutoCorr(frame):
     st = time.perf_counter()
     I0c = (frame != 0) * int(1)
     res = correlate(I0c, I0c, mode='full', method='fft')
@@ -162,7 +163,6 @@ def processCorr(run_cc=None, file=None, file_bias=None, D=None, latency=None, da
             else:
                 print(f' - data shape: {data.shape}')
             print(f' - time: {time.perf_counter() - st:.2f}')
-            
             
             frame, data_corr, cjk = processPupilWithCorr(data, latency)
 
