@@ -95,9 +95,13 @@ def circle(radius, size, circle_centre=(0, 0), origin="middle"):
     # (5) Return:
     return C
 
-def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_per_frame=None, cjk=None, initial_params=None, all_Vx=None, all_Vy=None, all_Cn2_bounds=None, conjugated_distance=None, num_of_layers=None, heights_of_layers=None, dome_index=None, use_gradient=False, do_fitting=True):
+def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_per_frame=None, cjk=None, initial_params=None, all_Vx=None, all_Vy=None, all_Cn2_bounds=None, conjugated_distance=None, num_of_layers=None, heights_of_layers=None, dome_index=None, use_gradient=False, do_fitting=True, dome_only=None, use_windvar=None):
     print(' - initial guess for the parameters:')
-    df_ip = pd.DataFrame(initial_params, columns = ['Vx, m/s','Vy, m/s','Cn2', 'z, m']) 
+    if use_windvar:
+        df_ip = pd.DataFrame(initial_params, columns = ['Vx, m/s','Vy, m/s','Cn2', 'z, m', 'var, m/s']) 
+    else:
+        df_ip = pd.DataFrame(initial_params, columns = ['Vx, m/s','Vy, m/s','Cn2', 'z, m']) 
+        
     df_ip = df_ip.sort_values(by=['z, m'])
     df_ip = df_ip.reset_index()
     df_ip['Cn2'] = df_ip['Cn2']*1e-13
@@ -107,7 +111,7 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
     df_ip = df_ip.round({'z, m': 2})
     df_ip.drop(columns=['index'], inplace=True)
     print(df_ip.to_string(index=False))
-       
+  
     def fitconvert(fit1d,shape):
         n_elem=shape[1]*shape[2]
         fit = np.ndarray(shape)
@@ -130,7 +134,7 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
             if array[idx] < value:
                 return idx+1, idx
 
-    def gamma_se(X, Y, t_delta, Vx, Vy, Cn2, z): 
+    def gamma_se1(X, Y, t_delta, Vx, Vy, Cn2, z): 
 #        Cn2=Cn2*1e-13 # БС: это не обязательно делать, см. комментарий в конце этой функции
         z=z*1000
 
@@ -143,7 +147,20 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
 # БС: здесь был баг - не было умножения на Cn2, из-за чего Cn2 вообще не подбиралось
         return res*Cn2 
 
-    def one_speckle_fit(initial_params=None, data=None, latency=None, lambda_=None, all_Vx=None, all_Vy=None, all_Cn2_bounds=None, conjugated_distance=None, dome_index=None, use_gradient=False, do_fitting=True): 
+    def gamma_se2(X, Y, t_delta, Vx, Vy, Cn2, z, Vsigma): 
+        z=z*1000
+
+        uv, lv = find_nearest(heights_of_layers, z)
+        res = gammas[lv] + (z - heights_of_layers[lv])*((gammas[uv] - gammas[lv])/(heights_of_layers[uv] - heights_of_layers[lv]))
+        
+        Xpix = Vx*t_delta
+        Ypix = Vy*t_delta
+        res = shift(res, (-Ypix, Xpix), order=1)  
+        res = res * Cn2
+        res = gaussian(res, sigma=Vsigma*t_delta)
+        return res
+
+    def one_speckle_fit(initial_params=None, data=None, latency=None, lambda_=None, all_Vx=None, all_Vy=None, all_Cn2_bounds=None, conjugated_distance=None, dome_index=None, use_gradient=None, do_fitting=None, dome_only=None, use_windvar=None): 
         class _g:
 
             def __init__(self):
@@ -168,21 +185,29 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
                         # путем кусочной линейной интерполяции 
                         arr = np.zeros(x.shape, dtype=np.float32)
                         Nsublayer = 15
-                        arr += gamma_se(x, y, t_delta, args[0], args[1], args[2], args[3]).ravel() # БС: между первым и вторым слоем градиент не делаем
+                        arr += gamma_se1(x, y, t_delta, args[0], args[1], args[2], args[3]).ravel() # БС: между первым и вторым слоем градиент не делаем
                         for i in range(1,len(args)//4-1):
                             Vx_range  = np.linspace(args[i*4],  args[i*4+4],Nsublayer)
                             Vy_range  = np.linspace(args[i*4+1],args[i*4+5],Nsublayer)
                             Cn2_range = np.linspace(args[i*4+2],args[i*4+6],Nsublayer)
                             z_range   = np.linspace(args[i*4+3],args[i*4+7],Nsublayer)
                             for j in range(Nsublayer):
-#                                Vsigma=z_range[j]/7
-                                term = gamma_se(x, y, t_delta, Vx_range[j], Vy_range[j], Cn2_range[j]/Nsublayer, z_range[j])
-#                                arr += gaussian(term, sigma=Vsigma*t_delta).ravel()
+                                #Vsigma=z_range[j]/7
+                                term = gamma_se1(x, y, t_delta, Vx_range[j], Vy_range[j], Cn2_range[j]/Nsublayer, z_range[j])
+                                #arr += gaussian(term, sigma=Vsigma*t_delta).ravel()
+                                arr += term.ravel()
+                            else:
+                                term = gamma_se1(x, y, t_delta, Vx_range[j], Vy_range[j], Cn2_range[j]/Nsublayer, z_range[j])
                                 arr += term.ravel()
                     else:
                         arr = np.zeros(x.shape, dtype=np.float32)
-                        for i in range(len(args)//4):
-                            arr += gamma_se(x, y, t_delta, args[i*4], args[i*4+1], args[i*4+2], args[i*4+3]).ravel()
+                        if self.use_windvar: 
+                            for i in range(len(args)//5):
+                                arr += gamma_se2(x, y, t_delta, args[i*5], args[i*5+1], args[i*5+2], args[i*5+3], args[i*5+4]).ravel()
+                        else:
+                            for i in range(len(args)//4):
+                                arr += gamma_se1(x, y, t_delta, args[i*4], args[i*4+1], args[i*4+2], args[i*4+3]).ravel()
+                    
                     total_cc[idx*n_elem:(idx+1)*n_elem] = arr
                 if hasattr(self,'mask'):
                     total_cc *= self.mask.ravel()
@@ -204,15 +229,33 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
 
         # более точные баунсы для начальных параметров
         if do_fitting:
-            lb2 = np.zeros((len(p0)//4, 4), dtype=np.float32)
-            ub2 = np.zeros((len(p0)//4, 4), dtype=np.float32)
+            if use_windvar:
+                lb2 = np.zeros((len(p0)//5, 5), dtype=np.float32)
+                ub2 = np.zeros((len(p0)//5, 5), dtype=np.float32)
+            else:
+                lb2 = np.zeros((len(p0)//4, 4), dtype=np.float32)
+                ub2 = np.zeros((len(p0)//4, 4), dtype=np.float32)
             for i in range(len(all_Vx)):
+#                 if use_windvar:
+#                     lb2[i] = [all_Vx[i]-0.5, all_Vy[i]-0.5, all_Cn2_bounds[i][0]-0.5, conjugated_distance, 0]
+#                     ub2[i] = [all_Vx[i]+0.5, all_Vy[i]+0.5, all_Cn2_bounds[i][1]+0.5, 50, 2]
+#                 else:
+#                     lb2[i] = [all_Vx[i]-0.5, all_Vy[i]-0.5, all_Cn2_bounds[i][0]-0.5, conjugated_distance]
+#                     ub2[i] = [all_Vx[i]+0.5, all_Vy[i]+0.5, all_Cn2_bounds[i][1]+0.5, 50]
                 if  i == dome_index:
-                    lb2[i] = [all_Vx[i]-0.5, all_Vy[i]-0.5, all_Cn2_bounds[i][0]-0.005, conjugated_distance-(conjugated_distance*0.02)]
-                    ub2[i] = [all_Vx[i]+0.5, all_Vy[i]+0.5, all_Cn2_bounds[i][1]+0.005, conjugated_distance+(conjugated_distance*0.02)]
+                    if use_windvar:
+                        lb2[i] = [all_Vx[i]-0.5, all_Vy[i]-0.5, all_Cn2_bounds[i][0]-0.005, conjugated_distance-(conjugated_distance*0.01), 0]
+                        ub2[i] = [all_Vx[i]+0.5, all_Vy[i]+0.5, all_Cn2_bounds[i][1]+0.005, conjugated_distance+(conjugated_distance*0.01), 2]
+                    else:
+                        lb2[i] = [all_Vx[i]-0.5, all_Vy[i]-0.5, all_Cn2_bounds[i][0]-0.005, conjugated_distance-(conjugated_distance*0.01)]
+                        ub2[i] = [all_Vx[i]+0.5, all_Vy[i]+0.5, all_Cn2_bounds[i][1]+0.005, conjugated_distance+(conjugated_distance*0.01)]
                 else:
-                    lb2[i] = [all_Vx[i]-0.5, all_Vy[i]-0.5, all_Cn2_bounds[i][0]-0.005, conjugated_distance]
-                    ub2[i] = [all_Vx[i]+0.5, all_Vy[i]+0.5, all_Cn2_bounds[i][1]+0.005, 50]
+                    if use_windvar:
+                        lb2[i] = [all_Vx[i]-0.5, all_Vy[i]-0.5, all_Cn2_bounds[i][0]-0.005, conjugated_distance, 0]
+                        ub2[i] = [all_Vx[i]+0.5, all_Vy[i]+0.5, all_Cn2_bounds[i][1]+0.005, 50, 2]
+                    else:
+                        lb2[i] = [all_Vx[i]-0.5, all_Vy[i]-0.5, all_Cn2_bounds[i][0]-0.005, conjugated_distance]
+                        ub2[i] = [all_Vx[i]+0.5, all_Vy[i]+0.5, all_Cn2_bounds[i][1]+0.005, 50]
             lb2=np.ravel(lb2)
             ub2=np.ravel(ub2)
 
@@ -227,7 +270,12 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
         _g = _g()
         _g.use_gradient = use_gradient
         _g.latency = latency
-#         _g.mask = mask
+        _g.use_windvar = use_windvar
+        # сюда добавить маску с моим флагом
+        if dome_only != 0:
+            mask = circle(dome_only, data.shape[1], circle_centre=(0, 0), origin="middle").ravel()
+            mask = np.tile(mask, len(latency))
+            _g.mask = mask
 
 # БС: считаем невязку для начального приближения
         fit_p0 = fitconvert(_g.fitfun(xdata,*p0),data.shape)
@@ -246,10 +294,13 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
 #            fit += gamma_se(X, Y, *popt[i*4:i*4+4])
 
 #     #     errors = np.sqrt(np.diag(pcov))
-
-        popt = popt.reshape(len(popt)//4, 4)
-
-        df = pd.DataFrame(popt, columns = ['Vx, m/s','Vy, m/s','Cn2', 'z, m'])
+        if use_windvar:
+            popt = popt.reshape(len(popt)//5, 5)
+            df = pd.DataFrame(popt, columns = ['Vx, m/s','Vy, m/s','Cn2', 'z, m', 'var, m/s'])     
+        else:
+            popt = popt.reshape(len(popt)//4, 4)
+            df = pd.DataFrame(popt, columns = ['Vx, m/s','Vy, m/s','Cn2', 'z, m'])
+            
         df = df.sort_values(by=['z, m'])
         df = df.reset_index()
         df['Cn2'] = df['Cn2']*1e-13
@@ -257,8 +308,7 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
         df = df.round({'Vx, m/s': 2})
         df = df.round({'Vy, m/s': 2})
         df = df.round({'z, m': 2})
-        df.drop(columns=['index'], inplace=True)
-
+        df.drop(columns=['index'], inplace=True)   
         sum_cn2 = np.sum(df['Cn2'])        
         r0 = pow(0.423 * pow((2*np.pi/lambda_), 2) * sum_cn2, -3/5)
         seeing = 206265 * 0.98 * lambda_/r0
@@ -289,7 +339,7 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
     # ax2.set_title('circle')
     # ax3.set_title('cc/cjk * circle')
     
-    fit = one_speckle_fit(initial_params=initial_params, data=cc, latency=latency, lambda_=lambda_, all_Vx=all_Vx, all_Vy=all_Vy, all_Cn2_bounds=all_Cn2_bounds, conjugated_distance=conjugated_distance, dome_index=dome_index, use_gradient=use_gradient, do_fitting=do_fitting)
+    fit = one_speckle_fit(initial_params=initial_params, data=cc, latency=latency, lambda_=lambda_, all_Vx=all_Vx, all_Vy=all_Vy, all_Cn2_bounds=all_Cn2_bounds, conjugated_distance=conjugated_distance, dome_index=dome_index, use_gradient=use_gradient, do_fitting=do_fitting, dome_only=dome_only, use_windvar=use_windvar)
     
 
 

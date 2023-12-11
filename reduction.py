@@ -8,7 +8,28 @@ from skimage.filters import threshold_otsu, gaussian
 from astropy.io import fits
 
 # ----------------------
-def correlate1(frames, image_binary, latency): 
+
+def circle(radius, size, circle_centre=(0, 0), origin="middle"):
+    C = np.zeros((size, size), dtype=np.float32)
+    coords = np.arange(0.5, size, 1.0, dtype=np.float32)
+    if len(coords) != size:
+        raise exceptions.Bug("len(coords) = {0}, ".format(len(coords)) +
+                             "size = {0}. They must be equal.".format(size) +
+                             "\n           Debug the line \"coords = ...\".")
+
+    x, y = np.meshgrid(coords, coords)
+    if origin == "middle":
+        x -= size / 2.
+        y -= size / 2.
+
+    x -= circle_centre[0]
+    y -= circle_centre[1]
+    mask = x * x + y * y <= radius * radius
+    C[mask] = 1
+    return C
+
+
+def correlate1(frames, image_binary, latency, dome_only=None): 
 #   corr = np.fft.fftshift(np.real(np.fft.ifft2(np.fft.fft2(img1)*np.fft.fft2(img2).conjugate()))) # np.real; np.abs
 #     correlation = [correlate(frames[i], frames[i + latency], mode='full', method='fft') 
 #                    for i in range(frames.shape[0] - latency)]
@@ -27,14 +48,17 @@ def correlate1(frames, image_binary, latency):
         res /= np.sum(image_binary, dtype=np.float32)
         
         tmp[latency_i, 1:, 1:] = res
-        tmp[latency_i] = gaussian(tmp[latency_i], sigma=1) # сглаживание изображения кросс-корреляции  
+        tmp[latency_i] = gaussian(tmp[latency_i], sigma=1) # сглаживание изображения кросс-корреляции
+        
+        if dome_only != 0:
+            tmp[latency_i] *= circle(dome_only, tmp[latency_i].shape[0], circle_centre=(0, 0), origin="middle")
     if len(latency) > 1:
             print(f' - latency {latency[latency_i]} done')
     
     return tmp
     
 # ----------------------
-def processPupilWithCorr(images, latency): 
+def processPupilWithCorr(images, latency, dome_only=None): 
     print('data reduction')
     st = time.perf_counter()
     def image_cropp(image): 
@@ -87,7 +111,7 @@ def processPupilWithCorr(images, latency):
     
     print('cross correlating')
     st = time.perf_counter() 
-    cc = correlate1(images_clean, image_binary, latency) # кросс-корреляция
+    cc = correlate1(images_clean, image_binary, latency, dome_only=dome_only) # кросс-корреляция
     cjk = processAutoCorr(random_pupil_image) # автокорреляция зрачка
     print(f' - cross-corr image shape: {cc.shape}; auto-corr pupil image shape: {cjk.shape}')
     print(f' - time: {time.perf_counter() - st:.2f}')
@@ -146,7 +170,7 @@ def processAutoCorr(frame):
     tmp[1:,1:] = res
     return tmp
 
-def processCorr(run_cc=None, file=None, file_bias=None, D=None, latency=None, data_dir=None):
+def processCorr(run_cc=None, file=None, file_bias=None, D=None, latency=None, data_dir=None, dome_only=None):
     print(f'{file}\n')
     st = time.perf_counter() 
     if run_cc == 'yes':
@@ -164,10 +188,13 @@ def processCorr(run_cc=None, file=None, file_bias=None, D=None, latency=None, da
                 print(f' - data shape: {data.shape}')
             print(f' - time: {time.perf_counter() - st:.2f}')
             
-            frame, data_corr, cjk = processPupilWithCorr(data, latency)
+            frame, data_corr, cjk = processPupilWithCorr(data, latency, dome_only=dome_only)
 
             for latency_i in range(len(latency)):
-                np.save(f'{data_dir}/crosscorr/{file[:-5]}_crosscorr_{latency[latency_i]}.npy', data_corr[latency_i])
+                if dome_only != 0:
+                    np.save(f'{data_dir}/crosscorr/{file[:-5]}_crosscorr_{latency[latency_i]}_dome.npy', data_corr[latency_i])
+                if dome_only == 0:
+                    np.save(f'{data_dir}/crosscorr/{file[:-5]}_crosscorr_{latency[latency_i]}.npy', data_corr[latency_i])
             np.save(f'{data_dir}/crosscorr/{file[:-5]}_cjk.npy', cjk)
     
     if run_cc == 'no':
@@ -175,7 +202,10 @@ def processCorr(run_cc=None, file=None, file_bias=None, D=None, latency=None, da
         cjk = np.load(f'{data_dir}/crosscorr/{file[:-5]}_cjk.npy')
         data_corr = np.zeros((len(latency), cjk.shape[0], cjk.shape[1]), dtype=np.float32)
         for latency_i in range(len(latency)):
-            data_corr[latency_i] = np.load(f'{data_dir}/crosscorr/{file[:-5]}_crosscorr_{latency[latency_i]}.npy')        
+            if dome_only != 0:
+                data_corr[latency_i] = np.load(f'{data_dir}/crosscorr/{file[:-5]}_crosscorr_{latency[latency_i]}_dome.npy')    
+            if dome_only == 0:
+                data_corr[latency_i] = np.load(f'{data_dir}/crosscorr/{file[:-5]}_crosscorr_{latency[latency_i]}.npy')    
         
         with fits.open("".join([data_dir, '/', file])) as f:
             header = f[0].header
