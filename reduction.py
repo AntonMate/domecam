@@ -171,7 +171,6 @@ def processAutoCorr(frame):
     return tmp
 
 def processCorr(run_cc=None, file=None, file_bias=None, D=None, latency=None, data_dir=None, dome_only=None):
-    print(f'{file}\n')
     st = time.perf_counter() 
     if run_cc == 'yes':
         print('collecting data')

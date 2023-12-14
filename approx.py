@@ -95,7 +95,7 @@ def circle(radius, size, circle_centre=(0, 0), origin="middle"):
     # (5) Return:
     return C
 
-def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_per_frame=None, cjk=None, initial_params=None, all_Vx=None, all_Vy=None, all_Cn2_bounds=None, conjugated_distance=None, num_of_layers=None, heights_of_layers=None, dome_index=None, use_gradient=False, do_fitting=True, dome_only=None, use_windvar=None):
+def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_per_frame=None, cjk=None, initial_params=None, all_Vx=None, all_Vy=None, all_Cn2_bounds=None, conjugated_distance=None, num_of_layers=None, heights_of_layers=None, dome_index=None, use_gradient=False, do_fitting=True, dome_only=None, use_windvar=None, data_dir=None, file=None):
     print(' - initial guess for the parameters:')
     if use_windvar:
         df_ip = pd.DataFrame(initial_params, columns = ['Vx, m/s','Vy, m/s','Cn2', 'z, m', 'var, m/s']) 
@@ -134,20 +134,7 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
             if array[idx] < value:
                 return idx+1, idx
 
-    def gamma_se1(X, Y, t_delta, Vx, Vy, Cn2, z): 
-#        Cn2=Cn2*1e-13 # БС: это не обязательно делать, см. комментарий в конце этой функции
-        z=z*1000
-
-        uv, lv = find_nearest(heights_of_layers, z)
-        res = gammas[lv] + (z - heights_of_layers[lv])*((gammas[uv] - gammas[lv])/(heights_of_layers[uv] - heights_of_layers[lv]))
-        
-        Xpix = Vx*t_delta
-        Ypix = Vy*t_delta
-        res = shift(res, (-Ypix, Xpix), order=1)  
-# БС: здесь был баг - не было умножения на Cn2, из-за чего Cn2 вообще не подбиралось
-        return res*Cn2 
-
-    def gamma_se2(X, Y, t_delta, Vx, Vy, Cn2, z, Vsigma): 
+    def gamma_se(X, Y, t_delta, Vx, Vy, Cn2, z, Vsigma=None): 
         z=z*1000
 
         uv, lv = find_nearest(heights_of_layers, z)
@@ -157,10 +144,11 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
         Ypix = Vy*t_delta
         res = shift(res, (-Ypix, Xpix), order=1)  
         res = res * Cn2
-        res = gaussian(res, sigma=Vsigma*t_delta)
+        if Vsigma is not None:
+            res = gaussian(res, sigma=Vsigma*t_delta)
         return res
 
-    def one_speckle_fit(initial_params=None, data=None, latency=None, lambda_=None, all_Vx=None, all_Vy=None, all_Cn2_bounds=None, conjugated_distance=None, dome_index=None, use_gradient=None, do_fitting=None, dome_only=None, use_windvar=None): 
+    def one_speckle_fit(initial_params=None, data=None, latency=None, lambda_=None, all_Vx=None, all_Vy=None, all_Cn2_bounds=None, conjugated_distance=None, dome_index=None, use_gradient=None, do_fitting=None, dome_only=None, use_windvar=None, data_dir=None, file=None): 
         class _g:
 
             def __init__(self):
@@ -185,7 +173,7 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
                         # путем кусочной линейной интерполяции 
                         arr = np.zeros(x.shape, dtype=np.float32)
                         Nsublayer = 15
-                        arr += gamma_se1(x, y, t_delta, args[0], args[1], args[2], args[3]).ravel() # БС: между первым и вторым слоем градиент не делаем
+                        arr += gamma_se(x, y, t_delta, args[0], args[1], args[2], args[3]).ravel() # БС: между первым и вторым слоем градиент не делаем
                         for i in range(1,len(args)//4-1):
                             Vx_range  = np.linspace(args[i*4],  args[i*4+4],Nsublayer)
                             Vy_range  = np.linspace(args[i*4+1],args[i*4+5],Nsublayer)
@@ -193,20 +181,20 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
                             z_range   = np.linspace(args[i*4+3],args[i*4+7],Nsublayer)
                             for j in range(Nsublayer):
                                 #Vsigma=z_range[j]/7
-                                term = gamma_se1(x, y, t_delta, Vx_range[j], Vy_range[j], Cn2_range[j]/Nsublayer, z_range[j])
+                                term = gamma_se(x, y, t_delta, Vx_range[j], Vy_range[j], Cn2_range[j]/Nsublayer, z_range[j])
                                 #arr += gaussian(term, sigma=Vsigma*t_delta).ravel()
                                 arr += term.ravel()
                             else:
-                                term = gamma_se1(x, y, t_delta, Vx_range[j], Vy_range[j], Cn2_range[j]/Nsublayer, z_range[j])
+                                term = gamma_se(x, y, t_delta, Vx_range[j], Vy_range[j], Cn2_range[j]/Nsublayer, z_range[j])
                                 arr += term.ravel()
                     else:
                         arr = np.zeros(x.shape, dtype=np.float32)
                         if self.use_windvar: 
                             for i in range(len(args)//5):
-                                arr += gamma_se2(x, y, t_delta, args[i*5], args[i*5+1], args[i*5+2], args[i*5+3], args[i*5+4]).ravel()
+                                arr += gamma_se(x, y, t_delta, args[i*5], args[i*5+1], args[i*5+2], args[i*5+3], args[i*5+4]).ravel()
                         else:
                             for i in range(len(args)//4):
-                                arr += gamma_se1(x, y, t_delta, args[i*4], args[i*4+1], args[i*4+2], args[i*4+3]).ravel()
+                                arr += gamma_se(x, y, t_delta, args[i*4], args[i*4+1], args[i*4+2], args[i*4+3]).ravel()
                     
                     total_cc[idx*n_elem:(idx+1)*n_elem] = arr
                 if hasattr(self,'mask'):
@@ -312,6 +300,7 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
         sum_cn2 = np.sum(df['Cn2'])        
         r0 = pow(0.423 * pow((2*np.pi/lambda_), 2) * sum_cn2, -3/5)
         seeing = 206265 * 0.98 * lambda_/r0
+        df.to_csv(f'{data_dir}/results/{file[:-5]}_result.txt', header=False, index=False)
         print(' - found params:')
         print(df.to_string(index=False))
         print(' - total Cn2:', sum_cn2)
@@ -325,24 +314,6 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
 
         return fit
     
-    # изображение кросс-корреляции делится на cjk, чтобы в аппроксимации не учитывать его домножение
-
-    # fig, (ax, ax2, ax3) = plt.subplots(1, 3, figsize=(25, 5))
-    # cc=cc/cjk
-    # cc[np.isinf(cc)] = 0
-    # fig.colorbar(ax.imshow(cc), ax=ax)
-    # fig.colorbar(ax2.imshow(circle(cc.shape[0]//2-3,cc.shape[0])), ax=ax2)
-    # cc = cc * circle(cc.shape[0]//2-3,cc.shape[0])
-    # # Для составления изображения весов для кервфита можно будет за пределами круга поменять 0 на 1е8 
-    # fig.colorbar(ax3.imshow(cc), ax=ax3)
-    # ax.set_title('cc/cjk')
-    # ax2.set_title('circle')
-    # ax3.set_title('cc/cjk * circle')
-    
-    fit = one_speckle_fit(initial_params=initial_params, data=cc, latency=latency, lambda_=lambda_, all_Vx=all_Vx, all_Vy=all_Vy, all_Cn2_bounds=all_Cn2_bounds, conjugated_distance=conjugated_distance, dome_index=dome_index, use_gradient=use_gradient, do_fitting=do_fitting, dome_only=dome_only, use_windvar=use_windvar)
-    
-
+    fit = one_speckle_fit(initial_params=initial_params, data=cc, latency=latency, lambda_=lambda_, all_Vx=all_Vx, all_Vy=all_Vy, all_Cn2_bounds=all_Cn2_bounds, conjugated_distance=conjugated_distance, dome_index=dome_index, use_gradient=use_gradient, do_fitting=do_fitting, dome_only=dome_only, use_windvar=use_windvar, data_dir=data_dir, file=file)
 
     return fit
-#         print()
-#         return fit, popt
