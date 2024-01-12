@@ -14,7 +14,7 @@ print('дир:', data_dir)
 file = new_path[indexes[-1]+1:]
 print('файл:', file)
 file_name = file.replace('_2km.fits', '')
-file_name = file.replace('_0km.fits', '')
+file_name = file_name.replace('_0km.fits', '')
 print('номер серии:', file_name)
 
 for item in os.listdir(data_dir):
