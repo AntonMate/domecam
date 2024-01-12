@@ -55,7 +55,7 @@ dome_only = 5 # 0, чтобы отключить. >0, чтобы задать р
 #                   [  -11.04 ,  -10.69, 2*1.060673,  9.83704],
 #                   [  -17.26 ,  -16.99, 3*3.670290, 10.65737]]
 #initial_params = None
-
+#
 for file in os.listdir(data_dir):
     if file.endswith('.fits') and not file.startswith('bias'):
         print(file[:-5])
