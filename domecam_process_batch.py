@@ -8,7 +8,7 @@ optlist, args = getopt.getopt(sys.argv[1:], 'infile', ['infile='])
 new_path = optlist[0][1]
 print(new_path)
 print('этот файл есть?', os.path.isfile(new_path))
-indexes = [i for i in range(len(new_path)) if new_path[i] == "\\"]
+indexes = [i for i in range(len(new_path)) if new_path[i] == "/"]
 data_dir = new_path[:indexes[-1]]
 print('дир:', data_dir)
 file = new_path[indexes[-1]+1:]
