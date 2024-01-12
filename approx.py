@@ -300,7 +300,7 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
         sum_cn2 = np.sum(df['Cn2'])        
         r0 = pow(0.423 * pow((2*np.pi/lambda_), 2) * sum_cn2, -3/5)
         seeing = 206265 * 0.98 * lambda_/r0
-        df.to_csv(f'{data_dir}/results/{file[:-5]}_result.txt', header=False, index=False)
+        df.to_csv(f'{data_dir}/results/{file[:-5]}_result.txt', index=False)
         print(' - found params:')
         print(df.to_string(index=False))
         print(' - total Cn2:', sum_cn2)
