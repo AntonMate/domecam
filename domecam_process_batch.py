@@ -70,4 +70,4 @@ dome_only = 5 # 0, чтобы отключить. >0, чтобы задать р
 #     if file.endswith('.fits') and not file.startswith('bias'):
 #         print(file[:-5])
 
-processDomecam(file=file, file_bias=file_bias, data_dir=data_dir, D=D, conjugated_distance=conjugated_distance, latency=latency, spectrum=spectrum, lambda_=lambda_, file_filter=file_filter, file_ccd=file_ccd, file_star=file_star, do_fitting=do_fitting, use_gradient=use_gradient, initial_params=None, dome_only=dome_only, use_windvar=use_windvar)
+processDomecam(file=file, file_name=file_name, file_bias=file_bias, data_dir=data_dir, D=D, conjugated_distance=conjugated_distance, latency=latency, spectrum=spectrum, lambda_=lambda_, file_filter=file_filter, file_ccd=file_ccd, file_star=file_star, do_fitting=do_fitting, use_gradient=use_gradient, initial_params=None, dome_only=dome_only, use_windvar=use_windvar)

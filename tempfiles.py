@@ -94,7 +94,7 @@ def star_values(file, data_dir=None):
     return x_star, y_star
 
 # --- функция спектрального отклика
-def processF_lamda(file=None, file_star=None, file_filter=None, file_ccd=None, data_dir=None):
+def processF_lamda(file=None, file_star=None, file_filter=None, file_ccd=None, data_dir=None, file_name=None):
     x_filter, y_filter = filter_values(file_filter, data_dir=data_dir)
     x_ccd, y_ccd = ccd_values(file_ccd, data_dir=data_dir)
     x_star, y_star = star_values(file_star, data_dir=data_dir)
@@ -122,7 +122,7 @@ def processF_lamda(file=None, file_star=None, file_filter=None, file_ccd=None, d
     ax2.set_title('Функция спектрального отклика')
     ax2.set_xlabel('Длина волны, [нм]')
     
-    plt.savefig(f'{data_dir}/results/{file[:-5]}_spectrum.png')
+    plt.savefig(f'{data_dir}/results/{file_name}/{file[:-5]}_spectrum.png')
     return f_lambda
 
 # --- спектральный фильтр
@@ -147,7 +147,7 @@ def processGammaPoly(z, f_lambda=None, cjk=None, D=None, const2=None, Aff113=Non
     # res = res * cjk
     return res
 
-def processGamma(lambda_, GammaType=None, cjk=None, D=None, file=None, file_star=None, file_filter=None, file_ccd=None, num_of_layers=None, heights_of_layers=None, data_dir=None):  
+def processGamma(lambda_, GammaType=None, cjk=None, D=None, file=None, file_star=None, file_filter=None, file_ccd=None, num_of_layers=None, heights_of_layers=None, data_dir=None, file_name=None):  
     # интенисвность теор гамм
     Cn2 = 1e-13
     
@@ -176,7 +176,7 @@ def processGamma(lambda_, GammaType=None, cjk=None, D=None, file=None, file_star
 #         проверка весовой функции:
 #         f_lambda = np.zeros((1071), dtype=np.float32)
 #         f_lambda[650] = 1
-        f_lambda=processF_lamda(file=file, file_star=file_star, file_filter=file_filter, file_ccd=file_ccd, data_dir=data_dir)
+        f_lambda=processF_lamda(file=file, file_star=file_star, file_filter=file_filter, file_ccd=file_ccd, data_dir=data_dir, file_name=file_name)
         
         coeff=1000 
         k = (len(f_lambda)-1)*coeff

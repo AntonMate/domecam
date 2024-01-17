@@ -11,13 +11,17 @@ from initialparams import processBestThresh, processPeakDetect, processCoordsToS
 from approx import processApprox 
 from checkfiles import processCheckFiles
 
-def processDomecam(file=None, file_bias=None, data_dir=None, D=None, conjugated_distance=None, latency=None, spectrum=None, lambda_=None, file_star=None, file_filter=None, file_ccd=None, initial_params=None, use_gradient=None, do_fitting=None, dome_only=None, use_windvar=None):
+def processDomecam(file=None, file_name=None, file_bias=None, data_dir=None, D=None, conjugated_distance=None, latency=None, spectrum=None, lambda_=None, file_star=None, file_filter=None, file_ccd=None, initial_params=None, use_gradient=None, do_fitting=None, dome_only=None, use_windvar=None):
     # считывание данных, получение кросс-корр и автокорреляции зрачка 
     metka = processCheckFiles(file=file, latency=latency, data_dir=data_dir, dome_only=dome_only)
+    
     # создание папки, куда будут сохраняться результаты
     if not os.path.isdir(f'{data_dir}/results'):
         os.mkdir(f'{data_dir}/results')
-        
+    # создание папки с результатами обработки серии
+    if not os.path.isdir(f'{data_dir}/results/{file_name}'):
+        os.mkdir(f'{data_dir}/results/{file_name}')
+    
     cc, cjk, sec_per_frame = processCorr(run_cc=metka, file=file, file_bias=file_bias, D=D, latency=latency, data_dir=data_dir, dome_only=dome_only)
     
     # cc - картина кросс-корреляции
@@ -31,7 +35,7 @@ def processDomecam(file=None, file_bias=None, data_dir=None, D=None, conjugated_
     
     num_of_layers=50
     heights_of_layers = np.geomspace(100, 50000, num_of_layers, dtype=np.float32)
-    gammas = processGamma(lambda_, GammaType=spectrum, cjk=cjk, D=D, file=file, file_star=file_star, file_filter=file_filter, file_ccd=file_ccd, num_of_layers=num_of_layers, heights_of_layers=heights_of_layers, data_dir=data_dir) 
+    gammas = processGamma(lambda_, GammaType=spectrum, cjk=cjk, D=D, file=file, file_star=file_star, file_filter=file_filter, file_ccd=file_ccd, num_of_layers=num_of_layers, heights_of_layers=heights_of_layers, data_dir=data_dir, file_name=file_name) 
     print(f' - {num_of_layers} {spectrum}chromatic turbulence layers from 0 to 50 km')
     print(f' - time: {time.perf_counter() - st:.2f}')
     
@@ -127,7 +131,7 @@ def processDomecam(file=None, file_bias=None, data_dir=None, D=None, conjugated_
             ax.set_xlim(xlims)
             ax.set_ylim(ylims)
             
-            plt.savefig(f'{data_dir}/results/{file[:-5]}_tmp.png')
+            plt.savefig(f'{data_dir}/results/{file_name}/{file[:-5]}_tmp.png')
             
     else:
         dome_index = 0
@@ -143,7 +147,7 @@ def processDomecam(file=None, file_bias=None, data_dir=None, D=None, conjugated_
     fit = processApprox(cc=cc, gammas=gammas, lambda_=lambda_, D=D, latency=latency, sec_per_frame=sec_per_frame, cjk=cjk, 
                         initial_params=initial_params, all_Vx=all_Vx, all_Vy=all_Vy, all_Cn2_bounds=all_Cn2_bounds, 
                         conjugated_distance=conjugated_distance, num_of_layers=num_of_layers, heights_of_layers=heights_of_layers, 
-                        dome_index=dome_index, use_gradient=use_gradient, do_fitting=do_fitting, dome_only=dome_only, use_windvar=use_windvar, data_dir=data_dir, file=file)
+                        dome_index=dome_index, use_gradient=use_gradient, do_fitting=do_fitting, dome_only=dome_only, use_windvar=use_windvar, data_dir=data_dir, file=file, file_name=file_name)
     print(f' - time: {time.perf_counter() - st:.2f}')
 
     # БС: отображение результатов аппроксимации        
@@ -201,4 +205,4 @@ def processDomecam(file=None, file_bias=None, data_dir=None, D=None, conjugated_
         result[0] = cc[latency_i]
         result[1] = fit[latency_i]*cjk
         result[2] = cc[latency_i]-fit[latency_i]*cjk
-        fits.writeto(f'{data_dir}/results/{file[:-5]}_{latency[latency_i]}_result.fits', result, overwrite=True)
+        fits.writeto(f'{data_dir}/results/{file_name}/{file[:-5]}_{latency[latency_i]}_result.fits', result, overwrite=True)
