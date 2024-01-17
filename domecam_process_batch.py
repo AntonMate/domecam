@@ -17,10 +17,19 @@ file_name = file.replace('_2km.fits', '')
 file_name = file_name.replace('_0km.fits', '')
 print('номер серии:', file_name)
 
+indexes_h = [i for i in range(len(file)) if file[i] == "k"]
+print('высота сопряжения:', file[indexes_h[0]-1])
+
 for item in os.listdir(data_dir):
-    if 'bias' in item and file_name in item:
+    if 'bias' in item and file_name in item and f'{file[indexes_h[0]-1]}km' in item:
         print('есть ли для него bias?', item)
         file_bias = item
+
+with open('logs.txt') as f:
+    for line in f:
+        if file in line:
+            print('спектр для этой серии:', line)
+            file_star = f'{line.split()[2].lower()}.sp'
 # ============================================================================
 
 # file = '20210130l_m2km.fits'
@@ -39,7 +48,7 @@ use_windvar = True # использовать ли дисперсию ветра
 # для полихроматического излучения нужны кривые фильтра, детектора и звезды
 file_filter = 'KC19_d16t4_Safonov.xls'
 file_ccd = 'ccd_prosilica2.crv'
-file_star = 'a05.sp'
+# file_star = 'a05.sp'
 
 # БС: если параметр do_fitting равен False: отладочный режим, аппроксимация не будет выполнена, а будут взяты начальные 
 # параметры initial_params

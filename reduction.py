@@ -180,7 +180,10 @@ def processCorr(run_cc=None, file=None, file_bias=None, D=None, latency=None, da
             data = np.float32(f[0].data)
             if file_bias is not None:
                 with fits.open("".join([data_dir, '/', file_bias])) as f:
-                    bias = np.mean(np.float32(f[0].data), axis=0, dtype=np.float32)
+                    if len((np.float32(f[0].data)).shape) == 3:
+                        bias = np.mean(np.float32(f[0].data), axis=0, dtype=np.float32)
+                    if len((np.float32(f[0].data)).shape) == 2:
+                        bias = np.float32(f[0].data)
                 print(f' - data shape: {data.shape}; bias shape: {bias.shape}')
                 data -= bias
             else:
