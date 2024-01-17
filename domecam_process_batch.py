@@ -28,8 +28,9 @@ for item in os.listdir(data_dir):
 with open('logs.txt') as f:
     for line in f:
         if file in line:
-            print('спектр для этой серии:', line)
+            print('из файла logs.txt:', line)
             file_star = f'{line.split()[2].lower()}.sp'
+            print(f'файл со спектром: {line.split()[2].lower()}.sp')
 # ============================================================================
 
 # file = '20210130l_m2km.fits'
