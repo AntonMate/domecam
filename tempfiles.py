@@ -46,7 +46,7 @@ def filter_values(file, data_dir=None):
     def xls_to_csv(file, data_dir=None):
         x =  xlrd.open_workbook(f'{data_dir}/{file}')
         x1 = x.sheet_by_name('Измерение')
-        csvfile = open(f'{data_dir}/filter.csv', 'w')
+        csvfile = open(f'{data_dir}/stars/filter.csv', 'w')
         writecsv = csv.writer(csvfile, quoting=csv.QUOTE_ALL)
 
         for rownum in range(1, x1.nrows): # пропускаю первую сртоку в файле, тк. там текст
@@ -57,7 +57,7 @@ def filter_values(file, data_dir=None):
     xls_to_csv(file, data_dir=data_dir)
     
     x_filter, y_filter = [], []
-    with open(f'{data_dir}/filter.csv') as f1:
+    with open(f'{data_dir}/stars/filter.csv') as f1:
         for line in f1:
             line = line.replace('"', '').strip().split(sep=',')
             if len(line) == 2:
@@ -65,12 +65,12 @@ def filter_values(file, data_dir=None):
                 x_filter.append(line[0])
                 y_filter.append(line[1]/100)
     
-    os.remove(f'{data_dir}/filter.csv')
+    os.remove(f'{data_dir}/stars/filter.csv')
     return x_filter, y_filter
 
 # --- кривая квантовой эффективности детектора
 def ccd_values(file, data_dir=None):
-    with open(f'{data_dir}/{file}') as f1, open(f'{data_dir}/{file}') as f2:
+    with open(f'{data_dir}/stars/{file}') as f1, open(f'{data_dir}/stars/{file}') as f2:
         x_ccd = [int(np.array(line.strip().split(' '), float)[0]*1000) for line in f1]
         x_ccd = x_ccd[:len(x_ccd)-1] # последнее значение по длине волны почему-то 0, тут я его удаляю
     
@@ -83,11 +83,12 @@ def ccd_values(file, data_dir=None):
 
 # --- излучение звезды
 def star_values(file, data_dir=None):
-    with open(f'{data_dir}/{file}') as f1, open(f'{data_dir}/{file}') as f2:
+    with open(f'{data_dir}/stars/{file}') as f1, open(f'{data_dir}/stars/{file}') as f2:
         x_star, y_star = [], []
         for line in f1:
             line = line.strip().split(' ')
-            del line[1]        
+            if line[1] == '':
+                del line[1]   
             x_star.append(int(np.array(line[0], float)))
             y_star.append(np.array(line[1], float))   
     return x_star, y_star
