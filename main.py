@@ -5,7 +5,7 @@ import os
 
 from astropy.io import fits
 
-from reduction import processCorr 
+from reduction2 import processCorr 
 from tempfiles import processGamma 
 from initialparams import processBestThresh, processPeakDetect, processCoordsToSpeed, processCn2
 from approx import processApprox 
@@ -13,8 +13,10 @@ from checkfiles import processCheckFiles
 
 def processDomecam(file=None, file_name=None, file_bias=None, data_dir=None, D=None, conjugated_distance=None, latency=None, spectrum=None, lambda_=None, file_star=None, file_filter=None, file_ccd=None, initial_params=None, use_gradient=None, do_fitting=None, dome_only=None, use_windvar=None):
     # считывание данных, получение кросс-корр и автокорреляции зрачка 
-    metka = processCheckFiles(file=file, latency=latency, data_dir=data_dir, dome_only=dome_only)
+#     metka = processCheckFiles(file=file, latency=latency, data_dir=data_dir, dome_only=dome_only)
     
+    
+    metka = 'yes' # пока что убрал функцию подзагрузки старых файлов
     # создание папки, куда будут сохраняться результаты
     if not os.path.isdir(f'{data_dir}/results'):
         os.mkdir(f'{data_dir}/results')
@@ -22,7 +24,7 @@ def processDomecam(file=None, file_name=None, file_bias=None, data_dir=None, D=N
     if not os.path.isdir(f'{data_dir}/results/{file_name}'):
         os.mkdir(f'{data_dir}/results/{file_name}')
     
-    cc, cjk, sec_per_frame = processCorr(run_cc=metka, file=file, file_bias=file_bias, D=D, latency=latency, data_dir=data_dir, dome_only=dome_only)
+    cc, cjk, sec_per_frame = processCorr(run_cc=metka, file=file, bias=file_bias, latencys=latency, data_dir=data_dir, dome_only=dome_only)
     
     # cc - картина кросс-корреляции
     # cjk - картина автокорреляции зрачка 
