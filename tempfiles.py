@@ -35,7 +35,8 @@ def processGammaMono(z, lambda_, cjk=None, const2=None, nx=None, fx=None, fy=Non
     
     res[np.isnan(res)] = 0
     
-    res = np.fft.fftshift(np.fft.irfft2(np.fft.fftshift(res), s=res.shape, norm='backward'))
+    #res = np.fft.fftshift(np.fft.irfft2(np.fft.fftshift(res), s=res.shape, norm='backward'))
+    res = np.fft.fftshift(np.fft.irfft2(np.fft.fftshift(res), s=res.shape))
     
     res = res * const2
     # res = res * cjk
@@ -141,7 +142,8 @@ def processGammaPoly(z, f_lambda=None, cjk=None, D=None, const2=None, Aff113=Non
     
     res[np.isnan(res)] = 0
     
-    res = np.fft.fftshift(np.fft.irfft2(np.fft.fftshift(res), s=res.shape, norm='backward'))
+    #res = np.fft.fftshift(np.fft.irfft2(np.fft.fftshift(res), s=res.shape, norm='backward'))
+    res = np.fft.fftshift(np.fft.irfft2(np.fft.fftshift(res), s=res.shape))
     
     res = res * const2   
     # res = res * cjk
