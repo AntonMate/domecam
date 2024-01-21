@@ -7,34 +7,35 @@ import sys
 optlist, args = getopt.getopt(sys.argv[1:], 'infile', ['infile='])
 new_path = optlist[0][1]
 print(f'---{new_path}')
+
 if new_path.endswith('.fits'):
-    print('обрабатываю 1 серию')
-    
+    print('---этот файл есть?', os.path.isfile(new_path))
+    indexes = [i for i in range(len(new_path)) if new_path[i] == "/"]
+    data_dir = new_path[:indexes[-1]]
+    print('---дир:', data_dir)
+    file = new_path[indexes[-1]+1:]
+    print('---файл:', file)
+    file_name = file.replace('_2km.fits', '')
+    file_name = file_name.replace('_0km.fits', '')
+    print('---номер серии:', file_name)
 
-print('---этот файл есть?', os.path.isfile(new_path))
-indexes = [i for i in range(len(new_path)) if new_path[i] == "/"]
-data_dir = new_path[:indexes[-1]]
-print('---дир:', data_dir)
-file = new_path[indexes[-1]+1:]
-print('---файл:', file)
-file_name = file.replace('_2km.fits', '')
-file_name = file_name.replace('_0km.fits', '')
-print('---номер серии:', file_name)
+    indexes_h = [i for i in range(len(file)) if file[i] == "k"]
+    print('---высота сопряжения:', file[indexes_h[0]-1])
 
-indexes_h = [i for i in range(len(file)) if file[i] == "k"]
-print('---высота сопряжения:', file[indexes_h[0]-1])
+    for item in os.listdir(data_dir):
+        if 'bias' in item and file_name in item and f'{file[indexes_h[0]-1]}km' in item:
+            print('---есть ли для него bias?', item)
+            file_bias = item
 
-for item in os.listdir(data_dir):
-    if 'bias' in item and file_name in item and f'{file[indexes_h[0]-1]}km' in item:
-        print('---есть ли для него bias?', item)
-        file_bias = item
-
-with open('logs.txt') as f:
-    for line in f:
-        if file in line:
-            print('---из файла logs.txt:', line.strip())
-            file_star = f'{line.split()[2].lower()}.sp'
-            print(f'---файл со спектром: {file_star}')
+    with open('logs.txt') as f:
+        for line in f:
+            if file in line:
+                print('---из файла logs.txt:', line.strip())
+                file_star = f'{line.split()[2].lower()}.sp'
+                print(f'---файл со спектром: {file_star}')
+                
+else:
+    print('lol')
 # ============================================================================
 
 # file = '20210130l_m2km.fits'
