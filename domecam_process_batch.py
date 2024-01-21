@@ -54,9 +54,9 @@ else:
             with open('logs.txt') as f:
                 for line in f:
                     if file in line:
-                    print('---из файла logs.txt:', line.strip())
-                    file_star = f'{line.split()[2].lower()}.sp'
-                    print(f'---файл со спектром: {file_star}')
+                        print('---из файла logs.txt:', line.strip())
+                        file_star = f'{line.split()[2].lower()}.sp'
+                        print(f'---файл со спектром: {file_star}')
 # ============================================================================
 
 # file = '20210130l_m2km.fits'
