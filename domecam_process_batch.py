@@ -7,7 +7,7 @@ import sys
 optlist, args = getopt.getopt(sys.argv[1:], 'infile', ['infile='])
 new_path = optlist[0][1]
 print(f'---{new_path}')
-if new_path.endswith('.fits.'):
+if new_path.endswith('.fits'):
     print('обрабатываю 1 серию')
     
 
