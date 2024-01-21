@@ -96,21 +96,21 @@ def circle(radius, size, circle_centre=(0, 0), origin="middle"):
     return C
 
 def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_per_frame=None, cjk=None, initial_params=None, all_Vx=None, all_Vy=None, all_Cn2_bounds=None, conjugated_distance=None, num_of_layers=None, heights_of_layers=None, dome_index=None, use_gradient=False, do_fitting=True, dome_only=None, use_windvar=None, data_dir=None, file=None, file_name=None):
-    print(' - initial guess for the parameters:')
-    if use_windvar:
-        df_ip = pd.DataFrame(initial_params, columns = ['Vx, m/s','Vy, m/s','Cn2', 'z, m', 'var, m/s']) 
-    else:
-        df_ip = pd.DataFrame(initial_params, columns = ['Vx, m/s','Vy, m/s','Cn2', 'z, m']) 
+#     print(' - initial guess for the parameters:')
+#     if use_windvar:
+#         df_ip = pd.DataFrame(initial_params, columns = ['Vx, m/s','Vy, m/s','Cn2', 'z, m', 'var, m/s']) 
+#     else:
+#         df_ip = pd.DataFrame(initial_params, columns = ['Vx, m/s','Vy, m/s','Cn2', 'z, m']) 
         
-    df_ip = df_ip.sort_values(by=['z, m'])
-    df_ip = df_ip.reset_index()
-    df_ip['Cn2'] = df_ip['Cn2']*1e-13
-    df_ip['z, m'] = df_ip['z, m']*1000
-    df_ip = df_ip.round({'Vx, m/s': 2})
-    df_ip = df_ip.round({'Vy, m/s': 2})
-    df_ip = df_ip.round({'z, m': 2})
-    df_ip.drop(columns=['index'], inplace=True)
-    print(df_ip.to_string(index=False))
+#     df_ip = df_ip.sort_values(by=['z, m'])
+#     df_ip = df_ip.reset_index()
+#     df_ip['Cn2'] = df_ip['Cn2']*1e-13
+#     df_ip['z, m'] = df_ip['z, m']*1000
+#     df_ip = df_ip.round({'Vx, m/s': 2})
+#     df_ip = df_ip.round({'Vy, m/s': 2})
+#     df_ip = df_ip.round({'z, m': 2})
+#     df_ip.drop(columns=['index'], inplace=True)
+#     print(df_ip.to_string(index=False))
   
     def fitconvert(fit1d,shape):
         n_elem=shape[1]*shape[2]
