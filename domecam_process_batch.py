@@ -6,7 +6,7 @@ import sys
 # ============================================================================
 optlist, args = getopt.getopt(sys.argv[1:], 'infile', ['infile='])
 new_path = optlist[0][1]
-print(f'---{new_path}')
+print(f'---обработка {new_path}')
 
 if new_path.endswith('.fits'):
     print('---этот файл есть?', os.path.isfile(new_path))
@@ -35,9 +35,28 @@ if new_path.endswith('.fits'):
                 print(f'---файл со спектром: {file_star}')
                 
 else:
+    print(f'---обработка всех файлов из папки {new_path}')
+    data_dir = new_path
+    print('---дир:', data_dir)
     for ser in os.listdir(new_path):
         if ser.endswith('_2km.fits'):
-            print(ser)
+            file = ser
+            print('---файл:', file)
+            file_name = file.replace('_2km.fits', '')
+            print('---номер серии:', file_name)
+            indexes_h = [i for i in range(len(file)) if file[i] == "k"]
+            print('---высота сопряжения:', file[indexes_h[0]-1])
+            for item in os.listdir(data_dir):
+                if 'bias' in item and file_name in item and f'{file[indexes_h[0]-1]}km' in item:
+                    print('---есть ли для него bias?', item)
+                    file_bias = item
+                    
+            with open('logs.txt') as f:
+                for line in f:
+                    if file in line:
+                    print('---из файла logs.txt:', line.strip())
+                    file_star = f'{line.split()[2].lower()}.sp'
+                    print(f'---файл со спектром: {file_star}')
 # ============================================================================
 
 # file = '20210130l_m2km.fits'
