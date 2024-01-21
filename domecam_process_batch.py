@@ -35,7 +35,9 @@ if new_path.endswith('.fits'):
                 print(f'---файл со спектром: {file_star}')
                 
 else:
-    print('lol')
+    for ser in os.listdir(new_path):
+        if ser.endswith('_2km.fits'):
+            print(ser)
 # ============================================================================
 
 # file = '20210130l_m2km.fits'
