@@ -63,7 +63,7 @@ if new_path.endswith('.fits'):
     processDomecam(file=file, file_name=file_name, file_bias=file_bias, data_dir=data_dir, D=D, conjugated_distance=conjugated_distance, latency=latency, spectrum=spectrum, lambda_=lambda_, file_filter=file_filter, file_ccd=file_ccd, file_star=file_star, do_fitting=do_fitting, use_gradient=use_gradient, initial_params=None, dome_only=dome_only, use_windvar=use_windvar)
                 
 else:
-    print(f'- MODE: обработка всех файлов _2km.fits из {new_path}')
+    print(f' - MODE: обработка всех файлов _2km.fits из {new_path}')
     data_dir = new_path
     for ser in os.listdir(new_path):
         if ser.endswith('_2km.fits'):

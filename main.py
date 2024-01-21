@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import time
 import os
+import pandas as pd
 
 from astropy.io import fits
 
