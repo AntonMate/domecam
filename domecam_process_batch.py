@@ -38,57 +38,51 @@ optlist, args = getopt.getopt(sys.argv[1:], 'infile', ['infile='])
 new_path = optlist[0][1]
 
 if new_path.endswith('.fits'):
-    print(f'---обработка {new_path}')
-    print('---этот файл есть?', os.path.isfile(new_path))
+    print(f' - MODE: обработка одного файла {new_path}')
     indexes = [i for i in range(len(new_path)) if new_path[i] == "/"]
     data_dir = new_path[:indexes[-1]]
-    print('---дир:', data_dir)
+    print(' - dir:', data_dir)
     file = new_path[indexes[-1]+1:]
-    print('---файл:', file)
+    print(' -', file)
     file_name = file.replace('_2km.fits', '')
-    file_name = file_name.replace('_0km.fits', '')
-    print('---номер серии:', file_name)
+    file_name = file_name.replace('_0km.fits', '') # номер серии
 
-    indexes_h = [i for i in range(len(file)) if file[i] == "k"]
-    print('---высота сопряжения:', file[indexes_h[0]-1])
-
+    indexes_h = [i for i in range(len(file)) if file[i] == "k"] # file[indexes_h[0]-1] высота сопряжения
     for item in os.listdir(data_dir):
         if 'bias' in item and file_name in item and f'{file[indexes_h[0]-1]}km' in item:
-            print('---есть ли для него bias?', item)
+            print(' - bias:', item)
             file_bias = item
 
     with open('logs.txt') as f:
         for line in f:
             if file in line:
-                print('---из файла logs.txt:', line.strip())
+                print(' - logs.txt:', line.strip())
                 file_star = f'{line.split()[2].lower()}.sp'
-                print(f'---файл со спектром: {file_star}')
+                print(f' - spectrum: {file_star}')
     
     processDomecam(file=file, file_name=file_name, file_bias=file_bias, data_dir=data_dir, D=D, conjugated_distance=conjugated_distance, latency=latency, spectrum=spectrum, lambda_=lambda_, file_filter=file_filter, file_ccd=file_ccd, file_star=file_star, do_fitting=do_fitting, use_gradient=use_gradient, initial_params=None, dome_only=dome_only, use_windvar=use_windvar)
                 
 else:
-    print(f'---обработка всех файлов из {new_path}')
+    print(f'- MODE: обработка всех файлов _2km.fits из {new_path}')
     data_dir = new_path
-    print('---дир:', data_dir)
     for ser in os.listdir(new_path):
         if ser.endswith('_2km.fits'):
+            print('')
             file = ser
-            print('---файл:', file)
-            file_name = file.replace('_2km.fits', '')
-            print('---номер серии:', file_name)
-            indexes_h = [i for i in range(len(file)) if file[i] == "k"]
-            print('---высота сопряжения:', file[indexes_h[0]-1])
+            print(' -', file)
+            file_name = file.replace('_2km.fits', '') # номер серии
+            indexes_h = [i for i in range(len(file)) if file[i] == "k"] # file[indexes_h[0]-1] высота сопряжения
             for item in os.listdir(data_dir):
                 if 'bias' in item and file_name in item and f'{file[indexes_h[0]-1]}km' in item:
-                    print('---есть ли для него bias?', item)
+                    print(' - bias:', item)
                     file_bias = item
                     
             with open('logs.txt') as f:
                 for line in f:
                     if file in line:
-                        print('---из файла logs.txt:', line.strip())
+                        print(' - logs.txt:', line.strip())
                         file_star = f'{line.split()[2].lower()}.sp'
-                        print(f'---файл со спектром: {file_star}')
+                        print(f' - spectrum: {file_star}')
             
             processDomecam(file=file, file_name=file_name, file_bias=file_bias, data_dir=data_dir, D=D, conjugated_distance=conjugated_distance, latency=latency, spectrum=spectrum, lambda_=lambda_, file_filter=file_filter, file_ccd=file_ccd, file_star=file_star, do_fitting=do_fitting, use_gradient=use_gradient, initial_params=None, dome_only=dome_only, use_windvar=use_windvar)
 # ============================================================================

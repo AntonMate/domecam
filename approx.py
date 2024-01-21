@@ -269,7 +269,7 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
         fit_p0 = fitconvert(_g.fitfun(xdata,*p0),data.shape)
 
         residual_p0 = np.sum(np.power(data-fit_p0,2))
-        print(f'residual for initial guess:{residual_p0}')
+        print(f' - residual for initial guess: {residual_p0:.4f}')
 
         if do_fitting:
             popt, pcov = curve_fit(_g.fitfun, xdata, ydata, p0, bounds=[lb2, ub2])   
@@ -307,10 +307,9 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
         print(f' - seeing, {lambda_/1e-9:.0f} nm: {seeing:.2f}')
 
 # БС: считаем невязку
-        print(fit.shape)
         mask = np.zeros(fit.shape)
         residual = np.sum(np.power(data-fit,2))
-        print(f'total residual:{residual}')
+        print(f' - total residual: {residual:.4f}')
 
         return fit
     

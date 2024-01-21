@@ -32,26 +32,25 @@ def processDomecam(file=None, file_name=None, file_bias=None, data_dir=None, D=N
     
     # создание теор. гамм 
     # 30 слоев до 30км работает быстрее, точность вроде бы та же
-    print('creating gammas')
     st = time.perf_counter()
     
     num_of_layers=50
     heights_of_layers = np.geomspace(100, 50000, num_of_layers, dtype=np.float32)
     gammas = processGamma(lambda_, GammaType=spectrum, cjk=cjk, D=D, file=file, file_star=file_star, file_filter=file_filter, file_ccd=file_ccd, num_of_layers=num_of_layers, heights_of_layers=heights_of_layers, data_dir=data_dir, file_name=file_name) 
-    print(f' - {num_of_layers} {spectrum}chromatic turbulence layers from 0 to 50 km')
-    print(f' - time: {time.perf_counter() - st:.2f}')
+    
+    print(f' - time creating {num_of_layers} {spectrum}chromatic turbulence layers, 0 to 50 km: {time.perf_counter() - st:.2f}')
     
     # подсчет начальных параметров для аппроксимации 
     # БС: начальные параметры будем определять по кросс-корряляции, посчитанной для минимальной задержки
     # БС: если начальные параметры были введены при вызове processDomecam, не оценивать их
     if do_fitting:
         for latency_i in [0]:
-            print('calculation initial parametrs')
             st = time.perf_counter()
             thresh = processBestThresh(cc[latency_i], acc=5)
             y, x = processPeakDetect(cc[latency_i] * (cc[latency_i]>thresh), size_of_neighborhood=7)
             all_Vy, all_Vx = processCoordsToSpeed(y, x, latency=latency[latency_i], sec_per_frame=sec_per_frame, D=D, cc=cc[latency_i])
-            all_Cn2_bounds, all_Cn2_mean = processCn2(cc[latency_i]/cjk, y, x, gammas, conjugated_distance=conjugated_distance, heights_of_layers=heights_of_layers)
+            with np.errstate(invalid='ignore'):
+                all_Cn2_bounds, all_Cn2_mean = processCn2(cc[latency_i]/cjk, y, x, gammas, conjugated_distance=conjugated_distance, heights_of_layers=heights_of_layers)
             
             if use_windvar:
                 initial_params = np.zeros((len(x), 5), dtype=np.float32)
@@ -71,8 +70,7 @@ def processDomecam(file=None, file_name=None, file_bias=None, data_dir=None, D=N
                         dome_index = i
                     else:
                         initial_params[i] = [all_Vx[i], all_Vy[i], all_Cn2_mean[i], 10]
-            print(f' - threshold: {thresh:.4f}; {len(y)} peaks found')
-            print(f' - time: {time.perf_counter() - st:.2f}')
+            print(f' - time for initial params, {len(y)} peaks found: {time.perf_counter() - st:.2f}')
             # thresh - оптимальный трешхолд картины кросс-корреляции 
             # y, x - координаты пиков
             # all_Vy, all_Vx - скорости этих же пиков, [м/с]
@@ -144,7 +142,6 @@ def processDomecam(file=None, file_name=None, file_bias=None, data_dir=None, D=N
         all_Cn2_bounds = None
 
     # БС: аппроксимацию выполняем по кросс-корреляциям, соответствующим всем задержкам одновременно        
-    print('approxing')
     st=time.perf_counter()
     fit = processApprox(cc=cc, gammas=gammas, lambda_=lambda_, D=D, latency=latency, sec_per_frame=sec_per_frame, cjk=cjk, 
                         initial_params=initial_params, all_Vx=all_Vx, all_Vy=all_Vy, all_Cn2_bounds=all_Cn2_bounds, 
@@ -208,3 +205,5 @@ def processDomecam(file=None, file_name=None, file_bias=None, data_dir=None, D=N
         result[1] = fit[latency_i]*cjk
         result[2] = cc[latency_i]-fit[latency_i]*cjk
         fits.writeto(f'{data_dir}/results/{file_name}/{file[:-5]}_{latency[latency_i]}_result.fits', result, overwrite=True)
+        
+    print(' - DONE!')
