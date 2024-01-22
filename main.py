@@ -224,4 +224,4 @@ def processDomecam(file=None, file_name=None, file_bias=None, data_dir=None, D=N
         result[2] = cc[latency_i]-fit[latency_i]*cjk
         fits.writeto(f'{data_dir}/results/{file_name}/{file[:-5]}_{latency[latency_i]}_result.fits', result, overwrite=True)
         
-    print(' - DONE!')
+    print(f' - DONE! Results saved to {data_dir}/results/{file_name}')

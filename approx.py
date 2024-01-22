@@ -284,7 +284,6 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
 #     #     errors = np.sqrt(np.diag(pcov))
         if use_windvar:
             popt = popt.reshape(len(popt)//5, 5)
-            print('popt shape:', popt.shape)
             if dome_only != 0:
                 all_info_about_layers = [file, star_name, 'dome layer', popt[0][0], popt[0][1], popt[0][2], popt[0][3], popt[0][4]]
                 df = pd.DataFrame([all_info_about_layers], columns = ['file', 'star', 'mode', 'Vx, m/s','Vy, m/s','Cn2', 'z, m', 'var, m/s'])     
@@ -313,7 +312,7 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
         seeing = 206265 * 0.98 * lambda_/r0
         df.to_csv(f'{data_dir}/results/{file_name}/{file[:-5]}_result.txt', index=False)
         print(' - found params:')
-        print(df.to_string(index=False))
+        print(df[['Vx, m/s','Vy, m/s','Cn2', 'z, m', 'var, m/s']].to_string(index=False))
         print(' - total Cn2:', sum_cn2)
         print(f' - seeing, {lambda_/1e-9:.0f} nm: {seeing:.2f}')
 
