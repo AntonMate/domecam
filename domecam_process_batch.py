@@ -58,6 +58,7 @@ if new_path.endswith('.fits'):
             if file in line:
                 print(' - logs.txt:', line.strip())
                 star_name = line.split()[1]
+                print('test star:', star_name)
                 file_star = f'{line.split()[2].lower()}.sp'
                 print(f' - spectrum: {file_star}')
     
