@@ -12,7 +12,7 @@ from initialparams import processBestThresh, processPeakDetect, processCoordsToS
 from approx import processApprox 
 from checkfiles import processCheckFiles
 
-def processDomecam(file=None, file_name=None, file_bias=None, data_dir=None, D=None, conjugated_distance=None, latency=None, spectrum=None, lambda_=None, file_star=None, file_filter=None, file_ccd=None, initial_params=None, use_gradient=None, do_fitting=None, dome_only=None, use_windvar=None):
+def processDomecam(file=None, file_name=None, file_bias=None, data_dir=None, D=None, conjugated_distance=None, latency=None, spectrum=None, lambda_=None, file_star=None, file_filter=None, file_ccd=None, initial_params=None, use_gradient=None, do_fitting=None, dome_only=None, use_windvar=None, star_name=None):
     # считывание данных, получение кросс-корр и автокорреляции зрачка 
 #     metka = processCheckFiles(file=file, latency=latency, data_dir=data_dir, dome_only=dome_only)
     
@@ -164,7 +164,7 @@ def processDomecam(file=None, file_name=None, file_bias=None, data_dir=None, D=N
     fit = processApprox(cc=cc, gammas=gammas, lambda_=lambda_, D=D, latency=latency, sec_per_frame=sec_per_frame, cjk=cjk, 
                         initial_params=initial_params, all_Vx=all_Vx, all_Vy=all_Vy, all_Cn2_bounds=all_Cn2_bounds, 
                         conjugated_distance=conjugated_distance, num_of_layers=num_of_layers, heights_of_layers=heights_of_layers, 
-                        dome_index=dome_index, use_gradient=use_gradient, do_fitting=do_fitting, dome_only=dome_only, use_windvar=use_windvar, data_dir=data_dir, file=file, file_name=file_name)
+                        dome_index=dome_index, use_gradient=use_gradient, do_fitting=do_fitting, dome_only=dome_only, use_windvar=use_windvar, data_dir=data_dir, file=file, file_name=file_name, star_name=star_name)
     print(f' - time: {time.perf_counter() - st:.2f}')
 
     # БС: отображение результатов аппроксимации        

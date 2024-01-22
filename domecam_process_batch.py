@@ -57,6 +57,7 @@ if new_path.endswith('.fits'):
         for line in f:
             if file in line:
                 print(' - logs.txt:', line.strip())
+                star_name = line.split()[1]
                 file_star = f'{line.split()[2].lower()}.sp'
                 print(f' - spectrum: {file_star}')
     
@@ -68,7 +69,7 @@ else:
     for ser in os.listdir(new_path):
         if ser.endswith('_2km.fits'):
             print('')
-            file = ser
+            file = ser # номер серии
             print(' -', file)
             file_name = file.replace('_2km.fits', '') # номер серии
             indexes_h = [i for i in range(len(file)) if file[i] == "k"] # file[indexes_h[0]-1] высота сопряжения
@@ -81,9 +82,10 @@ else:
                 for line in f:
                     if file in line:
                         print(' - logs.txt:', line.strip())
+                        star_name = line.split()[1]
                         file_star = f'{line.split()[2].lower()}.sp'
                         print(f' - spectrum: {file_star}')
             
-            processDomecam(file=file, file_name=file_name, file_bias=file_bias, data_dir=data_dir, D=D, conjugated_distance=conjugated_distance, latency=latency, spectrum=spectrum, lambda_=lambda_, file_filter=file_filter, file_ccd=file_ccd, file_star=file_star, do_fitting=do_fitting, use_gradient=use_gradient, initial_params=None, dome_only=dome_only, use_windvar=use_windvar)
+            processDomecam(file=file, file_name=file_name, file_bias=file_bias, data_dir=data_dir, D=D, conjugated_distance=conjugated_distance, latency=latency, spectrum=spectrum, lambda_=lambda_, file_filter=file_filter, file_ccd=file_ccd, file_star=file_star, do_fitting=do_fitting, use_gradient=use_gradient, initial_params=None, dome_only=dome_only, use_windvar=use_windvar, star_name=star_name)
 # ============================================================================
 

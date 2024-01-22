@@ -95,7 +95,7 @@ def circle(radius, size, circle_centre=(0, 0), origin="middle"):
     # (5) Return:
     return C
 
-def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_per_frame=None, cjk=None, initial_params=None, all_Vx=None, all_Vy=None, all_Cn2_bounds=None, conjugated_distance=None, num_of_layers=None, heights_of_layers=None, dome_index=None, use_gradient=False, do_fitting=True, dome_only=None, use_windvar=None, data_dir=None, file=None, file_name=None):
+def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_per_frame=None, cjk=None, initial_params=None, all_Vx=None, all_Vy=None, all_Cn2_bounds=None, conjugated_distance=None, num_of_layers=None, heights_of_layers=None, dome_index=None, use_gradient=False, do_fitting=True, dome_only=None, use_windvar=None, data_dir=None, file=None, file_name=None, star_name=None):
 #     print(' - initial guess for the parameters:')
 #     if use_windvar:
 #         df_ip = pd.DataFrame(initial_params, columns = ['Vx, m/s','Vy, m/s','Cn2', 'z, m', 'var, m/s']) 
@@ -148,7 +148,7 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
             res = gaussian(res, sigma=Vsigma*t_delta)
         return res
 
-    def one_speckle_fit(initial_params=None, data=None, latency=None, lambda_=None, all_Vx=None, all_Vy=None, all_Cn2_bounds=None, conjugated_distance=None, dome_index=None, use_gradient=None, do_fitting=None, dome_only=None, use_windvar=None, data_dir=None, file=None, file_name=None): 
+    def one_speckle_fit(initial_params=None, data=None, latency=None, lambda_=None, all_Vx=None, all_Vy=None, all_Cn2_bounds=None, conjugated_distance=None, dome_index=None, use_gradient=None, do_fitting=None, dome_only=None, use_windvar=None, data_dir=None, file=None, file_name=None, star_name=None): 
         class _g:
 
             def __init__(self):
@@ -284,10 +284,20 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
 #     #     errors = np.sqrt(np.diag(pcov))
         if use_windvar:
             popt = popt.reshape(len(popt)//5, 5)
-            df = pd.DataFrame(popt, columns = ['Vx, m/s','Vy, m/s','Cn2', 'z, m', 'var, m/s'])     
+            if dome_only != 0:
+                all_info_about_layers = [file, star_name, 'dome layer', popt]
+                df = pd.DataFrame(all_info_about_layers, columns = ['file', 'star', 'Vx, m/s','Vy, m/s','Cn2', 'z, m', 'var, m/s'])     
+            else:
+                all_info_about_layers = [file, star_name, popt]
+                df = pd.DataFrame(all_info_about_layers, columns = ['file', 'star', 'Vx, m/s','Vy, m/s','Cn2', 'z, m', 'var, m/s'])     
         else:
             popt = popt.reshape(len(popt)//4, 4)
-            df = pd.DataFrame(popt, columns = ['Vx, m/s','Vy, m/s','Cn2', 'z, m'])
+            if dome_only != 0:
+                all_info_about_layers = [file, star_name, 'dome layer', popt]
+                df = pd.DataFrame(all_info_about_layers, columns = ['file', 'star', 'mode', 'Vx, m/s','Vy, m/s','Cn2', 'z, m', 'var, m/s'])     
+            else:
+                all_info_about_layers = [file, star_name, popt]
+                df = pd.DataFrame(all_info_about_layers, columns = ['file', 'star', 'mode', 'Vx, m/s','Vy, m/s','Cn2', 'z, m'])
             
         df = df.sort_values(by=['z, m'])
         df = df.reset_index()
@@ -313,6 +323,6 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
 
         return fit
     
-    fit = one_speckle_fit(initial_params=initial_params, data=cc, latency=latency, lambda_=lambda_, all_Vx=all_Vx, all_Vy=all_Vy, all_Cn2_bounds=all_Cn2_bounds, conjugated_distance=conjugated_distance, dome_index=dome_index, use_gradient=use_gradient, do_fitting=do_fitting, dome_only=dome_only, use_windvar=use_windvar, data_dir=data_dir, file=file, file_name=file_name)
+    fit = one_speckle_fit(initial_params=initial_params, data=cc, latency=latency, lambda_=lambda_, all_Vx=all_Vx, all_Vy=all_Vy, all_Cn2_bounds=all_Cn2_bounds, conjugated_distance=conjugated_distance, dome_index=dome_index, use_gradient=use_gradient, do_fitting=do_fitting, dome_only=dome_only, use_windvar=use_windvar, data_dir=data_dir, file=file, file_name=file_name, star_name=star_name)
 
     return fit
