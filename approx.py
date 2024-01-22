@@ -286,7 +286,7 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
             popt = popt.reshape(len(popt)//5, 5)
             if dome_only != 0:
                 all_info_about_layers = [file, star_name, 'dome layer', popt]
-                df = pd.DataFrame(all_info_about_layers, columns = ['file', 'star', 'Vx, m/s','Vy, m/s','Cn2', 'z, m', 'var, m/s'])     
+                df = pd.DataFrame(all_info_about_layers, columns = ['file', 'star', 'mode', 'Vx, m/s','Vy, m/s','Cn2', 'z, m', 'var, m/s'])     
             else:
                 all_info_about_layers = [file, star_name, popt]
                 df = pd.DataFrame(all_info_about_layers, columns = ['file', 'star', 'Vx, m/s','Vy, m/s','Cn2', 'z, m', 'var, m/s'])     
@@ -297,7 +297,7 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
                 df = pd.DataFrame(all_info_about_layers, columns = ['file', 'star', 'mode', 'Vx, m/s','Vy, m/s','Cn2', 'z, m', 'var, m/s'])     
             else:
                 all_info_about_layers = [file, star_name, popt]
-                df = pd.DataFrame(all_info_about_layers, columns = ['file', 'star', 'mode', 'Vx, m/s','Vy, m/s','Cn2', 'z, m'])
+                df = pd.DataFrame(all_info_about_layers, columns = ['file', 'star', 'Vx, m/s','Vy, m/s','Cn2', 'z, m'])
             
         df = df.sort_values(by=['z, m'])
         df = df.reset_index()
