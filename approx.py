@@ -287,19 +287,18 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
             print('popt shape:', popt.shape)
             if dome_only != 0:
                 all_info_about_layers = [file, star_name, 'dome layer', popt[0][0], popt[0][1], popt[0][2], popt[0][3], popt[0][4]]
-                print('test1:', all_info_about_layers)
-                df = pd.DataFrame(all_info_about_layers, columns = ['file', 'star', 'mode', 'Vx, m/s','Vy, m/s','Cn2', 'z, m', 'var, m/s'])     
+                df = pd.DataFrame([all_info_about_layers], columns = ['file', 'star', 'mode', 'Vx, m/s','Vy, m/s','Cn2', 'z, m', 'var, m/s'])     
             else:
-                all_info_about_layers = [file, star_name, popt]
-                df = pd.DataFrame(all_info_about_layers, columns = ['file', 'star', 'Vx, m/s','Vy, m/s','Cn2', 'z, m', 'var, m/s'])     
+                all_info_about_layers = [file, star_name, popt[0][0], popt[0][1], popt[0][2], popt[0][3], popt[0][4]]
+                df = pd.DataFrame([all_info_about_layers], columns = ['file', 'star', 'Vx, m/s','Vy, m/s','Cn2', 'z, m', 'var, m/s'])     
         else:
             popt = popt.reshape(len(popt)//4, 4)
             if dome_only != 0:
-                all_info_about_layers = [file, star_name, 'dome layer', popt]
-                df = pd.DataFrame(all_info_about_layers, columns = ['file', 'star', 'mode', 'Vx, m/s','Vy, m/s','Cn2', 'z, m', 'var, m/s'])     
+                all_info_about_layers = [file, star_name, 'dome layer', popt[0][0], popt[0][1], popt[0][2], popt[0][3]]
+                df = pd.DataFrame([all_info_about_layers], columns = ['file', 'star', 'mode', 'Vx, m/s','Vy, m/s','Cn2', 'z, m', 'var, m/s'])     
             else:
-                all_info_about_layers = [file, star_name, popt]
-                df = pd.DataFrame(all_info_about_layers, columns = ['file', 'star', 'Vx, m/s','Vy, m/s','Cn2', 'z, m'])
+                all_info_about_layers = [file, star_name, popt[0][0], popt[0][1], popt[0][2], popt[0][3]]
+                df = pd.DataFrame([all_info_about_layers], columns = ['file', 'star', 'Vx, m/s','Vy, m/s','Cn2', 'z, m'])
             
         df = df.sort_values(by=['z, m'])
         df = df.reset_index()
