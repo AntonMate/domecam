@@ -40,7 +40,7 @@ def all_info_from_sql(data_dir, file_name, file, file_time, file_time_ub):
 
         data = cur.fetchall()
 
-        ts_1, ts_2, ts_3, ts_4, ts_5, ts_6, ts_7, ts_8, ts_9, ts_11, ts_12, ts_14, ts_15, ts_16, ts_17, ts_19 = [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []
+        ts_1, ts_2, ts_3, ts_4, ts_5, ts_6, ts_7, ts_8, ts_9, ts_11, ts_12, ts_14, ts_15, ts_16, ts_17, ts_19 = [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []
 
         for item in data:
             if item[0] == 1:
