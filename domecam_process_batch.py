@@ -51,7 +51,7 @@ if new_path.endswith('.fits'):
     file_time = datetime.strptime(file_time, '%y%m%d%H%M%S')
     file_time_ub = file_time + timedelta(minutes=5)  
     
-    result_temperature = all_info_from_sql(data_dir=data_dir, file_name, file, file_time, file_time_ub) # всю инофрмацию из базы данных в дополнительный файл txt пишу, чтобы не загромождать
+    result_temperature = all_info_from_sql(data_dir, file_name, file, file_time, file_time_ub) # всю инофрмацию из базы данных в дополнительный файл txt пишу, чтобы не загромождать
      
     indexes_h = [i for i in range(len(file)) if file[i] == "k"] # file[indexes_h[0]-1] высота сопряжения
     for item in os.listdir(data_dir):
@@ -83,7 +83,7 @@ else:
             file_time = datetime.strptime(file_time, '%y%m%d%H%M%S')
             file_time_ub = file_time + timedelta(minutes=5)
             
-            result_temperature = all_info_from_sql(data_dir=data_dir, file_name, file)
+            result_temperature = all_info_from_sql(data_dir, file_name, file, file_time, file_time_ub)
             
             indexes_h = [i for i in range(len(file)) if file[i] == "k"] # file[indexes_h[0]-1] высота сопряжения
             for item in os.listdir(data_dir):
