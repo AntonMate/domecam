@@ -4,7 +4,7 @@ import numpy as np
 import json
 
 def all_info_from_sql(data_dir, file_name, file, file_time, file_time_ub):
-    def speed_direction_temperature(data_dir=None, file_time, file_time_ub):
+    def speed_direction_temperature(data_dir, file_time, file_time_ub):
         cmd_sql = f"curl -G -H \"Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InNhZm9ub3YiLCJleHAiOjE3NjcyNTgwMDB9.GZ6_LQfb1L_kZNtF4z8Zrf8IgRD9N9DRwC2eEfR9bmQ\" 'http://eagle.sai.msu.ru/query?pretty=true' --data-urlencode \"db=collectd\" --data-urlencode \"q=select * from collectd.archive./collectd-sv.plugin_value/ where time>'{file_time}' and time<'{file_time_ub}';\" > wind_curr2.json"
         os.system(cmd_sql)
         
@@ -83,7 +83,7 @@ def all_info_from_sql(data_dir, file_name, file, file_time, file_time_ub):
         conn.close()
         return ts_1, ts_2, ts_3, ts_4, ts_5, ts_6, ts_7, ts_8, ts_9, ts_10, ts_11, ts_12, ts_13, ts_14, ts_15, ts_16, ts_17, ts_19
     
-    result_temperature, result_wind_direction, result_wind_speed = speed_direction_temperature(data_dir=data_dir, file_time, file_time_ub)
+    result_temperature, result_wind_direction, result_wind_speed = speed_direction_temperature(data_dir, file_time, file_time_ub)
     ts_1, ts_2, ts_3, ts_4, ts_5, ts_6, ts_7, ts_8, ts_9, ts_10, ts_11, ts_12, ts_13, ts_14, ts_15, ts_16, ts_17, ts_19 = telescope_temerarute(file_time=file_time, file_time_ub=file_time_ub)
     
     all_info = [result_temperature, result_wind_direction, result_wind_speed, ts_1, ts_2, ts_3, ts_4, ts_5, ts_6, ts_7, ts_8, ts_9, ts_10, ts_11, ts_12, ts_13, ts_14, ts_15, ts_16, ts_17, ts_19]
