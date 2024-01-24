@@ -71,7 +71,7 @@ if new_path.endswith('.fits'):
                 file_star = f'{line.split()[2].lower()}.sp'
                 print(f' - spectrum: {file_star}')
     
-    processDomecam(file=file, file_name=file_name, file_bias=file_bias, data_dir=data_dir, D=D, conjugated_distance=conjugated_distance, latency=latency, spectrum=spectrum, lambda_=lambda_, file_filter=file_filter, file_ccd=file_ccd, file_star=file_star, do_fitting=do_fitting, use_gradient=use_gradient, initial_params=initial_params, dome_only=dome_only, use_windvar=use_windvar, star_name=star_name, latency_list=latency)
+    processDomecam(file=file, file_name=file_name, file_bias=file_bias, data_dir=data_dir, D=D, conjugated_distance=conjugated_distance, latency=latency, spectrum=spectrum, lambda_=lambda_, file_filter=file_filter, file_ccd=file_ccd, file_star=file_star, do_fitting=do_fitting, use_gradient=use_gradient, initial_params=initial_params, dome_only=dome_only, use_windvar=use_windvar, star_name=star_name, latency_list=latency, result_temperature=result_temperature, result_wind_direction=result_wind_direction, result_wind_speed=result_wind_speed, ts_1=ts_1, ts_2=ts_2, ts_3=ts_3, ts_4=ts_4, ts_5=ts_5, ts_6=ts_6, ts_7=ts_7, ts_8=ts_8, ts_9=ts_9, ts_10=ts_10, ts_11=ts_11, ts_12=ts_12, ts_13=ts_13, ts_14=ts_14, ts_15=ts_15, ts_16=ts_16, ts_17=ts_17, ts_19=ts_19)
                 
 else:
     print(f' - MODE: обработка всех файлов _2km.fits из {new_path}')
@@ -105,6 +105,6 @@ else:
                         file_star = f'{line.split()[2].lower()}.sp'
                         print(f' - spectrum: {file_star}')
             
-            processDomecam(file=file, file_name=file_name, file_bias=file_bias, data_dir=data_dir, D=D, conjugated_distance=conjugated_distance, latency=latency, spectrum=spectrum, lambda_=lambda_, file_filter=file_filter, file_ccd=file_ccd, file_star=file_star, do_fitting=do_fitting, use_gradient=use_gradient, initial_params=initial_params, dome_only=dome_only, use_windvar=use_windvar, star_name=star_name, latency_list=latency)
+            processDomecam(file=file, file_name=file_name, file_bias=file_bias, data_dir=data_dir, D=D, conjugated_distance=conjugated_distance, latency=latency, spectrum=spectrum, lambda_=lambda_, file_filter=file_filter, file_ccd=file_ccd, file_star=file_star, do_fitting=do_fitting, use_gradient=use_gradient, initial_params=initial_params, dome_only=dome_only, use_windvar=use_windvar, star_name=star_name, latency_list=latency, result_temperature=result_temperature, result_wind_direction=result_wind_direction, result_wind_speed=result_wind_speed, ts_1=ts_1, ts_2=ts_2, ts_3=ts_3, ts_4=ts_4, ts_5=ts_5, ts_6=ts_6, ts_7=ts_7, ts_8=ts_8, ts_9=ts_9, ts_10=ts_10, ts_11=ts_11, ts_12=ts_12, ts_13=ts_13, ts_14=ts_14, ts_15=ts_15, ts_16=ts_16, ts_17=ts_17, ts_19=ts_19)
 # ============================================================================
 
