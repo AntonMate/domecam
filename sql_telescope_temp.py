@@ -35,12 +35,12 @@ def all_info_from_sql(data_dir, file_name, file, file_time, file_time_ub):
             user="tdsuser",
             password="?tdsuser=")
         cur = conn.cursor()
-        cmd_sql_execute = f"SELECT ts_id,meas_time,value from \"sai2p5_temp\" WHERE ( meas_time>'{file_time}' and meas_time<'{file_time_ub}') AND ((ts_id=1) or (ts_id=2) or (ts_id=3) or (ts_id=4) or (ts_id=5) or (ts_id=6) or (ts_id=7) or (ts_id=8) or (ts_id=9) or (ts_id=10) or (ts_id=11) or (ts_id=12) or (ts_id=13) or (ts_id=14) or (ts_id=15) or (ts_id=16) or (ts_id=17) or (ts_id=19));"
+        cmd_sql_execute = f"SELECT ts_id,meas_time,value from \"sai2p5_temp\" WHERE ( meas_time>'{file_time}' and meas_time<'{file_time_ub}') AND ((ts_id=1) or (ts_id=2) or (ts_id=3) or (ts_id=4) or (ts_id=5) or (ts_id=6) or (ts_id=7) or (ts_id=8) or (ts_id=9) or (ts_id=11) or (ts_id=12) or (ts_id=14) or (ts_id=15) or (ts_id=16) or (ts_id=17) or (ts_id=19));"
         cur.execute(cmd_sql_execute)
 
         data = cur.fetchall()
 
-        ts_1, ts_2, ts_3, ts_4, ts_5, ts_6, ts_7, ts_8, ts_9, ts_10, ts_11, ts_12, ts_13, ts_14, ts_15, ts_16, ts_17, ts_19 = [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []
+        ts_1, ts_2, ts_3, ts_4, ts_5, ts_6, ts_7, ts_8, ts_9, ts_11, ts_12, ts_14, ts_15, ts_16, ts_17, ts_19 = [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []
 
         for item in data:
             if item[0] == 1:
@@ -61,14 +61,10 @@ def all_info_from_sql(data_dir, file_name, file, file_time, file_time_ub):
                 ts_8.append(item[2])
             if item[0] == 9:
                 ts_9.append(item[2])
-            if item[0] == 10:
-                ts_10.append(item[2])
             if item[0] == 11:
                 ts_11.append(item[2])
             if item[0] == 12:
                 ts_12.append(item[2])
-            if item[0] == 13:
-                ts_13.append(item[2])
             if item[0] == 14:
                 ts_14.append(item[2])
             if item[0] == 15:
@@ -82,12 +78,12 @@ def all_info_from_sql(data_dir, file_name, file, file_time, file_time_ub):
 
         cur.close()
         conn.close()
-        return np.mean(ts_1), np.mean(ts_2), np.mean(ts_3), np.mean(ts_4), np.mean(ts_5), np.mean(ts_6), np.mean(ts_7), np.mean(ts_8), np.mean(ts_9), np.mean(ts_10), np.mean(ts_11), np.mean(ts_12), np.mean(ts_13), np.mean(ts_14), np.mean(ts_15), np.mean(ts_16), np.mean(ts_17), np.mean(ts_19)
+        return np.mean(ts_1), np.mean(ts_2), np.mean(ts_3), np.mean(ts_4), np.mean(ts_5), np.mean(ts_6), np.mean(ts_7), np.mean(ts_8), np.mean(ts_9), np.mean(ts_11), np.mean(ts_12), np.mean(ts_14), np.mean(ts_15), np.mean(ts_16), np.mean(ts_17), np.mean(ts_19)
     
     result_temperature, result_wind_direction, result_wind_speed = speed_direction_temperature(data_dir, file_time, file_time_ub)
-    ts_1, ts_2, ts_3, ts_4, ts_5, ts_6, ts_7, ts_8, ts_9, ts_10, ts_11, ts_12, ts_13, ts_14, ts_15, ts_16, ts_17, ts_19 = telescope_temerarute(file_time=file_time, file_time_ub=file_time_ub)
+    ts_1, ts_2, ts_3, ts_4, ts_5, ts_6, ts_7, ts_8, ts_9, ts_11, ts_12, ts_14, ts_15, ts_16, ts_17, ts_19 = telescope_temerarute(file_time=file_time, file_time_ub=file_time_ub)
     
-    all_info = [result_temperature, result_wind_direction, result_wind_speed, ts_1, ts_2, ts_3, ts_4, ts_5, ts_6, ts_7, ts_8, ts_9, ts_10, ts_11, ts_12, ts_13, ts_14, ts_15, ts_16, ts_17, ts_19]
-    df = pd.DataFrame([all_info], columns = ['temperute', 'wind direction', 'wind speed', 'ts_1', 'ts_2', 'ts_3', 'ts_4', 'ts_5', 'ts_6', 'ts_7', 'ts_8', 'ts_9', 'ts_10', 'ts_11', 'ts_12', 'ts_13', 'ts_14', 'ts_15', 'ts_16', 'ts_17', 'ts_19'])
+    all_info = [result_temperature, result_wind_direction, result_wind_speed, ts_1, ts_2, ts_3, ts_4, ts_5, ts_6, ts_7, ts_8, ts_9, ts_11, ts_12, ts_14, ts_15, ts_16, ts_17, ts_19]
+    df = pd.DataFrame([all_info], columns = ['temperute', 'wind direction', 'wind speed', 'ts_1', 'ts_2', 'ts_3', 'ts_4', 'ts_5', 'ts_6', 'ts_7', 'ts_8', 'ts_9', 'ts_11', 'ts_12', 'ts_14', 'ts_15', 'ts_16', 'ts_17', 'ts_19'])
     df.to_csv(f'{data_dir}/results/{file_name}/{file[:-5]}_info_from_logs.txt', index=False)
     return result_temperature
