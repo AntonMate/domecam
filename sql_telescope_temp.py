@@ -89,6 +89,5 @@ def all_info_from_sql(data_dir, file_name, file, file_time, file_time_ub):
     
     all_info = [result_temperature, result_wind_direction, result_wind_speed, ts_1, ts_2, ts_3, ts_4, ts_5, ts_6, ts_7, ts_8, ts_9, ts_10, ts_11, ts_12, ts_13, ts_14, ts_15, ts_16, ts_17, ts_19]
     df = pd.DataFrame([all_info], columns = ['temperute', 'wind direction', 'wind speed', 'ts_1', 'ts_2', 'ts_3', 'ts_4', 'ts_5', 'ts_6', 'ts_7', 'ts_8', 'ts_9', 'ts_10', 'ts_11', 'ts_12', 'ts_13', 'ts_14', 'ts_15', 'ts_16', 'ts_17', 'ts_19'])
-    df.drop(columns=['index'], inplace=True)
     df.to_csv(f'{data_dir}/results/{file_name}/{file[:-5]}_info_from_logs.txt', index=False)
     return result_temperature
