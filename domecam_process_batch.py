@@ -50,6 +50,7 @@ if new_path.endswith('.fits'):
     file_time = datetime.strptime(file_time, '%y%m%d%H%M%S')
     file_time_ub = file_time + timedelta(minutes=1)
     cmd_sql = f"curl -G -H \"Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InNhZm9ub3YiLCJleHAiOjE3NjcyNTgwMDB9.GZ6_LQfb1L_kZNtF4z8Zrf8IgRD9N9DRwC2eEfR9bmQ\" 'http://eagle.sai.msu.ru/query?pretty=true' --data-urlencode \"db=collectd\" --data-urlencode \"q=select * from collectd.archive.\"collectd-sv.plugin_value\" where time>'{file_time}' and time<'{file_time_ub}';\" > wind_curr2.json"
+    print(cmd_sql)
     os.system(cmd_sql)  
     
     indexes_h = [i for i in range(len(file)) if file[i] == "k"] # file[indexes_h[0]-1] высота сопряжения
