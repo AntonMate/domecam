@@ -2,7 +2,9 @@ from main import processDomecam
 import os
 import getopt
 import sys
+from datetime import datetime, timedelta
 
+# os.system(f'wsl source-extractor temp/image{file} -c prepsfex.sex')
 # ============================================================================
 latency = [4, 6] # задержка для кросс-корреляции, [кадр]
 conjugated_distance = 2 # сопряженное расстояние, [километр]
@@ -40,11 +42,16 @@ if new_path.endswith('.fits'):
     indexes = [i for i in range(len(new_path)) if new_path[i] == "/"]
     data_dir = new_path[:indexes[-1]]
     print(' - dir:', data_dir)
-    file = new_path[indexes[-1]+1:]
+    file = new_path[indexes[-1]+1:] # полное название фаайла серии
     print(' -', file)
     file_name = file.replace('_2km.fits', '')
     file_name = file_name.replace('_0km.fits', '') # номер серии
-
+    
+    file_time = file_name.replace('DC', '') # дата записи из названия файла
+    file_time = datetime.strptime(file_time, '%y%m%d%H%M%S')
+    file_time_ub = file_time + timedelta(minutes=1)
+    print('time file:', file_time, file_time_ub)
+    
     indexes_h = [i for i in range(len(file)) if file[i] == "k"] # file[indexes_h[0]-1] высота сопряжения
     for item in os.listdir(data_dir):
         if 'bias' in item and file_name in item and f'{file[indexes_h[0]-1]}km' in item:
