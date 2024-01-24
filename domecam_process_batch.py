@@ -49,7 +49,7 @@ if new_path.endswith('.fits'):
     file_time = file_name.replace('DC', '') # дата записи из названия файла
     file_time = datetime.strptime(file_time, '%y%m%d%H%M%S')
     file_time_ub = file_time + timedelta(minutes=1)
-    cmd_sql = f"curl -G -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InNhZm9ub3YiLCJleHAiOjE3NjcyNTgwMDB9.GZ6_LQfb1L_kZNtF4z8Zrf8IgRD9N9DRwC2eEfR9bmQ' 'http://eagle.sai.msu.ru/query?pretty=true' --data-urlencode 'db=collectd' --data-urlencode 'q=SELECT * FROM babel_fish_value where (type='wind_direction' OR type='wind_speed') AND time >'{file_time}' AND time <'{file_time_ub}' AND type_instance='avg';' > wind_curr2.json"
+    cmd_sql = f"curl -G -H \"Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InNhZm9ub3YiLCJleHAiOjE3NjcyNTgwMDB9.GZ6_LQfb1L_kZNtF4z8Zrf8IgRD9N9DRwC2eEfR9bmQ\" 'http://eagle.sai.msu.ru/query?pretty=true' --data-urlencode \"db=collectd\" --data-urlencode \"q=SELECT * FROM babel_fish_value where (type='wind_direction' OR type='wind_speed') AND time >'{file_time}' AND time <'{file_time_ub}' AND type_instance='avg';\" > wind_curr2.json"
     os.system(cmd_sql)
     print(cmd_sql)
     
