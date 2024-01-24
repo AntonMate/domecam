@@ -2,6 +2,7 @@ import psycopg2
 import pandas as pd
 import numpy as np
 import json
+import os
 
 def all_info_from_sql(data_dir, file_name, file, file_time, file_time_ub):
     def speed_direction_temperature(data_dir, file_time, file_time_ub):
