@@ -4,7 +4,6 @@ import getopt
 import sys
 from datetime import datetime, timedelta
 
-# os.system(f'wsl source-extractor temp/image{file} -c prepsfex.sex')
 # ============================================================================
 latency = [4, 6] # задержка для кросс-корреляции, [кадр]
 conjugated_distance = 2 # сопряженное расстояние, [километр]
@@ -51,6 +50,8 @@ if new_path.endswith('.fits'):
     file_time = datetime.strptime(file_time, '%y%m%d%H%M%S')
     file_time_ub = file_time + timedelta(minutes=1)
     print('time file:', file_time, file_time_ub)
+    os.system(f"curl -G -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InNhZm9ub3YiLCJleHAiOjE3NjcyNTgwMDB9.GZ6_LQfb1L_kZNtF4z8Zrf8IgRD9N9DRwC2eEfR9bmQ' 'http://eagle.sai.msu.ru/query?pretty=true' --data-urlencode 'db=collectd' --data-urlencode 'q=SELECT * FROM babel_fish_value where (type='wind_direction' OR type='wind_speed') AND time >'{file_time}' AND time <'{file_time_ub}' AND type_instance='avg';' > wind_curr2.json")
+    print(os.system(f"curl -G -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InNhZm9ub3YiLCJleHAiOjE3NjcyNTgwMDB9.GZ6_LQfb1L_kZNtF4z8Zrf8IgRD9N9DRwC2eEfR9bmQ' 'http://eagle.sai.msu.ru/query?pretty=true' --data-urlencode 'db=collectd' --data-urlencode 'q=SELECT * FROM babel_fish_value where (type='wind_direction' OR type='wind_speed') AND time >'{file_time}' AND time <'{file_time_ub}' AND type_instance='avg';' > wind_curr2.json"))
     
     indexes_h = [i for i in range(len(file)) if file[i] == "k"] # file[indexes_h[0]-1] высота сопряжения
     for item in os.listdir(data_dir):
