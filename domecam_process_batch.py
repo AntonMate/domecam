@@ -55,7 +55,7 @@ if new_path.endswith('.fits'):
     
     result_temperature, result_wind_direction, result_wind_speed, ts_1, ts_2, ts_3, ts_4, ts_5, ts_6, ts_7, ts_8, ts_9, ts_10, ts_11, ts_12, ts_13, ts_14, ts_15, ts_16, ts_17, ts_19 = all_info_from_sql(data_dir=data_dir)
     
-    print(result_temperature, result_wind_direction, result_wind_speed)
+    print(result_temperature, result_wind_direction, result_wind_speed, ts_1, ts_2, ts_3, ts_4, ts_5, ts_6, ts_7, ts_8, ts_9, ts_10, ts_11, ts_12, ts_13, ts_14, ts_15, ts_16, ts_17, ts_19)
     
     indexes_h = [i for i in range(len(file)) if file[i] == "k"] # file[indexes_h[0]-1] высота сопряжения
     for item in os.listdir(data_dir):

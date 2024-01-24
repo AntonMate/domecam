@@ -13,13 +13,10 @@ def all_info_from_sql(data_dir):
             all_wind_direction = []
             for item in tmp:
                 if item[-1] == 'WIND':
-                    print('wind speed:', item[2])
                     all_wind_speed.append(item[2])
                 if item[-1] == 'WIND_DIR':
-                    print('wind direction:', item[2])
                     all_wind_direction.append(item[2])
                 if item[-1] == 'TEMP_EX':
-                    print('temperature:', item[2])
                     all_temerature.append(item[2])
             result_wind_speed = np.mean(all_wind_speed)
             result_wind_direction = np.mean(all_wind_direction) 
