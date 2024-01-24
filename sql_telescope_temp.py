@@ -82,7 +82,7 @@ def all_info_from_sql(data_dir, file_name, file, file_time, file_time_ub):
 
         cur.close()
         conn.close()
-        return ts_1, ts_2, ts_3, ts_4, ts_5, ts_6, ts_7, ts_8, ts_9, ts_10, ts_11, ts_12, ts_13, ts_14, ts_15, ts_16, ts_17, ts_19
+        return ts_1[0], ts_2[0], ts_3[0], ts_4[0], ts_5[0], ts_6[0], ts_7[0], ts_8[0], ts_9[0], ts_10[0], ts_11[0], ts_12[0], ts_13[0], ts_14[0], ts_15[0], ts_16[0], ts_17[0], ts_19[0]
     
     result_temperature, result_wind_direction, result_wind_speed = speed_direction_temperature(data_dir, file_time, file_time_ub)
     ts_1, ts_2, ts_3, ts_4, ts_5, ts_6, ts_7, ts_8, ts_9, ts_10, ts_11, ts_12, ts_13, ts_14, ts_15, ts_16, ts_17, ts_19 = telescope_temerarute(file_time=file_time, file_time_ub=file_time_ub)
