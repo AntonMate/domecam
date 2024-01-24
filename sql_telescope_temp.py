@@ -5,7 +5,7 @@ conn = psycopg2.connect(
     user="tdsuser",
     password="?tdsuser=")
 cur = conn.cursor()
-cur.execute("SELECT ts_id,meas_time,value from \"sai2p5_temp\" WHERE meas_time> now() - INTERVAL '3 HOUR' - INTERVAL '2 MINUTE';")
+cur.execute("SELECT ts_id,meas_time,value from \"sai2p5_temp\" WHERE (meas_time> now() - INTERVAL '3 HOUR' - INTERVAL '2 MINUTE') AND (ts_id=1);")
 
 data = cur.fetchall()
 print(data)
