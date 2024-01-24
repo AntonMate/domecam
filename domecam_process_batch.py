@@ -49,14 +49,10 @@ if new_path.endswith('.fits'):
     
     file_time = file_name.replace('DC', '') # дата записи из названия файла
     file_time = datetime.strptime(file_time, '%y%m%d%H%M%S')
-    file_time_ub = file_time + timedelta(minutes=5)
-    cmd_sql = f"curl -G -H \"Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InNhZm9ub3YiLCJleHAiOjE3NjcyNTgwMDB9.GZ6_LQfb1L_kZNtF4z8Zrf8IgRD9N9DRwC2eEfR9bmQ\" 'http://eagle.sai.msu.ru/query?pretty=true' --data-urlencode \"db=collectd\" --data-urlencode \"q=select * from collectd.archive./collectd-sv.plugin_value/ where time>'{file_time}' and time<'{file_time_ub}';\" > wind_curr2.json"
-    os.system(cmd_sql)  
+    file_time_ub = file_time + timedelta(minutes=5)  
     
-    result_temperature, result_wind_direction, result_wind_speed, ts_1, ts_2, ts_3, ts_4, ts_5, ts_6, ts_7, ts_8, ts_9, ts_10, ts_11, ts_12, ts_13, ts_14, ts_15, ts_16, ts_17, ts_19 = all_info_from_sql(data_dir=data_dir)
-    
-    print(result_temperature, result_wind_direction, result_wind_speed, ts_1, ts_2, ts_3, ts_4, ts_5, ts_6, ts_7, ts_8, ts_9, ts_10, ts_11, ts_12, ts_13, ts_14, ts_15, ts_16, ts_17, ts_19)
-    
+    result_temperature = all_info_from_sql(data_dir=data_dir, file_name, file, file_time, file_time_ub) # всю инофрмацию из базы данных в дополнительный файл txt пишу, чтобы не загромождать
+     
     indexes_h = [i for i in range(len(file)) if file[i] == "k"] # file[indexes_h[0]-1] высота сопряжения
     for item in os.listdir(data_dir):
         if 'bias' in item and file_name in item and f'{file[indexes_h[0]-1]}km' in item:
@@ -71,7 +67,7 @@ if new_path.endswith('.fits'):
                 file_star = f'{line.split()[2].lower()}.sp'
                 print(f' - spectrum: {file_star}')
     
-    processDomecam(file=file, file_name=file_name, file_bias=file_bias, data_dir=data_dir, D=D, conjugated_distance=conjugated_distance, latency=latency, spectrum=spectrum, lambda_=lambda_, file_filter=file_filter, file_ccd=file_ccd, file_star=file_star, do_fitting=do_fitting, use_gradient=use_gradient, initial_params=initial_params, dome_only=dome_only, use_windvar=use_windvar, star_name=star_name, latency_list=latency, result_temperature=result_temperature, result_wind_direction=result_wind_direction, result_wind_speed=result_wind_speed, ts_1=ts_1, ts_2=ts_2, ts_3=ts_3, ts_4=ts_4, ts_5=ts_5, ts_6=ts_6, ts_7=ts_7, ts_8=ts_8, ts_9=ts_9, ts_10=ts_10, ts_11=ts_11, ts_12=ts_12, ts_13=ts_13, ts_14=ts_14, ts_15=ts_15, ts_16=ts_16, ts_17=ts_17, ts_19=ts_19)
+    processDomecam(file=file, file_name=file_name, file_bias=file_bias, data_dir=data_dir, D=D, conjugated_distance=conjugated_distance, latency=latency, spectrum=spectrum, lambda_=lambda_, file_filter=file_filter, file_ccd=file_ccd, file_star=file_star, do_fitting=do_fitting, use_gradient=use_gradient, initial_params=initial_params, dome_only=dome_only, use_windvar=use_windvar, star_name=star_name, latency_list=latency)
                 
 else:
     print(f' - MODE: обработка всех файлов _2km.fits из {new_path}')
@@ -86,10 +82,8 @@ else:
             file_time = file_name.replace('DC', '') # дата записи из названия файла
             file_time = datetime.strptime(file_time, '%y%m%d%H%M%S')
             file_time_ub = file_time + timedelta(minutes=5)
-            cmd_sql = f"curl -G -H \"Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InNhZm9ub3YiLCJleHAiOjE3NjcyNTgwMDB9.GZ6_LQfb1L_kZNtF4z8Zrf8IgRD9N9DRwC2eEfR9bmQ\" 'http://eagle.sai.msu.ru/query?pretty=true' --data-urlencode \"db=collectd\" --data-urlencode \"q=select * from collectd.archive./collectd-sv.plugin_value/ where time>'{file_time}' and time<'{file_time_ub}';\" > wind_curr2.json"
-            os.system(cmd_sql)  
             
-            result_temperature, result_wind_direction, result_wind_speed, ts_1, ts_2, ts_3, ts_4, ts_5, ts_6, ts_7, ts_8, ts_9, ts_10, ts_11, ts_12, ts_13, ts_14, ts_15, ts_16, ts_17, ts_19 = all_info_from_sql(data_dir=data_dir)
+            result_temperature = all_info_from_sql(data_dir=data_dir, file_name, file)
             
             indexes_h = [i for i in range(len(file)) if file[i] == "k"] # file[indexes_h[0]-1] высота сопряжения
             for item in os.listdir(data_dir):
@@ -105,6 +99,6 @@ else:
                         file_star = f'{line.split()[2].lower()}.sp'
                         print(f' - spectrum: {file_star}')
             
-            processDomecam(file=file, file_name=file_name, file_bias=file_bias, data_dir=data_dir, D=D, conjugated_distance=conjugated_distance, latency=latency, spectrum=spectrum, lambda_=lambda_, file_filter=file_filter, file_ccd=file_ccd, file_star=file_star, do_fitting=do_fitting, use_gradient=use_gradient, initial_params=initial_params, dome_only=dome_only, use_windvar=use_windvar, star_name=star_name, latency_list=latency, result_temperature=result_temperature, result_wind_direction=result_wind_direction, result_wind_speed=result_wind_speed, ts_1=ts_1, ts_2=ts_2, ts_3=ts_3, ts_4=ts_4, ts_5=ts_5, ts_6=ts_6, ts_7=ts_7, ts_8=ts_8, ts_9=ts_9, ts_10=ts_10, ts_11=ts_11, ts_12=ts_12, ts_13=ts_13, ts_14=ts_14, ts_15=ts_15, ts_16=ts_16, ts_17=ts_17, ts_19=ts_19)
+            processDomecam(file=file, file_name=file_name, file_bias=file_bias, data_dir=data_dir, D=D, conjugated_distance=conjugated_distance, latency=latency, spectrum=spectrum, lambda_=lambda_, file_filter=file_filter, file_ccd=file_ccd, file_star=file_star, do_fitting=do_fitting, use_gradient=use_gradient, initial_params=initial_params, dome_only=dome_only, use_windvar=use_windvar, star_name=star_name, latency_list=latency)
 # ============================================================================
 

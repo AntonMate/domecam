@@ -12,7 +12,7 @@ from initialparams import processBestThresh, processPeakDetect, processCoordsToS
 from approx import processApprox 
 from checkfiles import processCheckFiles
 
-def processDomecam(file=None, file_name=None, file_bias=None, data_dir=None, D=None, conjugated_distance=None, latency=None, spectrum=None, lambda_=None, file_star=None, file_filter=None, file_ccd=None, initial_params=None, use_gradient=None, do_fitting=None, dome_only=None, use_windvar=None, star_name=None, latency_list=None, result_temperature=None, result_wind_direction=None, result_wind_speed=None, ts_1=None, ts_2=None, ts_3=None, ts_4=None, ts_5=None, ts_6=None, ts_7=None, ts_8=None, ts_9=None, ts_10=None, ts_11=None, ts_12=None, ts_13=None, ts_14=None, ts_15=None, ts_16=None, ts_17=None, ts_19=None):
+def processDomecam(file=None, file_name=None, file_bias=None, data_dir=None, D=None, conjugated_distance=None, latency=None, spectrum=None, lambda_=None, file_star=None, file_filter=None, file_ccd=None, initial_params=None, use_gradient=None, do_fitting=None, dome_only=None, use_windvar=None, star_name=None, latency_list=None):
     # считывание данных, получение кросс-корр и автокорреляции зрачка 
 #     metka = processCheckFiles(file=file, latency=latency, data_dir=data_dir, dome_only=dome_only)
     
