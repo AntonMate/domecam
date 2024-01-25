@@ -64,42 +64,37 @@ def processCorr(run_cc=None, file=None, bias=None, latencys=None, data_dir=None,
 
     # =========================================================================================================
     # получение bias
+    
+    st = time.perf_counter()
+    
+    hdul = fits.open(f'{data_dir}/{file}')  
+    frame_random = hdul[0].section[np.random.randint(hdul[0].header['NAXIS3']),:,:].astype(np.float32)
+    
     if bias is not None:
-        st = time.perf_counter()
-
-        hdul = fits.open(f'{data_dir}/{file}')  
-        frame = hdul[0].section[np.random.randint(hdul[0].header['NAXIS3']),:,:].astype(np.float32)
-
         with fits.open(f'{data_dir}/{bias}') as f:
             if f[0].header['NAXIS'] == 3:
                 bias = np.mean(np.float32(f[0].data), axis=0, dtype=np.float32)
                 bias_shape = bias.shape
-                if frame.shape != bias_shape:
+                if frame_random.shape != bias_shape:
                     metka_bias = 'wrong shape'
-                    bias = np.zeros(frame.shape)
-                    print(f' - WARNING: bias shape {bias_shape} != frame shape {frame.shape}')
+                    bias = np.zeros(frame_random.shape, dtype=np.float32)
+                    print(f' - WARNING: bias shape {bias_shape} != frame shape {frame_random.shape}')
             
             if f[0].header['NAXIS'] == 2:
                 bias = np.float32(f[0].data)
                 bias_shape = bias.shape
-                if frame.shape != bias_shape:
+                if frame_random.shape != bias_shape:
                     metka_bias = 'wrong shape'
-                    bias = np.zeros(frame.shape)
-                    print(f' - WARNING: bias shape {bias_shape} != frame shape {frame.shape}')
-
-        print(f' - time bias, {bias.shape}: {time.perf_counter() - st:.2f}')
+                    bias = np.zeros(frame_random.shape, dtype=np.float32)
+                    print(f' - WARNING: bias shape {bias_shape} != frame shape {frame_random.shape}')
     
     if bias is None:
         metka_bias = 'not found'
-        hdul = fits.open(f'{data_dir}/{file}')  
-        frame = hdul[0].section[np.random.randint(hdul[0].header['NAXIS3']),:,:].astype(np.float32)
-        bias = np.zeros(frame.shape)
+        bias = np.zeros(frame_random.shape, dtype=np.float32)
         print(' - WARNING: file bias not found')
         
     # =========================================================================================================
     # получение среднего кадра всей серии (и заодно периода между снимками)
-
-    st = time.perf_counter()
 
     with fits.open(f'{data_dir}/{file}') as f:
         image_average =  np.mean(np.float32(f[0].data) - bias, axis=0, dtype=np.float32)
@@ -107,12 +102,8 @@ def processCorr(run_cc=None, file=None, bias=None, latencys=None, data_dir=None,
         header = f[0].header
         sec_per_frame = 1/header['FRATE']
 
-    print(f' - time image_average: {time.perf_counter() - st:.2f}')
-
     # =========================================================================================================
     # обрезка среднего кадра, получение границ обрезки
-
-    st = time.perf_counter()
 
     image_binary = (image_average > threshold_otsu(image_average)) # маска среднего кадра
     image_binary = np.array(image_binary, dtype=np.float32) # перевод в numpy
@@ -121,8 +112,18 @@ def processCorr(run_cc=None, file=None, bias=None, latencys=None, data_dir=None,
     mask, yn, xn = image_resize(mask) # обрезка изображения под квадратное
     image_average=image_average[y1:y2-yn, x1:x2-xn]
 
-    print(f' - time image_average_cropp: {time.perf_counter() - st:.2f}')
+    # =========================================================================================================
+    # подсчет автокорреляции зрачка, беру случайный кадр серии
 
+    frame_random -= bias
+    frame_random = frame_random[y1:y2-yn, x1:x2-xn]
+    frame_random_norm = image_norm(frame_random, image_average)
+    frame_random_clean = image_clean(frame_random_norm, mask) 
+    frame_random_clean[np.isnan(frame_random_clean)] = 0 
+    cjk = processAutoCorr(frame_random_clean)
+
+    print(f' - time bias, image_average, image_average_cropp, autocorr: {time.perf_counter() - st:.2f}')
+    
     # =========================================================================================================
     # по полученным границам далее обрезается каждый отдельный кадр серии и считается кросс корреляция
 
@@ -166,22 +167,5 @@ def processCorr(run_cc=None, file=None, bias=None, latencys=None, data_dir=None,
     if do_crosscorr == False:
         print(' - WARNING: no cross correlation count!')
         corr_result = np.zeros((len(latencys), 2*((y2-yn)-y1), 2*((x2-xn)-x1)), dtype=np.float32)
-
-    # =========================================================================================================
-    # подсчет автокорреляции зрачка, беру случайный кадр серии
-
-    st = time.perf_counter()
-
-    hdul = fits.open(f'{data_dir}/{file}')  
-
-    frame_random = hdul[0].section[np.random.randint(hdul[0].header['NAXIS3']),:,:].astype(np.float32)
-    frame_random -= bias
-    frame_random = frame_random[y1:y2-yn, x1:x2-xn]
-    frame_random_norm = image_norm(frame_random, image_average)
-    frame_random_clean = image_clean(frame_random_norm, mask) 
-    frame_random_clean[np.isnan(frame_random_clean)] = 0 
-    cjk = processAutoCorr(frame_random_clean)
-
-    print(f' - time autocorr: {time.perf_counter() - st:.2f}')
     
     return corr_result, cjk, sec_per_frame, metka_bias

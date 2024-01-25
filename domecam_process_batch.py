@@ -73,16 +73,16 @@ if new_path.endswith('.fits'):
     with open('logs2.txt') as f:
         for line in f:
             if file in line:
-                print(' - logs.txt:', line.strip())
+                print(f' - logs.txt: {line.strip()} --> spectrum: {file_star}')
                 star_name = line.split()[1]
                 file_star = f'{line.split()[2].lower()}.sp'
                 alt = round(float(line.split()[-2]), 4)
                 az = round(float(line.split()[-1]), 4)
-                print(f' - spectrum: {file_star}')
     
     processDomecam(file=file, file_name=file_name, file_bias=file_bias, data_dir=data_dir, D=D, conjugated_distance=conjugated_distance, latency=latency, spectrum=spectrum, lambda_=lambda_, file_filter=file_filter, file_ccd=file_ccd, file_star=file_star, do_fitting=do_fitting, use_gradient=use_gradient, initial_params=initial_params, dome_only=dome_only, use_windvar=use_windvar, star_name=star_name, latency_list=latency, alt=alt, az=az, do_crosscorr=do_crosscorr, metka_bias=metka_bias)
                 
 else:
+    print('')
     print(f' - MODE: обработка всех файлов _2km.fits из {new_path}')
     data_dir = new_path
     for ser in os.listdir(new_path):
@@ -116,12 +116,11 @@ else:
             with open('logs2.txt') as f:
                 for line in f:
                     if file in line:
-                        print(' - logs.txt:', line.strip())
+                        print(f' - logs.txt: {line.strip()} --> spectrum: {file_star}')
                         star_name = line.split()[1]
                         file_star = f'{line.split()[2].lower()}.sp'
                         alt = round(float(line.split()[-2]), 4)
                         az = round(float(line.split()[-1]), 4)
-                        print(f' - spectrum: {file_star}')
             
             processDomecam(file=file, file_name=file_name, file_bias=file_bias, data_dir=data_dir, D=D, conjugated_distance=conjugated_distance, latency=latency, spectrum=spectrum, lambda_=lambda_, file_filter=file_filter, file_ccd=file_ccd, file_star=file_star, do_fitting=do_fitting, use_gradient=use_gradient, initial_params=initial_params, dome_only=dome_only, use_windvar=use_windvar, star_name=star_name, latency_list=latency, alt=alt, az=az, do_crosscorr=do_crosscorr, metka_bias=metka_bias)
 # ============================================================================
