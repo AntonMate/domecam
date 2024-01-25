@@ -39,6 +39,7 @@ optlist, args = getopt.getopt(sys.argv[1:], 'infile', ['infile='])
 new_path = optlist[0][1]
 
 if new_path.endswith('.fits'):
+    print('')
     print(f' - MODE: fitting {new_path}')
     indexes = [i for i in range(len(new_path)) if new_path[i] == "/"]
     data_dir = new_path[:indexes[-1]]
