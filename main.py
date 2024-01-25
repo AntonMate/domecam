@@ -12,7 +12,7 @@ from initialparams import processBestThresh, processPeakDetect, processCoordsToS
 from approx import processApprox 
 from checkfiles import processCheckFiles
 
-def processDomecam(file=None, file_name=None, file_bias=None, data_dir=None, D=None, conjugated_distance=None, latency=None, spectrum=None, lambda_=None, file_star=None, file_filter=None, file_ccd=None, initial_params=None, use_gradient=None, do_fitting=None, dome_only=None, use_windvar=None, star_name=None, latency_list=None, alt=None, az=None):
+def processDomecam(file=None, file_name=None, file_bias=None, data_dir=None, D=None, conjugated_distance=None, latency=None, spectrum=None, lambda_=None, file_star=None, file_filter=None, file_ccd=None, initial_params=None, use_gradient=None, do_fitting=None, dome_only=None, use_windvar=None, star_name=None, latency_list=None, alt=None, az=None, do_crosscorr=None):
     # считывание данных, получение кросс-корр и автокорреляции зрачка 
 #     metka = processCheckFiles(file=file, latency=latency, data_dir=data_dir, dome_only=dome_only)
     
@@ -25,7 +25,7 @@ def processDomecam(file=None, file_name=None, file_bias=None, data_dir=None, D=N
     if not os.path.isdir(f'{data_dir}/results/{file_name}'):
         os.mkdir(f'{data_dir}/results/{file_name}')
     
-    cc, cjk, sec_per_frame = processCorr(run_cc=metka, file=file, bias=file_bias, latencys=latency, data_dir=data_dir, dome_only=dome_only)
+    cc, cjk, sec_per_frame = processCorr(run_cc=metka, file=file, bias=file_bias, latencys=latency, data_dir=data_dir, dome_only=dome_only, do_crosscorr=do_crosscorr)
     
     # cc - картина кросс-корреляции
     # cjk - картина автокорреляции зрачка 

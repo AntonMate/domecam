@@ -5,7 +5,7 @@ from scipy.signal import correlate
 import time
 
 
-def processCorr(run_cc=None, file=None, bias=None, latencys=None, data_dir=None, dome_only=None):
+def processCorr(run_cc=None, file=None, bias=None, latencys=None, data_dir=None, dome_only=None, do_crosscorr=None):
     def image_cropp(image): 
         mask = image != 0
         rows = np.flatnonzero((mask.any(axis=1))) 
@@ -105,41 +105,45 @@ def processCorr(run_cc=None, file=None, bias=None, latencys=None, data_dir=None,
     # =========================================================================================================
     # по полученным границам далее обрезается каждый отдельный кадр серии и считается кросс корреляция
 
-    hdul = fits.open(f'{data_dir}/{file}')  
-    nz = hdul[0].header['NAXIS3']
-    corr_result = np.zeros((len(latencys), 2*((y2-yn)-y1), 2*((x2-xn)-x1)), dtype=np.float32)
+    if do_crosscorr:
+        hdul = fits.open(f'{data_dir}/{file}')  
+        nz = hdul[0].header['NAXIS3']
+        corr_result = np.zeros((len(latencys), 2*((y2-yn)-y1), 2*((x2-xn)-x1)), dtype=np.float32)
 
-    for k, latency in enumerate(latencys):
-        st = time.perf_counter()
+        for k, latency in enumerate(latencys):
+            st = time.perf_counter()
 
-        correlation = np.zeros((nz-latency, 2*((y2-yn)-y1)-1, 2*((x2-xn)-x1)-1), dtype=np.float32)
-        for i in range(0, nz-latency): # добавить потом nz-lantecy
-            frame = hdul[0].section[i,:,:].astype(np.float32)
-            frame -= bias
-            frame = frame[y1:y2-yn, x1:x2-xn] # обрезка кадра 
-            frame_norm = image_norm(frame, image_average) # нормировка кадра
-            frame_clean = image_clean(frame_norm, mask) # отделение зрачка от фона
-            frame_clean[np.isnan(frame_clean)] = 0 
+            correlation = np.zeros((nz-latency, 2*((y2-yn)-y1)-1, 2*((x2-xn)-x1)-1), dtype=np.float32)
+            for i in range(0, nz-latency): # добавить потом nz-lantecy
+                frame = hdul[0].section[i,:,:].astype(np.float32)
+                frame -= bias
+                frame = frame[y1:y2-yn, x1:x2-xn] # обрезка кадра 
+                frame_norm = image_norm(frame, image_average) # нормировка кадра
+                frame_clean = image_clean(frame_norm, mask) # отделение зрачка от фона
+                frame_clean[np.isnan(frame_clean)] = 0 
 
-            frame_latency = hdul[0].section[i+latency,:,:].astype(np.float32)
-            frame_latency -= bias
-            frame_latency = frame_latency[y1:y2-yn, x1:x2-xn] # обрезка кадра 
-            frame_latency_norm = image_norm(frame_latency, image_average) # нормировка кадра
-            frame_latency_clean = image_clean(frame_latency_norm, mask) # отделение зрачка от фона
-            frame_latency_clean[np.isnan(frame_latency_clean)] = 0
+                frame_latency = hdul[0].section[i+latency,:,:].astype(np.float32)
+                frame_latency -= bias
+                frame_latency = frame_latency[y1:y2-yn, x1:x2-xn] # обрезка кадра 
+                frame_latency_norm = image_norm(frame_latency, image_average) # нормировка кадра
+                frame_latency_clean = image_clean(frame_latency_norm, mask) # отделение зрачка от фона
+                frame_latency_clean[np.isnan(frame_latency_clean)] = 0
 
-            correlation[i] = correlate(frame_clean, frame_latency_clean, mode='full', method='fft')   
+                correlation[i] = correlate(frame_clean, frame_latency_clean, mode='full', method='fft')   
 
-        res = np.mean(correlation, axis=0, dtype=np.float32)
-        res /= np.sum(image_binary, dtype=np.float32)
+            res = np.mean(correlation, axis=0, dtype=np.float32)
+            res /= np.sum(image_binary, dtype=np.float32)
 
-        corr_result[k, 1:, 1:] = res
-        corr_result[k] = gaussian(corr_result[k], sigma=1) # сглаживание изображения кросс-корреляции
+            corr_result[k, 1:, 1:] = res
+            corr_result[k] = gaussian(corr_result[k], sigma=1) # сглаживание изображения кросс-корреляции
 
-        if dome_only != 0:
-            corr_result[k] *= circle(dome_only, corr_result[k].shape[0], circle_centre=(0, 0), origin="middle")
+            if dome_only != 0:
+                corr_result[k] *= circle(dome_only, corr_result[k].shape[0], circle_centre=(0, 0), origin="middle")
 
         print(f' - time corr, latency {latency}: {time.perf_counter() - st:.2f}')
+    if do_crosscorr == False:
+        print(' - WARNING: no cross correlation count!')
+        corr_result = np.zeros((len(latencys), 2*((y2-yn)-y1), 2*((x2-xn)-x1)), dtype=np.float32)
 
     # =========================================================================================================
     # подсчет автокорреляции зрачка, беру случайный кадр серии

@@ -19,11 +19,12 @@ file_ccd = 'ccd_prosilica2.crv'
 
 use_gradient = False # БС: использовать ли градиенты между слоями
 use_windvar = True # использовать ли дисперсию ветра
+do_crosscorr = False # подсчет кросс корреляции
 
 # БС: если параметр do_fitting равен False: отладочный режим, аппроксимация не будет выполнена, а будут взяты начальные 
 # параметры initial_params
 # БС: если параметр do_fitting равен True, то будет выполнена оценка начальных параметров и проведена аппроксимация
-do_fitting = True
+do_fitting = False
 dome_only = 5 # 0, чтобы отключить. >0, чтобы задать радиус области вокруг центра
 input_parametrs = [[0, 0, 2*0.5495173, 2, 0.25]]
 # ============================================================================
@@ -69,7 +70,7 @@ if new_path.endswith('.fits'):
                 az = round(float(line.split()[-1]), 4)
                 print(f' - spectrum: {file_star}')
     
-    processDomecam(file=file, file_name=file_name, file_bias=file_bias, data_dir=data_dir, D=D, conjugated_distance=conjugated_distance, latency=latency, spectrum=spectrum, lambda_=lambda_, file_filter=file_filter, file_ccd=file_ccd, file_star=file_star, do_fitting=do_fitting, use_gradient=use_gradient, initial_params=initial_params, dome_only=dome_only, use_windvar=use_windvar, star_name=star_name, latency_list=latency, alt=alt, az=az)
+    processDomecam(file=file, file_name=file_name, file_bias=file_bias, data_dir=data_dir, D=D, conjugated_distance=conjugated_distance, latency=latency, spectrum=spectrum, lambda_=lambda_, file_filter=file_filter, file_ccd=file_ccd, file_star=file_star, do_fitting=do_fitting, use_gradient=use_gradient, initial_params=initial_params, dome_only=dome_only, use_windvar=use_windvar, star_name=star_name, latency_list=latency, alt=alt, az=az, do_crosscorr=do_crosscorr)
                 
 else:
     print(f' - MODE: обработка всех файлов _2km.fits из {new_path}')
@@ -103,6 +104,6 @@ else:
                         az = round(float(line.split()[-1]), 4)
                         print(f' - spectrum: {file_star}')
             
-            processDomecam(file=file, file_name=file_name, file_bias=file_bias, data_dir=data_dir, D=D, conjugated_distance=conjugated_distance, latency=latency, spectrum=spectrum, lambda_=lambda_, file_filter=file_filter, file_ccd=file_ccd, file_star=file_star, do_fitting=do_fitting, use_gradient=use_gradient, initial_params=initial_params, dome_only=dome_only, use_windvar=use_windvar, star_name=star_name, latency_list=latency, alt=alt, az=az)
+            processDomecam(file=file, file_name=file_name, file_bias=file_bias, data_dir=data_dir, D=D, conjugated_distance=conjugated_distance, latency=latency, spectrum=spectrum, lambda_=lambda_, file_filter=file_filter, file_ccd=file_ccd, file_star=file_star, do_fitting=do_fitting, use_gradient=use_gradient, initial_params=initial_params, dome_only=dome_only, use_windvar=use_windvar, star_name=star_name, latency_list=latency, alt=alt, az=az, do_crosscorr=do_crosscorr)
 # ============================================================================
 
