@@ -111,6 +111,7 @@ else:
             
             indexes_h = [i for i in range(len(file)) if file[i] == "k"] # file[indexes_h[0]-1] высота сопряжения
             file_bias = None
+            metka_bias = 'found'
             for item in os.listdir(data_dir):
                 if 'bias' in item and file_name in item and f'{file[indexes_h[0]-1]}km' in item:
                     print(' - bias:', item)
