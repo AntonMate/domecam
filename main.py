@@ -17,14 +17,13 @@ def processDomecam(file=None, file_name=None, file_bias=None, data_dir=None, D=N
 #     metka = processCheckFiles(file=file, latency=latency, data_dir=data_dir, dome_only=dome_only)
     metka = 'yes' # пока что убрал функцию подзагрузки старых файлов
 
-    cc, cjk, sec_per_frame = processCorr(run_cc=metka, file=file, bias=file_bias, latencys=latency, data_dir=data_dir, dome_only=dome_only, do_crosscorr=do_crosscorr)
+    cc, cjk, sec_per_frame, metka_bias_new = processCorr(run_cc=metka, file=file, bias=file_bias, latencys=latency, data_dir=data_dir, dome_only=dome_only, do_crosscorr=do_crosscorr, metka_bias)
     
     # cc - картина кросс-корреляции
     # cjk - картина автокорреляции зрачка 
     # sec_per_frame - период между кадрами, [секунда]
     
     # создание теор. гамм 
-    # 30 слоев до 30км работает быстрее, точность вроде бы та же
     st = time.perf_counter()
     
     num_of_layers=50
@@ -51,7 +50,7 @@ def processDomecam(file=None, file_name=None, file_bias=None, data_dir=None, D=N
 #                     if int(all_Vx[i])==0 and int(all_Vy[i])==0:
                     if int(all_Vx[i])==0 or int(all_Vy[i])==0: # это неверное условие, но оно нужно, чтобы обойти ошибку DC221108144644_2km.fits
                         # тут можно для Cn2 брать значение Cn2 для conjugated_distance, а не Cn2_mean
-                        print(' - WARNING: 71ая строчка main.py условие if потом исправить')
+                        print(' - WARNING: 51ая строчка main.py условие if потом исправить')
                         initial_params[i] = [all_Vx[i], all_Vy[i], all_Cn2_bounds[i][1], conjugated_distance, 2]
                         dome_index = i
                     else:
@@ -83,65 +82,65 @@ def processDomecam(file=None, file_name=None, file_bias=None, data_dir=None, D=N
             df_ip['z, m'] = df_ip['z, m']*1000
             df_ip = df_ip.round({'Vx, m/s': 2})
             df_ip = df_ip.round({'Vy, m/s': 2})
-            df_ip = df_ip.round({'z, m': 2})
+            df_ip = df_ip.round({'z, m': 0})
             df_ip.drop(columns=['index'], inplace=True)
             print(df_ip.to_string(index=False))
             
-            fig, (ax, ax2, ax3) = plt.subplots(1, 3, figsize=(25, 5))
-            ax.scatter(x, y, c='red', marker='x', s=1)
-            fig.colorbar(ax.imshow(cc[latency_i]), ax=ax)
-            fig.colorbar(ax2.imshow(cc[latency_i] * (cc[latency_i]>thresh)), ax=ax2)
-            fig.colorbar(ax3.imshow(cjk), ax=ax3)
-            ax.set_title('Найденные пики')
-            ax2.set_title('Оптимальный трешхолд')
-            ax3.set_title('Автокорреляция зрачка')
-            fig.suptitle('Вспомогательные картинки')
+#             fig, (ax, ax2, ax3) = plt.subplots(1, 3, figsize=(25, 5))
+#             ax.scatter(x, y, c='red', marker='x', s=1)
+#             fig.colorbar(ax.imshow(cc[latency_i]), ax=ax)
+#             fig.colorbar(ax2.imshow(cc[latency_i] * (cc[latency_i]>thresh)), ax=ax2)
+#             fig.colorbar(ax3.imshow(cjk), ax=ax3)
+#             ax.set_title('Найденные пики')
+#             ax2.set_title('Оптимальный трешхолд')
+#             ax3.set_title('Автокорреляция зрачка')
+#             fig.suptitle('Вспомогательные картинки')
             
-            xc=226
-            if dome_only != 0:
-                wind_speed_step = 51
-                xs = 20
-            if dome_only == 0:
-                wind_speed_step = 5
-                xs = 220
+#             xc=226
+#             if dome_only != 0:
+#                 wind_speed_step = 51
+#                 xs = 20
+#             if dome_only == 0:
+#                 wind_speed_step = 5
+#                 xs = 220
             
-            xlims=(xc-xs,xc+xs)
-            ylims=(xc+xs,xc-xs)
+#             xlims=(xc-xs,xc+xs)
+#             ylims=(xc+xs,xc-xs)
             
-            v = (D / cjk.shape[0]) / (latency[latency_i] * sec_per_frame)
-            x = np.round(v*np.linspace(-cjk.shape[0]//2+1, cjk.shape[0]//2, wind_speed_step), 2)
-            y = np.round(v*np.linspace(-cjk.shape[0]//2+1, cjk.shape[0]//2, wind_speed_step), 2)
-            y = np.flipud(y)
-            ax.set_xticks(np.linspace(0, cjk.shape[1], wind_speed_step))
-            ax.set_yticks(np.linspace(0, cjk.shape[0], wind_speed_step))
-            ax.set_xticklabels(x)
-            ax.set_yticklabels(y)
-            ax.set_ylabel('Vy, m/s')
-            ax.set_xlabel('Vx, m/s')
+#             v = (D / cjk.shape[0]) / (latency[latency_i] * sec_per_frame)
+#             x = np.round(v*np.linspace(-cjk.shape[0]//2+1, cjk.shape[0]//2, wind_speed_step), 2)
+#             y = np.round(v*np.linspace(-cjk.shape[0]//2+1, cjk.shape[0]//2, wind_speed_step), 2)
+#             y = np.flipud(y)
+#             ax.set_xticks(np.linspace(0, cjk.shape[1], wind_speed_step))
+#             ax.set_yticks(np.linspace(0, cjk.shape[0], wind_speed_step))
+#             ax.set_xticklabels(x)
+#             ax.set_yticklabels(y)
+#             ax.set_ylabel('Vy, m/s')
+#             ax.set_xlabel('Vx, m/s')
             
-            ax2.set_xticks(np.linspace(0, cjk.shape[1], wind_speed_step))
-            ax2.set_yticks(np.linspace(0, cjk.shape[0], wind_speed_step))
-            ax2.set_xticklabels(x)
-            ax2.set_yticklabels(y)
-            ax2.set_ylabel('Vy, m/s')
-            ax2.set_xlabel('Vx, m/s')
+#             ax2.set_xticks(np.linspace(0, cjk.shape[1], wind_speed_step))
+#             ax2.set_yticks(np.linspace(0, cjk.shape[0], wind_speed_step))
+#             ax2.set_xticklabels(x)
+#             ax2.set_yticklabels(y)
+#             ax2.set_ylabel('Vy, m/s')
+#             ax2.set_xlabel('Vx, m/s')
             
-            x_cjk = np.round(v*np.linspace(-cjk.shape[0]//2+1, cjk.shape[0]//2, 5), 2)
-            y_cjk = np.round(v*np.linspace(-cjk.shape[0]//2+1, cjk.shape[0]//2, 5), 2)
-            y_cjk = np.flipud(y_cjk)
-            ax3.set_xticks(np.linspace(0, cjk.shape[1], 5))
-            ax3.set_yticks(np.linspace(0, cjk.shape[0], 5))
-            ax3.set_xticklabels(x_cjk)
-            ax3.set_yticklabels(y_cjk)
-            ax3.set_ylabel('Vy, m/s')
-            ax3.set_xlabel('Vx, m/s')
+#             x_cjk = np.round(v*np.linspace(-cjk.shape[0]//2+1, cjk.shape[0]//2, 5), 2)
+#             y_cjk = np.round(v*np.linspace(-cjk.shape[0]//2+1, cjk.shape[0]//2, 5), 2)
+#             y_cjk = np.flipud(y_cjk)
+#             ax3.set_xticks(np.linspace(0, cjk.shape[1], 5))
+#             ax3.set_yticks(np.linspace(0, cjk.shape[0], 5))
+#             ax3.set_xticklabels(x_cjk)
+#             ax3.set_yticklabels(y_cjk)
+#             ax3.set_ylabel('Vy, m/s')
+#             ax3.set_xlabel('Vx, m/s')
 
-            ax2.set_xlim(xlims)
-            ax2.set_ylim(ylims)
-            ax.set_xlim(xlims)
-            ax.set_ylim(ylims)
+#             ax2.set_xlim(xlims)
+#             ax2.set_ylim(ylims)
+#             ax.set_xlim(xlims)
+#             ax.set_ylim(ylims)
             
-            plt.savefig(f'{data_dir}/results/{file_name}/{file[:-5]}_tmp.png')
+#             plt.savefig(f'{data_dir}/results/{file_name}/{file[:-5]}_tmp.png')
             
     else:
         dome_index = 0
@@ -156,7 +155,7 @@ def processDomecam(file=None, file_name=None, file_bias=None, data_dir=None, D=N
     fit = processApprox(cc=cc, gammas=gammas, lambda_=lambda_, D=D, latency=latency, sec_per_frame=sec_per_frame, cjk=cjk, 
                         initial_params=initial_params, all_Vx=all_Vx, all_Vy=all_Vy, all_Cn2_bounds=all_Cn2_bounds, 
                         conjugated_distance=conjugated_distance, num_of_layers=num_of_layers, heights_of_layers=heights_of_layers, 
-                        dome_index=dome_index, use_gradient=use_gradient, do_fitting=do_fitting, dome_only=dome_only, use_windvar=use_windvar, data_dir=data_dir, file=file, file_name=file_name, star_name=star_name, spectrum=spectrum, latency_list=latency_list, alt=alt, az=az, metka_bias=metka_bias)
+                        dome_index=dome_index, use_gradient=use_gradient, do_fitting=do_fitting, dome_only=dome_only, use_windvar=use_windvar, data_dir=data_dir, file=file, file_name=file_name, star_name=star_name, spectrum=spectrum, latency_list=latency_list, alt=alt, az=az, metka_bias=metka_bias_new)
     print(f' - time: {time.perf_counter() - st:.2f}')
 
 #     # БС: отображение результатов аппроксимации        

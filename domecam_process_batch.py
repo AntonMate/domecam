@@ -69,10 +69,6 @@ if new_path.endswith('.fits'):
         if 'bias' in item and file_name in item and f'{file[indexes_h[0]-1]}km' in item:
             print(' - bias:', item)
             file_bias = item
-
-    if file_bias is None:
-        metka_bias = 'not found'
-        print(' - WARNING: file bias not found')
             
     with open('logs2.txt') as f:
         for line in f:
@@ -117,10 +113,6 @@ else:
                     print(' - bias:', item)
                     file_bias = item
                     
-            if file_bias is None:
-                metka_bias = 'not found'
-                print(' - WARNING: file bias not found')
-                
             with open('logs2.txt') as f:
                 for line in f:
                     if file in line:

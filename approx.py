@@ -48,70 +48,26 @@ def circle(radius, size, circle_centre=(0, 0), origin="middle"):
     Returns:
         ndarray (float64) : the circle array
     """
-    # (2) Generate the output array:
     C = np.zeros((size, size), dtype=np.float32)
-
-    # (3.a) Generate the 1-D coordinates of the pixel's centres:
-    # coords = numpy.linspace(-size/2.,size/2.,size) # Wrong!!:
-    # size = 5: coords = array([-2.5 , -1.25,  0.  ,  1.25,  2.5 ])
-    # size = 6: coords = array([-3. , -1.8, -0.6,  0.6,  1.8,  3. ])
-    # (2015 Mar 30; delete this comment after Dec 2015 at the latest.)
-
-    # Before 2015 Apr 7 (delete 2015 Dec at the latest):
-    # coords = numpy.arange(-size/2.+0.5, size/2.-0.4, 1.0)
-    # size = 5: coords = array([-2., -1.,  0.,  1.,  2.])
-    # size = 6: coords = array([-2.5, -1.5, -0.5,  0.5,  1.5,  2.5])
-
     coords = np.arange(0.5, size, 1.0, dtype=np.float32)
-    # size = 5: coords = [ 0.5  1.5  2.5  3.5  4.5]
-    # size = 6: coords = [ 0.5  1.5  2.5  3.5  4.5  5.5]
-
-    # (3.b) Just an internal sanity check:
     if len(coords) != size:
         raise exceptions.Bug("len(coords) = {0}, ".format(len(coords)) +
                              "size = {0}. They must be equal.".format(size) +
                              "\n           Debug the line \"coords = ...\".")
 
-    # (3.c) Generate the 2-D coordinates of the pixel's centres:
     x, y = np.meshgrid(coords, coords)
-
-    # (3.d) Move the circle origin to the middle of the grid, if required:
     if origin == "middle":
         x -= size / 2.
         y -= size / 2.
 
-    # (3.e) Move the circle centre to the alternative position, if provided:
     x -= circle_centre[0]
     y -= circle_centre[1]
-
-    # (4) Calculate the output:
-    # if distance(pixel's centre, circle_centre) <= radius:
-    #     output = 1
-    # else:
-    #     output = 0
     mask = x * x + y * y <= radius * radius
     C[mask] = 1
-
-    # (5) Return:
     return C
 
 def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_per_frame=None, cjk=None, initial_params=None, all_Vx=None, all_Vy=None, all_Cn2_bounds=None, conjugated_distance=None, num_of_layers=None, heights_of_layers=None, dome_index=None, use_gradient=False, do_fitting=True, dome_only=None, use_windvar=None, data_dir=None, file=None, file_name=None, star_name=None, spectrum=None, latency_list=None, alt=None, az=None, metka_bias=None):
-#     print(' - initial guess for the parameters:')
-#     if use_windvar:
-#         df_ip = pd.DataFrame(initial_params, columns = ['Vx, m/s','Vy, m/s','Cn2', 'z, m', 'var, m/s']) 
-#     else:
-#         df_ip = pd.DataFrame(initial_params, columns = ['Vx, m/s','Vy, m/s','Cn2', 'z, m']) 
-        
-#     df_ip = df_ip.sort_values(by=['z, m'])
-#     df_ip = df_ip.reset_index()
-#     df_ip['Cn2'] = df_ip['Cn2']*1e-13
-#     df_ip['z, m'] = df_ip['z, m']*1000
-#     df_ip = df_ip.round({'Vx, m/s': 2})
-#     df_ip = df_ip.round({'Vy, m/s': 2})
-#     df_ip = df_ip.round({'z, m': 2})
-#     df_ip.drop(columns=['index'], inplace=True)
-#     print(df_ip.to_string(index=False))
-  
+    
     def fitconvert(fit1d,shape):
         n_elem=shape[1]*shape[2]
         fit = np.ndarray(shape)
@@ -121,7 +77,6 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
         return fit
 
     def find_nearest(array, value):
-        # array = np.asarray(array)
         idx = (np.abs(array - value)).argmin()
 
         if idx == (len(array) - 1):
@@ -224,12 +179,6 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
                 lb2 = np.zeros((len(p0)//4, 4), dtype=np.float32)
                 ub2 = np.zeros((len(p0)//4, 4), dtype=np.float32)
             for i in range(len(all_Vx)):
-#                 if use_windvar:
-#                     lb2[i] = [all_Vx[i]-0.5, all_Vy[i]-0.5, all_Cn2_bounds[i][0]-0.5, conjugated_distance, 0]
-#                     ub2[i] = [all_Vx[i]+0.5, all_Vy[i]+0.5, all_Cn2_bounds[i][1]+0.5, 50, 2]
-#                 else:
-#                     lb2[i] = [all_Vx[i]-0.5, all_Vy[i]-0.5, all_Cn2_bounds[i][0]-0.5, conjugated_distance]
-#                     ub2[i] = [all_Vx[i]+0.5, all_Vy[i]+0.5, all_Cn2_bounds[i][1]+0.5, 50]
                 if  i == dome_index:
                     if use_windvar:
                         lb2[i] = [all_Vx[i]-0.5, all_Vy[i]-0.5, all_Cn2_bounds[i][0]-0.005, conjugated_distance-(conjugated_distance*0.01), 0]
@@ -247,11 +196,6 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
             lb2=np.ravel(lb2)
             ub2=np.ravel(ub2)
 
-#         lb = [-np.inf, -np.inf, 0, conjugated_distance]
-#         lb = np.tile(lb, len(p0)//4) 
-#         ub = [np.inf, np.inf, np.inf, 50]
-#         ub = np.tile(ub, len(p0)//4)
-
 # БС: Класс позволяет передавать аппроксимирующей функции дополнительные параметры, 
 # в данном случае используем ли мы градиент между слоями или нет.
 # Такая реализация лучше, поскольку мы концентрируем сложение слоев в одной функции _g.fitfun
@@ -267,7 +211,6 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
 
 # БС: считаем невязку для начального приближения
         fit_p0 = fitconvert(_g.fitfun(xdata,*p0),data.shape)
-
         residual_p0 = np.sum(np.power(data-fit_p0,2))
         print(f' - residual for initial guess: {residual_p0:.4f}')
 
@@ -282,6 +225,7 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
 #            fit += gamma_se(X, Y, *popt[i*4:i*4+4])
 
 #     #     errors = np.sqrt(np.diag(pcov))
+
         num_of_numbers = 4
         if use_windvar:
             popt = popt.reshape(len(popt)//5, 5)
@@ -307,7 +251,7 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
         df['z, m'] = df['z, m']*1000
         df = df.round({'Vx, m/s': 2})
         df = df.round({'Vy, m/s': 2})
-        df = df.round({'z, m': 2})
+        df = df.round({'z, m': 0})
         df.drop(columns=['index'], inplace=True)   
         sum_cn2 = np.sum(df['Cn2'])        
         r0 = pow(0.423 * pow((2*np.pi/lambda_), 2) * sum_cn2, -3/5)
@@ -316,7 +260,7 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
         df = df.assign(seeing=[seeing_count])
         df.to_csv(f'{data_dir}/results/{file_name}/{file[:-5]}_result.txt', index=False)
         print(' - found params:')
-        print(df[['Vx, m/s','Vy, m/s','Cn2', 'z, m', 'var, m/s', 'seeing']].to_string(index=False))
+        print(df[['Vx, m/s','Vy, m/s','Cn2', 'z, m', 'var, m/s']].to_string(index=False))
         print(' - total Cn2:', sum_cn2)
         print(f' - seeing, {lambda_/1e-9:.0f} nm: {seeing_count:.2f}')
 

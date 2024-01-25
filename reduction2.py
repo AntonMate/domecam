@@ -5,7 +5,7 @@ from scipy.signal import correlate
 import time
 
 
-def processCorr(run_cc=None, file=None, bias=None, latencys=None, data_dir=None, dome_only=None, do_crosscorr=None):
+def processCorr(run_cc=None, file=None, bias=None, latencys=None, data_dir=None, dome_only=None, do_crosscorr=None, metka_bias=None):
     def image_cropp(image): 
         mask = image != 0
         rows = np.flatnonzero((mask.any(axis=1))) 
@@ -73,21 +73,29 @@ def processCorr(run_cc=None, file=None, bias=None, latencys=None, data_dir=None,
         with fits.open(f'{data_dir}/{bias}') as f:
             if f[0].header['NAXIS'] == 3:
                 bias = np.mean(np.float32(f[0].data), axis=0, dtype=np.float32)
-                if frame.shape != bias.shape:
-                    print(' - WARNING: bias shape != frame shape')
+                bias_shape = bias.shape
+                if frame.shape != bias_shape:
+                    metka_bias = 'wrong shape'
                     bias = np.zeros(frame.shape)
+                    print(f' - WARNING: bias shape {bias_shape} != frame shape {frame.shape}')
+            
             if f[0].header['NAXIS'] == 2:
                 bias = np.float32(f[0].data)
-                if frame.shape != bias.shape:
-                    print(' - WARNING: bias shape != frame shape')
+                bias_shape = bias.shape
+                if frame.shape != bias_shape:
+                    metka_bias = 'wrong shape'
                     bias = np.zeros(frame.shape)
-
+                    print(f' - WARNING: bias shape {bias_shape} != frame shape {frame.shape}')
 
         print(f' - time bias, {bias.shape}: {time.perf_counter() - st:.2f}')
+    
     if bias is None:
+        metka_bias = 'not found'
         hdul = fits.open(f'{data_dir}/{file}')  
         frame = hdul[0].section[np.random.randint(hdul[0].header['NAXIS3']),:,:].astype(np.float32)
         bias = np.zeros(frame.shape)
+        print(' - WARNING: file bias not found')
+        
     # =========================================================================================================
     # получение среднего кадра всей серии (и заодно периода между снимками)
 
@@ -154,6 +162,7 @@ def processCorr(run_cc=None, file=None, bias=None, latencys=None, data_dir=None,
                 corr_result[k] *= circle(dome_only, corr_result[k].shape[0], circle_centre=(0, 0), origin="middle")
 
         print(f' - time corr, latency {latency}: {time.perf_counter() - st:.2f}')
+    
     if do_crosscorr == False:
         print(' - WARNING: no cross correlation count!')
         corr_result = np.zeros((len(latencys), 2*((y2-yn)-y1), 2*((x2-xn)-x1)), dtype=np.float32)
@@ -175,4 +184,4 @@ def processCorr(run_cc=None, file=None, bias=None, latencys=None, data_dir=None,
 
     print(f' - time autocorr: {time.perf_counter() - st:.2f}')
     
-    return corr_result, cjk, sec_per_frame
+    return corr_result, cjk, sec_per_frame, metka_bias
