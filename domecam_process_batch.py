@@ -65,8 +65,8 @@ if new_path.endswith('.fits'):
                 print(' - logs.txt:', line.strip())
                 star_name = line.split()[1]
                 file_star = f'{line.split()[2].lower()}.sp'
-                alt = line.split()[-2]
-                az = line.split()[-1]
+                alt = round(float(line.split()[-2]), 4)
+                az = round(float(line.split()[-1]), 4)
                 print(f' - spectrum: {file_star}')
     
     processDomecam(file=file, file_name=file_name, file_bias=file_bias, data_dir=data_dir, D=D, conjugated_distance=conjugated_distance, latency=latency, spectrum=spectrum, lambda_=lambda_, file_filter=file_filter, file_ccd=file_ccd, file_star=file_star, do_fitting=do_fitting, use_gradient=use_gradient, initial_params=initial_params, dome_only=dome_only, use_windvar=use_windvar, star_name=star_name, latency_list=latency, alt=alt, az=az)
@@ -99,8 +99,8 @@ else:
                         print(' - logs.txt:', line.strip())
                         star_name = line.split()[1]
                         file_star = f'{line.split()[2].lower()}.sp'
-                        alt = line.split()[-2]
-                        az = line.split()[-1]
+                        alt = round(float(line.split()[-2]), 4)
+                        az = round(float(line.split()[-1]), 4)
                         print(f' - spectrum: {file_star}')
             
             processDomecam(file=file, file_name=file_name, file_bias=file_bias, data_dir=data_dir, D=D, conjugated_distance=conjugated_distance, latency=latency, spectrum=spectrum, lambda_=lambda_, file_filter=file_filter, file_ccd=file_ccd, file_star=file_star, do_fitting=do_fitting, use_gradient=use_gradient, initial_params=initial_params, dome_only=dome_only, use_windvar=use_windvar, star_name=star_name, latency_list=latency, alt=alt, az=az)

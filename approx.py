@@ -283,8 +283,6 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
 
 #     #     errors = np.sqrt(np.diag(pcov))
         num_of_numbers = 4
-        alt = round(alt, num_of_numbers)
-        az = round(az, num_of_numbers)
         if use_windvar:
             popt = popt.reshape(len(popt)//5, 5)
             popt[0][4] = round(popt[0][4], num_of_numbers)
