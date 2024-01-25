@@ -48,6 +48,13 @@ if new_path.endswith('.fits'):
     file_name = file.replace('_2km.fits', '')
     file_name = file_name.replace('_0km.fits', '') # номер серии
     
+    # создание папки, куда будут сохраняться результаты
+    if not os.path.isdir(f'{data_dir}/results'):
+        os.mkdir(f'{data_dir}/results')
+    # создание папки с результатами обработки серии
+    if not os.path.isdir(f'{data_dir}/results/{file_name}'):
+        os.mkdir(f'{data_dir}/results/{file_name}')
+    
     file_time = file_name.replace('DC', '') # дата записи из названия файла
     file_time = datetime.strptime(file_time, '%y%m%d%H%M%S')
     file_time_ub = file_time + timedelta(minutes=5)  
@@ -82,6 +89,13 @@ else:
             print(' -', file)
             file_name = file.replace('_2km.fits', '') # номер серии
             
+            # создание папки, куда будут сохраняться результаты
+            if not os.path.isdir(f'{data_dir}/results'):
+                os.mkdir(f'{data_dir}/results')
+            # создание папки с результатами обработки серии
+            if not os.path.isdir(f'{data_dir}/results/{file_name}'):
+                os.mkdir(f'{data_dir}/results/{file_name}')
+      
             file_time = file_name.replace('DC', '') # дата записи из названия файла
             file_time = datetime.strptime(file_time, '%y%m%d%H%M%S')
             file_time_ub = file_time + timedelta(minutes=5)
