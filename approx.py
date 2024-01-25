@@ -282,10 +282,14 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
 #            fit += gamma_se(X, Y, *popt[i*4:i*4+4])
 
 #     #     errors = np.sqrt(np.diag(pcov))
+        num_of_numbers = 4
+        alt = round(alt, num_of_numbers)
+        az = round(az, num_of_numbers)
         if use_windvar:
             popt = popt.reshape(len(popt)//5, 5)
+            popt[0][4] = round(popt[0][4], num_of_numbers)
             if dome_only != 0:
-                all_info_about_layers = [file, star_name, alt, az, 'dome layer', spectrum, latency_list, popt[0][0], popt[0][1], popt[0][2], popt[0][3], popt[0][4]]
+                all_info_about_layers = [file, star_name, alt, az, 'dome', spectrum, latency_list, popt[0][0], popt[0][1], popt[0][2], popt[0][3], popt[0][4]]
                 df = pd.DataFrame([all_info_about_layers], columns = ['file', 'star', 'alt', 'az', 'mode', 'spectrum', 'latency', 'Vx, m/s','Vy, m/s','Cn2', 'z, m', 'var, m/s'])     
             else:
                 all_info_about_layers = [file, star_name, alt, az, spectrum, latency_list, popt[0][0], popt[0][1], popt[0][2], popt[0][3], popt[0][4]]
@@ -293,7 +297,7 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
         else:
             popt = popt.reshape(len(popt)//4, 4)
             if dome_only != 0:
-                all_info_about_layers = [file, star_name, alt, az, 'dome layer', spectrum, latency_list, popt[0][0], popt[0][1], popt[0][2], popt[0][3]]
+                all_info_about_layers = [file, star_name, alt, az, 'dome', spectrum, latency_list, popt[0][0], popt[0][1], popt[0][2], popt[0][3]]
                 df = pd.DataFrame([all_info_about_layers], columns = ['file', 'star', 'alt', 'az', 'mode', 'spectrum', 'latency', 'Vx, m/s','Vy, m/s','Cn2', 'z, m', 'var, m/s'])     
             else:
                 all_info_about_layers = [file, star_name, alt, az, spectrum, latency_list, popt[0][0], popt[0][1], popt[0][2], popt[0][3]]
@@ -310,6 +314,7 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
         sum_cn2 = np.sum(df['Cn2'])        
         r0 = pow(0.423 * pow((2*np.pi/lambda_), 2) * sum_cn2, -3/5)
         seeing_count = 206265 * 0.98 * lambda_/r0
+        seeing_count = round(seeing_count, num_of_numbers)
         df = df.assign(seeing=[seeing_count])
         df.to_csv(f'{data_dir}/results/{file_name}/{file[:-5]}_result.txt', index=False)
         print(' - found params:')
