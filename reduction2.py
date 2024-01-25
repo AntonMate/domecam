@@ -68,7 +68,7 @@ def processCorr(run_cc=None, file=None, bias=None, latencys=None, data_dir=None,
     st = time.perf_counter()
     
     hdul = fits.open(f'{data_dir}/{file}')  
-    frame = hdul[0].section[i,:,:].astype(np.float32)
+    frame = hdul[0].section[np.random.randint(hdul[0].header['NAXIS3']),:,:].astype(np.float32)
     
     with fits.open(f'{data_dir}/{bias}') as f:
         if f[0].header['NAXIS'] == 3:
