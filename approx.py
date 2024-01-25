@@ -261,8 +261,7 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
         df.to_csv(f'{data_dir}/results/{file_name}/{file[:-5]}_result.txt', index=False)
         print(' - found params:')
         print(df[['Vx, m/s','Vy, m/s','Cn2', 'z, m', 'var, m/s']].to_string(index=False))
-        print(' - total Cn2:', sum_cn2)
-        print(f' - seeing, {lambda_/1e-9:.0f} nm: {seeing_count:.2f}')
+        print(f' - total Cn2: {sum_cn2} --> seeing, {lambda_/1e-9:.0f} nm: {seeing_count:.2f}')
 
 # БС: считаем невязку
         mask = np.zeros(fit.shape)
