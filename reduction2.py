@@ -66,12 +66,22 @@ def processCorr(run_cc=None, file=None, bias=None, latencys=None, data_dir=None,
     # получение bias
 
     st = time.perf_counter()
-
+    
+    hdul = fits.open(f'{data_dir}/{file}')  
+    frame = hdul[0].section[i,:,:].astype(np.float32)
+    
     with fits.open(f'{data_dir}/{bias}') as f:
         if f[0].header['NAXIS'] == 3:
             bias = np.mean(np.float32(f[0].data), axis=0, dtype=np.float32)
+            if frame.shape != bias.shape:
+                print(' - WARNING: bias shape != frame shape')
+                bias = np.zeros(frame.shape)
         if f[0].header['NAXIS'] == 2:
             bias = np.float32(f[0].data)
+            if frame.shape != bias.shape:
+                print(' - WARNING: bias shape != frame shape')
+                bias = np.zeros(frame.shape)
+            
 
     print(f' - time bias, {bias.shape}: {time.perf_counter() - st:.2f}')
 
