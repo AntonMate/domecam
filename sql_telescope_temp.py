@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import json
 import os
+import warnings
 
 from astropy.coordinates import EarthLocation,SkyCoord
 from astropy.time import Time
@@ -83,6 +84,7 @@ def all_info_from_sql(data_dir, file_name, file, file_time, file_time_ub):
 
         cur.close()
         conn.close()
+        warnings.simplefilter("ignore")
         return np.mean(ts_1), np.mean(ts_2), np.mean(ts_3), np.mean(ts_4), np.mean(ts_5), np.mean(ts_6), np.mean(ts_7), np.mean(ts_8), np.mean(ts_9), np.mean(ts_11), np.mean(ts_12), np.mean(ts_14), np.mean(ts_15), np.mean(ts_16), np.mean(ts_17), np.mean(ts_19)
     
 #     def telescope_coords(file_time, ra, dec):
