@@ -64,12 +64,14 @@ if new_path.endswith('.fits'):
     indexes_h = [i for i in range(len(file)) if file[i] == "k"] # file[indexes_h[0]-1] высота сопряжения
     
     file_bias = None
+    metka_bias = 'found'
     for item in os.listdir(data_dir):
         if 'bias' in item and file_name in item and f'{file[indexes_h[0]-1]}km' in item:
             print(' - bias:', item)
             file_bias = item
 
     if file_bias is None:
+        metka_bias = 'not found'
         print(' - WARNING: file bias not found')
             
     with open('logs2.txt') as f:
@@ -82,7 +84,7 @@ if new_path.endswith('.fits'):
                 az = round(float(line.split()[-1]), 4)
                 print(f' - spectrum: {file_star}')
     
-    processDomecam(file=file, file_name=file_name, file_bias=file_bias, data_dir=data_dir, D=D, conjugated_distance=conjugated_distance, latency=latency, spectrum=spectrum, lambda_=lambda_, file_filter=file_filter, file_ccd=file_ccd, file_star=file_star, do_fitting=do_fitting, use_gradient=use_gradient, initial_params=initial_params, dome_only=dome_only, use_windvar=use_windvar, star_name=star_name, latency_list=latency, alt=alt, az=az, do_crosscorr=do_crosscorr)
+    processDomecam(file=file, file_name=file_name, file_bias=file_bias, data_dir=data_dir, D=D, conjugated_distance=conjugated_distance, latency=latency, spectrum=spectrum, lambda_=lambda_, file_filter=file_filter, file_ccd=file_ccd, file_star=file_star, do_fitting=do_fitting, use_gradient=use_gradient, initial_params=initial_params, dome_only=dome_only, use_windvar=use_windvar, star_name=star_name, latency_list=latency, alt=alt, az=az, do_crosscorr=do_crosscorr, metka_bias=metka_bias)
                 
 else:
     print(f' - MODE: обработка всех файлов _2km.fits из {new_path}')
@@ -115,6 +117,7 @@ else:
                     file_bias = item
                     
             if file_bias is None:
+                metka_bias = 'not found'
                 print(' - WARNING: file bias not found')
                 
             with open('logs2.txt') as f:
@@ -127,6 +130,6 @@ else:
                         az = round(float(line.split()[-1]), 4)
                         print(f' - spectrum: {file_star}')
             
-            processDomecam(file=file, file_name=file_name, file_bias=file_bias, data_dir=data_dir, D=D, conjugated_distance=conjugated_distance, latency=latency, spectrum=spectrum, lambda_=lambda_, file_filter=file_filter, file_ccd=file_ccd, file_star=file_star, do_fitting=do_fitting, use_gradient=use_gradient, initial_params=initial_params, dome_only=dome_only, use_windvar=use_windvar, star_name=star_name, latency_list=latency, alt=alt, az=az, do_crosscorr=do_crosscorr)
+            processDomecam(file=file, file_name=file_name, file_bias=file_bias, data_dir=data_dir, D=D, conjugated_distance=conjugated_distance, latency=latency, spectrum=spectrum, lambda_=lambda_, file_filter=file_filter, file_ccd=file_ccd, file_star=file_star, do_fitting=do_fitting, use_gradient=use_gradient, initial_params=initial_params, dome_only=dome_only, use_windvar=use_windvar, star_name=star_name, latency_list=latency, alt=alt, az=az, do_crosscorr=do_crosscorr, metka_bias=metka_bias)
 # ============================================================================
 

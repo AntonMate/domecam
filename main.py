@@ -12,7 +12,7 @@ from initialparams import processBestThresh, processPeakDetect, processCoordsToS
 from approx import processApprox 
 from checkfiles import processCheckFiles
 
-def processDomecam(file=None, file_name=None, file_bias=None, data_dir=None, D=None, conjugated_distance=None, latency=None, spectrum=None, lambda_=None, file_star=None, file_filter=None, file_ccd=None, initial_params=None, use_gradient=None, do_fitting=None, dome_only=None, use_windvar=None, star_name=None, latency_list=None, alt=None, az=None, do_crosscorr=None):
+def processDomecam(file=None, file_name=None, file_bias=None, data_dir=None, D=None, conjugated_distance=None, latency=None, spectrum=None, lambda_=None, file_star=None, file_filter=None, file_ccd=None, initial_params=None, use_gradient=None, do_fitting=None, dome_only=None, use_windvar=None, star_name=None, latency_list=None, alt=None, az=None, do_crosscorr=None, metka_bias=None):
     # считывание данных, получение кросс-корр и автокорреляции зрачка 
 #     metka = processCheckFiles(file=file, latency=latency, data_dir=data_dir, dome_only=dome_only)
     metka = 'yes' # пока что убрал функцию подзагрузки старых файлов
@@ -156,59 +156,59 @@ def processDomecam(file=None, file_name=None, file_bias=None, data_dir=None, D=N
     fit = processApprox(cc=cc, gammas=gammas, lambda_=lambda_, D=D, latency=latency, sec_per_frame=sec_per_frame, cjk=cjk, 
                         initial_params=initial_params, all_Vx=all_Vx, all_Vy=all_Vy, all_Cn2_bounds=all_Cn2_bounds, 
                         conjugated_distance=conjugated_distance, num_of_layers=num_of_layers, heights_of_layers=heights_of_layers, 
-                        dome_index=dome_index, use_gradient=use_gradient, do_fitting=do_fitting, dome_only=dome_only, use_windvar=use_windvar, data_dir=data_dir, file=file, file_name=file_name, star_name=star_name, spectrum=spectrum, latency_list=latency_list, alt=alt, az=az)
+                        dome_index=dome_index, use_gradient=use_gradient, do_fitting=do_fitting, dome_only=dome_only, use_windvar=use_windvar, data_dir=data_dir, file=file, file_name=file_name, star_name=star_name, spectrum=spectrum, latency_list=latency_list, alt=alt, az=az, metka_bias=metka_bias)
     print(f' - time: {time.perf_counter() - st:.2f}')
 
-    # БС: отображение результатов аппроксимации        
-    xc=226
-    if dome_only != 0:
-        wind_speed_step = 51
-        xs = 20
-    if dome_only == 0:
-        wind_speed_step = 5
-        xs = 220
-    xlims=(xc-xs,xc+xs)
-    ylims=(xc+xs,xc-xs)
-    vmin=-0.002
-    vmax=0.008
-    for latency_i in range(len(latency)):
-        fig, (ax, ax2, ax3) = plt.subplots(1, 3, figsize=(25, 5))
-        fig.colorbar(ax.imshow(cc[latency_i], vmin=vmin, vmax=vmax), ax=ax)
-        fig.colorbar(ax2.imshow(fit[latency_i]*cjk, vmin=vmin, vmax=vmax), ax=ax2)
-        fig.colorbar(ax3.imshow((cc[latency_i]-fit[latency_i]*cjk), vmin=-0.004, vmax=0.004), ax=ax3)
-        ax.set_title(f'orig, lat={latency[latency_i]}')
-        v = (D / cjk.shape[0]) / (latency[latency_i] * sec_per_frame)
-        x = np.round(v*np.linspace(-cjk.shape[0]//2+1, cjk.shape[0]//2, wind_speed_step), 2)
-        y = np.round(v*np.linspace(-cjk.shape[0]//2+1, cjk.shape[0]//2, wind_speed_step), 2)
-        y = np.flipud(y)
-        ax.set_xticks(np.linspace(0, cjk.shape[1], wind_speed_step))
-        ax.set_yticks(np.linspace(0, cjk.shape[0], wind_speed_step))
-        ax.set_xticklabels(x)
-        ax.set_yticklabels(y)
-        ax.set_ylabel('Vy, m/s')
-        ax.set_xlabel('Vx, m/s')
-        ax.set_xlim(xlims)
-        ax.set_ylim(ylims)
+#     # БС: отображение результатов аппроксимации        
+#     xc=226
+#     if dome_only != 0:
+#         wind_speed_step = 51
+#         xs = 20
+#     if dome_only == 0:
+#         wind_speed_step = 5
+#         xs = 220
+#     xlims=(xc-xs,xc+xs)
+#     ylims=(xc+xs,xc-xs)
+#     vmin=-0.002
+#     vmax=0.008
+#     for latency_i in range(len(latency)):
+#         fig, (ax, ax2, ax3) = plt.subplots(1, 3, figsize=(25, 5))
+#         fig.colorbar(ax.imshow(cc[latency_i], vmin=vmin, vmax=vmax), ax=ax)
+#         fig.colorbar(ax2.imshow(fit[latency_i]*cjk, vmin=vmin, vmax=vmax), ax=ax2)
+#         fig.colorbar(ax3.imshow((cc[latency_i]-fit[latency_i]*cjk), vmin=-0.004, vmax=0.004), ax=ax3)
+#         ax.set_title(f'orig, lat={latency[latency_i]}')
+#         v = (D / cjk.shape[0]) / (latency[latency_i] * sec_per_frame)
+#         x = np.round(v*np.linspace(-cjk.shape[0]//2+1, cjk.shape[0]//2, wind_speed_step), 2)
+#         y = np.round(v*np.linspace(-cjk.shape[0]//2+1, cjk.shape[0]//2, wind_speed_step), 2)
+#         y = np.flipud(y)
+#         ax.set_xticks(np.linspace(0, cjk.shape[1], wind_speed_step))
+#         ax.set_yticks(np.linspace(0, cjk.shape[0], wind_speed_step))
+#         ax.set_xticklabels(x)
+#         ax.set_yticklabels(y)
+#         ax.set_ylabel('Vy, m/s')
+#         ax.set_xlabel('Vx, m/s')
+#         ax.set_xlim(xlims)
+#         ax.set_ylim(ylims)
         
-        ax2.set_title(f'model, lat={latency[latency_i]}')
-        ax2.set_xticks(np.linspace(0, cjk.shape[1], wind_speed_step))
-        ax2.set_yticks(np.linspace(0, cjk.shape[0], wind_speed_step))
-        ax2.set_xticklabels(x)
-        ax2.set_yticklabels(y)
-        ax2.set_ylabel('Vy, m/s')
-        ax2.set_xlabel('Vx, m/s')
-        ax2.set_xlim(xlims)
-        ax2.set_ylim(ylims)
+#         ax2.set_title(f'model, lat={latency[latency_i]}')
+#         ax2.set_xticks(np.linspace(0, cjk.shape[1], wind_speed_step))
+#         ax2.set_yticks(np.linspace(0, cjk.shape[0], wind_speed_step))
+#         ax2.set_xticklabels(x)
+#         ax2.set_yticklabels(y)
+#         ax2.set_ylabel('Vy, m/s')
+#         ax2.set_xlabel('Vx, m/s')
+#         ax2.set_xlim(xlims)
+#         ax2.set_ylim(ylims)
         
-        ax3.set_title(f'resid, lat={latency[latency_i]}')
-        ax3.set_xticks(np.linspace(0, cjk.shape[1], wind_speed_step))
-        ax3.set_yticks(np.linspace(0, cjk.shape[0], wind_speed_step))
-        ax3.set_xticklabels(x)
-        ax3.set_yticklabels(y)
-        ax3.set_ylabel('Vy, m/s')
-        ax3.set_xlabel('Vx, m/s')
-        ax3.set_xlim(xlims)
-        ax3.set_ylim(ylims)
+#         ax3.set_title(f'resid, lat={latency[latency_i]}')
+#         ax3.set_xticks(np.linspace(0, cjk.shape[1], wind_speed_step))
+#         ax3.set_yticks(np.linspace(0, cjk.shape[0], wind_speed_step))
+#         ax3.set_xticklabels(x)
+#         ax3.set_yticklabels(y)
+#         ax3.set_ylabel('Vy, m/s')
+#         ax3.set_xlabel('Vx, m/s')
+#         ax3.set_xlim(xlims)
+#         ax3.set_ylim(ylims)
         
         result = np.zeros((3, cjk.shape[0], cjk.shape[1]), dtype=np.float32)
         result[0] = cc[latency_i]

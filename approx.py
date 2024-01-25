@@ -95,7 +95,7 @@ def circle(radius, size, circle_centre=(0, 0), origin="middle"):
     # (5) Return:
     return C
 
-def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_per_frame=None, cjk=None, initial_params=None, all_Vx=None, all_Vy=None, all_Cn2_bounds=None, conjugated_distance=None, num_of_layers=None, heights_of_layers=None, dome_index=None, use_gradient=False, do_fitting=True, dome_only=None, use_windvar=None, data_dir=None, file=None, file_name=None, star_name=None, spectrum=None, latency_list=None, alt=None, az=None):
+def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_per_frame=None, cjk=None, initial_params=None, all_Vx=None, all_Vy=None, all_Cn2_bounds=None, conjugated_distance=None, num_of_layers=None, heights_of_layers=None, dome_index=None, use_gradient=False, do_fitting=True, dome_only=None, use_windvar=None, data_dir=None, file=None, file_name=None, star_name=None, spectrum=None, latency_list=None, alt=None, az=None, metka_bias=None):
 #     print(' - initial guess for the parameters:')
 #     if use_windvar:
 #         df_ip = pd.DataFrame(initial_params, columns = ['Vx, m/s','Vy, m/s','Cn2', 'z, m', 'var, m/s']) 
@@ -148,7 +148,7 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
             res = gaussian(res, sigma=Vsigma*t_delta)
         return res
 
-    def one_speckle_fit(initial_params=None, data=None, latency=None, lambda_=None, all_Vx=None, all_Vy=None, all_Cn2_bounds=None, conjugated_distance=None, dome_index=None, use_gradient=None, do_fitting=None, dome_only=None, use_windvar=None, data_dir=None, file=None, file_name=None, star_name=None, spectrum=None, latency_list=None, alt=None, az=None): 
+    def one_speckle_fit(initial_params=None, data=None, latency=None, lambda_=None, all_Vx=None, all_Vy=None, all_Cn2_bounds=None, conjugated_distance=None, dome_index=None, use_gradient=None, do_fitting=None, dome_only=None, use_windvar=None, data_dir=None, file=None, file_name=None, star_name=None, spectrum=None, latency_list=None, alt=None, az=None, metka_bias=None): 
         class _g:
 
             def __init__(self):
@@ -287,19 +287,19 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
             popt = popt.reshape(len(popt)//5, 5)
             popt[0][4] = round(popt[0][4], num_of_numbers)
             if dome_only != 0:
-                all_info_about_layers = [file, star_name, alt, az, 'dome', spectrum, latency_list, popt[0][0], popt[0][1], popt[0][2], popt[0][3], popt[0][4]]
-                df = pd.DataFrame([all_info_about_layers], columns = ['file', 'star', 'alt', 'az', 'mode', 'spectrum', 'latency', 'Vx, m/s','Vy, m/s','Cn2', 'z, m', 'var, m/s'])     
+                all_info_about_layers = [file, metka_bias, star_name, alt, az, 'dome', spectrum, latency_list, popt[0][0], popt[0][1], popt[0][2], popt[0][3], popt[0][4]]
+                df = pd.DataFrame([all_info_about_layers], columns = ['file', 'bias', 'star', 'alt', 'az', 'mode', 'spectrum', 'latency', 'Vx, m/s','Vy, m/s','Cn2', 'z, m', 'var, m/s'])     
             else:
-                all_info_about_layers = [file, star_name, alt, az, spectrum, latency_list, popt[0][0], popt[0][1], popt[0][2], popt[0][3], popt[0][4]]
-                df = pd.DataFrame([all_info_about_layers], columns = ['file', 'star', 'alt', 'az', 'spectrum', 'latency', 'Vx, m/s','Vy, m/s','Cn2', 'z, m', 'var, m/s'])     
+                all_info_about_layers = [file, metka_bias, star_name, alt, az, spectrum, latency_list, popt[0][0], popt[0][1], popt[0][2], popt[0][3], popt[0][4]]
+                df = pd.DataFrame([all_info_about_layers], columns = ['file', 'bias', 'star', 'alt', 'az', 'spectrum', 'latency', 'Vx, m/s','Vy, m/s','Cn2', 'z, m', 'var, m/s'])     
         else:
             popt = popt.reshape(len(popt)//4, 4)
             if dome_only != 0:
-                all_info_about_layers = [file, star_name, alt, az, 'dome', spectrum, latency_list, popt[0][0], popt[0][1], popt[0][2], popt[0][3]]
-                df = pd.DataFrame([all_info_about_layers], columns = ['file', 'star', 'alt', 'az', 'mode', 'spectrum', 'latency', 'Vx, m/s','Vy, m/s','Cn2', 'z, m', 'var, m/s'])     
+                all_info_about_layers = [file, metka_bias, star_name, alt, az, 'dome', spectrum, latency_list, popt[0][0], popt[0][1], popt[0][2], popt[0][3]]
+                df = pd.DataFrame([all_info_about_layers], columns = ['file', 'bias', 'star', 'alt', 'az', 'mode', 'spectrum', 'latency', 'Vx, m/s','Vy, m/s','Cn2', 'z, m', 'var, m/s'])     
             else:
-                all_info_about_layers = [file, star_name, alt, az, spectrum, latency_list, popt[0][0], popt[0][1], popt[0][2], popt[0][3]]
-                df = pd.DataFrame([all_info_about_layers], columns = ['file', 'star', 'alt', 'az', 'spectrum', 'latency', 'Vx, m/s','Vy, m/s','Cn2', 'z, m'])
+                all_info_about_layers = [file, metka_bias, star_name, alt, az, spectrum, latency_list, popt[0][0], popt[0][1], popt[0][2], popt[0][3]]
+                df = pd.DataFrame([all_info_about_layers], columns = ['file', 'bias', 'star', 'alt', 'az', 'spectrum', 'latency', 'Vx, m/s','Vy, m/s','Cn2', 'z, m'])
             
         df = df.sort_values(by=['z, m'])
         df = df.reset_index()
@@ -327,6 +327,6 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
 
         return fit
     
-    fit = one_speckle_fit(initial_params=initial_params, data=cc, latency=latency, lambda_=lambda_, all_Vx=all_Vx, all_Vy=all_Vy, all_Cn2_bounds=all_Cn2_bounds, conjugated_distance=conjugated_distance, dome_index=dome_index, use_gradient=use_gradient, do_fitting=do_fitting, dome_only=dome_only, use_windvar=use_windvar, data_dir=data_dir, file=file, file_name=file_name, star_name=star_name, spectrum=spectrum, latency_list=latency_list, alt=alt, az=az)
+    fit = one_speckle_fit(initial_params=initial_params, data=cc, latency=latency, lambda_=lambda_, all_Vx=all_Vx, all_Vy=all_Vy, all_Cn2_bounds=all_Cn2_bounds, conjugated_distance=conjugated_distance, dome_index=dome_index, use_gradient=use_gradient, do_fitting=do_fitting, dome_only=dome_only, use_windvar=use_windvar, data_dir=data_dir, file=file, file_name=file_name, star_name=star_name, spectrum=spectrum, latency_list=latency_list, alt=alt, az=az, metka_bias=metka_bias)
 
     return fit
