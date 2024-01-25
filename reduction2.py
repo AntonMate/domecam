@@ -78,7 +78,7 @@ def processCorr(run_cc=None, file=None, bias=None, latencys=None, data_dir=None,
                 if frame_random.shape != bias_shape:
                     metka_bias = 'wrong shape'
                     bias = np.zeros(frame_random.shape, dtype=np.float32)
-                    print(f' - WARNING: bias shape {bias_shape} != frame shape {frame_random.shape}')
+                    print(f' (!) WARNING: bias shape {bias_shape} != frame shape {frame_random.shape}')
             
             if f[0].header['NAXIS'] == 2:
                 bias = np.float32(f[0].data)
@@ -86,12 +86,12 @@ def processCorr(run_cc=None, file=None, bias=None, latencys=None, data_dir=None,
                 if frame_random.shape != bias_shape:
                     metka_bias = 'wrong shape'
                     bias = np.zeros(frame_random.shape, dtype=np.float32)
-                    print(f' - WARNING: bias shape {bias_shape} != frame shape {frame_random.shape}')
+                    print(f' (!) WARNING: bias shape {bias_shape} != frame shape {frame_random.shape}')
     
     if bias is None:
         metka_bias = 'not found'
         bias = np.zeros(frame_random.shape, dtype=np.float32)
-        print(' - WARNING: file bias not found')
+        print(' (!) WARNING: file bias not found')
         
     # =========================================================================================================
     # получение среднего кадра всей серии (и заодно периода между снимками)
@@ -165,7 +165,7 @@ def processCorr(run_cc=None, file=None, bias=None, latencys=None, data_dir=None,
         print(f' - time corr, latency {latency}: {time.perf_counter() - st:.2f}')
     
     if do_crosscorr == False:
-        print(' - WARNING: no cross correlation count!')
+        print(' (!) WARNING: no cross correlation count!')
         corr_result = np.zeros((len(latencys), 2*((y2-yn)-y1), 2*((x2-xn)-x1)), dtype=np.float32)
     
     return corr_result, cjk, sec_per_frame, metka_bias

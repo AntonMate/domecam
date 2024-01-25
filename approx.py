@@ -259,15 +259,14 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
         seeing_count = round(seeing_count, num_of_numbers)
         df = df.assign(seeing=[seeing_count])
         df.to_csv(f'{data_dir}/results/{file_name}/{file[:-5]}_result.txt', index=False)
-        print(' - found params:')
-        print(df[['Vx, m/s','Vy, m/s','Cn2', 'z, m', 'var, m/s']].to_string(index=False))
-        print(f' - total Cn2: {sum_cn2} --> seeing, {lambda_/1e-9:.0f} nm: {seeing_count:.2f}')
-
-# БС: считаем невязку
+        
+        # БС: считаем невязку
         mask = np.zeros(fit.shape)
         residual = np.sum(np.power(data-fit,2))
-        print(f' - total residual: {residual:.4f}')
 
+        print(f' - found params, residual = {residual:.4f}:')
+        print(df[['Vx, m/s','Vy, m/s','Cn2', 'z, m', 'var, m/s']].to_string(index=False))
+        print(f' - total Cn2: {sum_cn2} --> seeing, {lambda_/1e-9:.0f} nm: {seeing_count:.2f}')
         return fit
     
     fit = one_speckle_fit(initial_params=initial_params, data=cc, latency=latency, lambda_=lambda_, all_Vx=all_Vx, all_Vy=all_Vy, all_Cn2_bounds=all_Cn2_bounds, conjugated_distance=conjugated_distance, dome_index=dome_index, use_gradient=use_gradient, do_fitting=do_fitting, dome_only=dome_only, use_windvar=use_windvar, data_dir=data_dir, file=file, file_name=file_name, star_name=star_name, spectrum=spectrum, latency_list=latency_list, alt=alt, az=az, metka_bias=metka_bias)

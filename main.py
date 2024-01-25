@@ -156,7 +156,7 @@ def processDomecam(file=None, file_name=None, file_bias=None, data_dir=None, D=N
                         initial_params=initial_params, all_Vx=all_Vx, all_Vy=all_Vy, all_Cn2_bounds=all_Cn2_bounds, 
                         conjugated_distance=conjugated_distance, num_of_layers=num_of_layers, heights_of_layers=heights_of_layers, 
                         dome_index=dome_index, use_gradient=use_gradient, do_fitting=do_fitting, dome_only=dome_only, use_windvar=use_windvar, data_dir=data_dir, file=file, file_name=file_name, star_name=star_name, spectrum=spectrum, latency_list=latency_list, alt=alt, az=az, metka_bias=metka_bias_new)
-    print(f' - time: {time.perf_counter() - st:.2f}')
+    print(f' - time for approximation: {time.perf_counter() - st:.2f}')
 
 #     # БС: отображение результатов аппроксимации        
 #     xc=226

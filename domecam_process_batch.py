@@ -39,12 +39,11 @@ optlist, args = getopt.getopt(sys.argv[1:], 'infile', ['infile='])
 new_path = optlist[0][1]
 
 if new_path.endswith('.fits'):
-    print(f' - MODE: обработка одного файла {new_path}')
+    print(f' - MODE: fitting {new_path}')
     indexes = [i for i in range(len(new_path)) if new_path[i] == "/"]
     data_dir = new_path[:indexes[-1]]
     print(' - dir:', data_dir)
     file = new_path[indexes[-1]+1:] # полное название фаайла серии
-    print(' -', file)
     file_name = file.replace('_2km.fits', '')
     file_name = file_name.replace('_0km.fits', '') # номер серии
     
@@ -67,8 +66,11 @@ if new_path.endswith('.fits'):
     metka_bias = 'found'
     for item in os.listdir(data_dir):
         if 'bias' in item and file_name in item and f'{file[indexes_h[0]-1]}km' in item:
-            print(' - bias:', item)
             file_bias = item
+            print(f' - {file} --> bias: {item}')
+            
+    if file_bias is None:
+        print(f' - {file} --> bias: not found')
             
     with open('logs2.txt') as f:
         for line in f:
@@ -83,13 +85,12 @@ if new_path.endswith('.fits'):
                 
 else:
     print('')
-    print(f' - MODE: обработка всех файлов _2km.fits из {new_path}')
+    print(f' - MODE: fitting all files _2km.fits from {new_path}')
     data_dir = new_path
     for ser in os.listdir(new_path):
         if ser.endswith('_2km.fits'):
             print('')
             file = ser # номер серии
-            print(' -', file)
             file_name = file.replace('_2km.fits', '') # номер серии
             
             # создание папки, куда будут сохраняться результаты
@@ -110,8 +111,11 @@ else:
             metka_bias = 'found'
             for item in os.listdir(data_dir):
                 if 'bias' in item and file_name in item and f'{file[indexes_h[0]-1]}km' in item:
-                    print(' - bias:', item)
                     file_bias = item
+                    print(f' - {file} --> bias: {item}')
+            
+            if file_bias is None:
+                print(f' - {file} --> bias: not found')
                     
             with open('logs2.txt') as f:
                 for line in f:
