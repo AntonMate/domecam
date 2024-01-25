@@ -13,7 +13,7 @@ from astropy.coordinates import AltAz
 
 def all_info_from_sql(data_dir, file_name, file, file_time, file_time_ub):
     def speed_direction_temperature(data_dir, file_time, file_time_ub):
-        cmd_sql = f"curl -G -H \"Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InNhZm9ub3YiLCJleHAiOjE3NjcyNTgwMDB9.GZ6_LQfb1L_kZNtF4z8Zrf8IgRD9N9DRwC2eEfR9bmQ\" 'http://eagle.sai.msu.ru/query?pretty=true' --data-urlencode \"db=collectd\" --data-urlencode \"q=select * from collectd.archive./collectd-sv.plugin_value/ where time>'{file_time}' and time<'{file_time_ub}';\" > wind_curr2.json >/dev/null"
+        cmd_sql = f"curl -G -H \"Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InNhZm9ub3YiLCJleHAiOjE3NjcyNTgwMDB9.GZ6_LQfb1L_kZNtF4z8Zrf8IgRD9N9DRwC2eEfR9bmQ\" 'http://eagle.sai.msu.ru/query?pretty=true' --data-urlencode \"db=collectd\" --data-urlencode \"q=select * from collectd.archive./collectd-sv.plugin_value/ where time>'{file_time}' and time<'{file_time_ub}';\" > wind_curr2.json >/dev/null 2>&1"
         print(cmd_sql)
         os.system(cmd_sql)
         
