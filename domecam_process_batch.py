@@ -66,7 +66,10 @@ if new_path.endswith('.fits'):
         if 'bias' in item and file_name in item and f'{file[indexes_h[0]-1]}km' in item:
             print(' - bias:', item)
             file_bias = item
-
+        else:
+            print(' - WARNING: file bias not found')
+            file_bias = None
+            
     with open('logs2.txt') as f:
         for line in f:
             if file in line:
@@ -107,6 +110,9 @@ else:
                 if 'bias' in item and file_name in item and f'{file[indexes_h[0]-1]}km' in item:
                     print(' - bias:', item)
                     file_bias = item
+                else:
+                    print(' - WARNING: file bias not found')
+                    file_bias = None
                     
             with open('logs2.txt') as f:
                 for line in f:
