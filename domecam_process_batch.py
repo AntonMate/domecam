@@ -62,13 +62,15 @@ if new_path.endswith('.fits'):
     result_temperature = all_info_from_sql(data_dir, file_name, file, file_time, file_time_ub) # всю инофрмацию из базы данных в дополнительный файл txt пишу, чтобы не загромождать
      
     indexes_h = [i for i in range(len(file)) if file[i] == "k"] # file[indexes_h[0]-1] высота сопряжения
+    
+    file_bias = None
     for item in os.listdir(data_dir):
         if 'bias' in item and file_name in item and f'{file[indexes_h[0]-1]}km' in item:
             print(' - bias:', item)
             file_bias = item
-        else:
-            print(' - WARNING: file bias not found')
-            file_bias = None
+
+    if file_bias is None:
+        print(' - WARNING: file bias not found')
             
     with open('logs2.txt') as f:
         for line in f:
@@ -106,14 +108,15 @@ else:
             result_temperature = all_info_from_sql(data_dir, file_name, file, file_time, file_time_ub)
             
             indexes_h = [i for i in range(len(file)) if file[i] == "k"] # file[indexes_h[0]-1] высота сопряжения
+            file_bias = None
             for item in os.listdir(data_dir):
                 if 'bias' in item and file_name in item and f'{file[indexes_h[0]-1]}km' in item:
                     print(' - bias:', item)
                     file_bias = item
-                else:
-                    print(' - WARNING: file bias not found')
-                    file_bias = None
                     
+            if file_bias is None:
+                print(' - WARNING: file bias not found')
+                
             with open('logs2.txt') as f:
                 for line in f:
                     if file in line:
