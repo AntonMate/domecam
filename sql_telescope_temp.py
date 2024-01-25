@@ -4,6 +4,11 @@ import numpy as np
 import json
 import os
 
+from astropy.coordinates import EarthLocation,SkyCoord
+from astropy.time import Time
+from astropy import units as u
+from astropy.coordinates import AltAz
+
 def all_info_from_sql(data_dir, file_name, file, file_time, file_time_ub):
     def speed_direction_temperature(data_dir, file_time, file_time_ub):
         cmd_sql = f"curl -G -H \"Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InNhZm9ub3YiLCJleHAiOjE3NjcyNTgwMDB9.GZ6_LQfb1L_kZNtF4z8Zrf8IgRD9N9DRwC2eEfR9bmQ\" 'http://eagle.sai.msu.ru/query?pretty=true' --data-urlencode \"db=collectd\" --data-urlencode \"q=select * from collectd.archive./collectd-sv.plugin_value/ where time>'{file_time}' and time<'{file_time_ub}';\" > wind_curr2.json"
@@ -80,10 +85,20 @@ def all_info_from_sql(data_dir, file_name, file, file_time, file_time_ub):
         conn.close()
         return np.mean(ts_1), np.mean(ts_2), np.mean(ts_3), np.mean(ts_4), np.mean(ts_5), np.mean(ts_6), np.mean(ts_7), np.mean(ts_8), np.mean(ts_9), np.mean(ts_11), np.mean(ts_12), np.mean(ts_14), np.mean(ts_15), np.mean(ts_16), np.mean(ts_17), np.mean(ts_19)
     
+#     def telescope_coords(file_time, ra, dec):
+#         observing_location = EarthLocation(lat='43 44 10', lon='42 40 03', height=2100*u.m)
+#         observing_time = Time(file_time)  
+#         aa = AltAz(location=observing_location, obstime=observing_time)
+#         coord = SkyCoord(ra, dec)
+#         cAltAz = coord.transform_to(aa)
+#         return cAltAz.alt.deg, cAltAz.az.deg
+
     result_temperature, result_wind_direction, result_wind_speed = speed_direction_temperature(data_dir, file_time, file_time_ub)
     ts_1, ts_2, ts_3, ts_4, ts_5, ts_6, ts_7, ts_8, ts_9, ts_11, ts_12, ts_14, ts_15, ts_16, ts_17, ts_19 = telescope_temerarute(file_time=file_time, file_time_ub=file_time_ub)
     
     all_info = [result_temperature, result_wind_direction, result_wind_speed, ts_1, ts_2, ts_3, ts_4, ts_5, ts_6, ts_7, ts_8, ts_9, ts_11, ts_12, ts_14, ts_15, ts_16, ts_17, ts_19]
     df = pd.DataFrame([all_info], columns = ['temperute', 'wind direction', 'wind speed', 'ts_1', 'ts_2', 'ts_3', 'ts_4', 'ts_5', 'ts_6', 'ts_7', 'ts_8', 'ts_9', 'ts_11', 'ts_12', 'ts_14', 'ts_15', 'ts_16', 'ts_17', 'ts_19'])
     df.to_csv(f'{data_dir}/results/{file_name}/{file[:-5]}_info_from_logs.txt', index=False)
+    
+    
     return result_temperature
