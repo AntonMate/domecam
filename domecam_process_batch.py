@@ -92,7 +92,7 @@ else:
     print(f' - MODE: fitting all files _2km.fits from {new_path}')
     data_dir = new_path
     for ser in os.listdir(new_path):
-        if ser.endswith('_2km.fits') and item not in err_files:
+        if ser.endswith('_2km.fits') and ser not in err_files:
             print('')
             file = ser # номер серии
             file_name = file.replace('_2km.fits', '') # номер серии
