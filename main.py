@@ -171,7 +171,7 @@ def processDomecam(file=None, file_name=None, file_bias=None, data_dir=None, D=N
 #     ylims=(xc+xs,xc-xs)
 #     vmin=-0.002
 #     vmax=0.008
-#     for latency_i in range(len(latency)):
+    for latency_i in range(len(latency)):
 #         fig, (ax, ax2, ax3) = plt.subplots(1, 3, figsize=(25, 5))
 #         fig.colorbar(ax.imshow(cc[latency_i], vmin=vmin, vmax=vmax), ax=ax)
 #         fig.colorbar(ax2.imshow(fit[latency_i]*cjk, vmin=vmin, vmax=vmax), ax=ax2)
