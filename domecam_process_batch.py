@@ -27,6 +27,9 @@ do_crosscorr = False # подсчет кросс корреляции
 do_fitting = False
 dome_only = 5 # 0, чтобы отключить. >0, чтобы задать радиус области вокруг центра
 input_parametrs = [[0, 0, 2*0.5495173, 2, 0.25]]
+
+err_files = ['DC220131123749_2km.fits', 'DC220506144552_2km.fits'] # файлы/серии, которые нужно исключить общей обработки
+
 # ============================================================================
 if do_fitting == True:
     initial_params = None
@@ -89,7 +92,7 @@ else:
     print(f' - MODE: fitting all files _2km.fits from {new_path}')
     data_dir = new_path
     for ser in os.listdir(new_path):
-        if ser.endswith('_2km.fits'):
+        if ser.endswith('_2km.fits') and item not in err_files:
             print('')
             file = ser # номер серии
             file_name = file.replace('_2km.fits', '') # номер серии
