@@ -17,7 +17,7 @@ def processDomecam(file=None, file_name=None, file_bias=None, data_dir=None, D=N
 #     metka = processCheckFiles(file=file, latency=latency, data_dir=data_dir, dome_only=dome_only)
     metka = 'yes' # пока что убрал функцию подзагрузки старых файлов
 
-    cc, cjk, sec_per_frame, metka_bias_new = processCorr(run_cc=metka, file=file, bias=file_bias, latencys=latency, data_dir=data_dir, dome_only=dome_only, do_crosscorr=do_crosscorr, metka_bias)
+    cc, cjk, sec_per_frame, metka_bias_new = processCorr(run_cc=metka, file=file, bias=file_bias, latencys=latency, data_dir=data_dir, dome_only=dome_only, do_crosscorr=do_crosscorr, metka_bias=metka_bias)
     
     # cc - картина кросс-корреляции
     # cjk - картина автокорреляции зрачка 
