@@ -23,6 +23,7 @@ def processDomecam(file=None, file_name=None, file_bias=None, data_dir=None, D=N
         os.mkdir(f'{data_dir}/results')
     # создание папки с результатами обработки серии
     if not os.path.isdir(f'{data_dir}/results/{file_name}'):
+        print('test1')
         os.mkdir(f'{data_dir}/results/{file_name}')
     
     cc, cjk, sec_per_frame = processCorr(run_cc=metka, file=file, bias=file_bias, latencys=latency, data_dir=data_dir, dome_only=dome_only, do_crosscorr=do_crosscorr)
