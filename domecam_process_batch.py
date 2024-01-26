@@ -74,7 +74,16 @@ if new_path.endswith('.fits'):
             print(f' - {file} --> bias: {item}')
             
     if file_bias is None:
-        print(f' - {file} --> bias: not found')
+        for item in os.listdir(data_dir): 
+            if item == 'DC231008152952_2km.fits':
+                file_bias = 'DC230902202035_2km_bias.fits'
+                metka_bias = 'DC230902202035_2km_bias.fits'
+                print(f' - {file} --> bias: not found, took bias: {file_bias}')
+            else:
+                if item.startswith('DC2202') or item.startswith('DC2203') or item.startswith('DC2205') or item.startswith('DC2211'):
+                    file_bias = 'DC221108182951_2km_bias.fits'
+                    metka_bias = 'DC221108182951_2km_bias.fits'
+                    print(f' - {file} --> bias: not found, took bias: {file_bias}')
             
     with open('logs2.txt') as f:
         for line in f:
@@ -119,7 +128,16 @@ else:
                     print(f' - {file} --> bias: {item}')
             
             if file_bias is None:
-                print(f' - {file} --> bias: not found')
+                for item in os.listdir(data_dir): 
+                    if item == 'DC231008152952_2km.fits':
+                        file_bias = 'DC230902202035_2km_bias.fits'
+                        metka_bias = 'DC230902202035_2km_bias.fits'
+                        print(f' - {file} --> bias: not found, took bias: {file_bias}')
+                    else:
+                        if item.startswith('DC2202') or item.startswith('DC2203') or item.startswith('DC2205') or item.startswith('DC2211'):
+                            file_bias = 'DC221108182951_2km_bias.fits'
+                            metka_bias = 'DC221108182951_2km_bias.fits'
+                            print(f' - {file} --> bias: not found, took bias: {file_bias}')
                     
             with open('logs2.txt') as f:
                 for line in f:
