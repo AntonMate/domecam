@@ -71,7 +71,7 @@ if new_path.endswith('.fits'):
     for item in os.listdir(data_dir):
         if item.endswith('_2km_bias.fits'):
             from astropy.io import fits
-            with fits.open(f'{data_dir}/{item}') as f:
+            with fits.open(f'{data_dir}/{file}') as f:
                 print(f.info())
                 
         if 'bias' in item and file_name in item and f'{file[indexes_h[0]-1]}km' in item:
