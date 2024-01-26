@@ -69,7 +69,7 @@ if new_path.endswith('.fits'):
     file_bias = None
     metka_bias = 'found'
     for item in os.listdir(data_dir):
-        if item ends.with('_2km_bias.fits'):
+        if item.endswith('_2km_bias.fits'):
             from astropy.io import fits
             with fits.open(f'{data_dir}/{bias}') as f:
                 print(f.info())
