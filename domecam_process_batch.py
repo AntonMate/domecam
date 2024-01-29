@@ -140,7 +140,7 @@ else:
                             print('file shape:', f.info())
                         with fits.open(f'{data_dir}/{file_bias}') as fb:
                             print('bias shape:', fb.info())
-            print(f' - {file} --> bias: not found, took bias: {file_bias}')
+                print(f' - {file} --> bias: not found, took bias: {file_bias}')
                     
             with open('logs2.txt') as f:
                 for line in f:
