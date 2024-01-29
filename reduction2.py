@@ -162,7 +162,7 @@ def processCorr(run_cc=None, file=None, bias=None, latencys=None, data_dir=None,
             if dome_only != 0:
                 corr_result[k] *= circle(dome_only, corr_result[k].shape[0], circle_centre=(0, 0), origin="middle")
 
-        print(f' - time corr, latency {latency}: {time.perf_counter() - st:.2f}')
+            print(f' - time corr, latency {latency}: {time.perf_counter() - st:.2f}')
     
     if do_crosscorr == False:
         print(' (!) WARNING: no cross correlation count!')
