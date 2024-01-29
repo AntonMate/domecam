@@ -136,6 +136,10 @@ else:
                     if file.startswith('DC2202') or file.startswith('DC2203') or file.startswith('DC2205') or file.startswith('DC2211'):
                         file_bias = 'DC221108182951_2km_bias.fits'
                         metka_bias = 'DC221108182951_2km_bias.fits'
+                        with fits.open(f'{data_dir}/{file}') as f:
+                            print('file shape:', f.info())
+                        with fits.open(f'{data_dir}/{file_bias}') as fb:
+                            print('bias shape:', fb.info())
             print(f' - {file} --> bias: not found, took bias: {file_bias}')
                     
             with open('logs2.txt') as f:
