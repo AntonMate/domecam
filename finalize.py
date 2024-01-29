@@ -30,4 +30,4 @@ for item in os.listdir(data_dir):
         df = pd.concat([df, df1])
 
 df = df.tail(-1)
-df.to_csv(f'{data_dir}/together.txt', index=False)
+df.to_excel(f'{data_dir}/together.xlsx', index=False)
