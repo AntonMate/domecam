@@ -19,7 +19,7 @@ for item in os.listdir(data_dir):
 data_dir = f'{data_dir}/together'
 for item in os.listdir(data_dir):
     if item.startswith('DC'):
-        df_tmp = pd.read_csv(f'{data_dir}/together/{item}.txt')
+        df_tmp = pd.read_csv(f'{data_dir}/{item}')
         break
 
 df = pd.DataFrame().reindex_like(df_tmp)
