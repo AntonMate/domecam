@@ -14,7 +14,7 @@ for item in os.listdir(data_dir):
         df1 = pd.read_csv(f'{data_dir}/{item}/{item}_2km_result.txt')
         df2 = pd.read_csv(f'{data_dir}/{item}/{item}_2km_info_from_logs.txt')
         df_res = pd.concat([df1, df2], axis=1)
-        df_res.to_csv(f'{data_dir}/together/{item}.txt')
+        df_res.to_csv(f'{data_dir}/together/{item}.txt', index=False)
 
 data_dir = f'{data_dir}/together'
 for item in os.listdir(data_dir):
@@ -29,4 +29,4 @@ for item in os.listdir(data_dir):
         df1 = pd.read_csv(f'{data_dir}/{item}')
         df = pd.concat([df, df1])
 
-df.to_csv(f'{data_dir}/together.txt')
+df.to_csv(f'{data_dir}/together.txt', index=False)
