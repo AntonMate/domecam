@@ -3,7 +3,9 @@ import getopt
 import sys
 
 optlist, args = getopt.getopt(sys.argv[1:], 'infile', ['infile='])
-new_path = optlist[0][1]
+data_dir = optlist[0][1]
 
-data_dir = new_path
-print(data_dir)
+for item in os.listdir(data_dir):
+    if item.startswith('DC'):
+        print(os.path.isfile(f'{data_dir}/{item}/{item}_2km_result.txt'))
+        print(os.path.isfile(f'{data_dir}/{item}/{item}_2km_info_from_logs.txt'))
