@@ -5,6 +5,9 @@ import sys
 from datetime import datetime, timedelta
 from sql_telescope_temp import all_info_from_sql
 
+from astropy.io import fits
+
+
 # ============================================================================
 latency = [4, 6] # задержка для кросс-корреляции, [кадр]
 conjugated_distance = 2 # сопряженное расстояние, [километр]
@@ -78,6 +81,10 @@ if new_path.endswith('.fits'):
             if item == 'DC231008152952_2km.fits':
                 file_bias = 'DC230902202035_2km_bias.fits'
                 metka_bias = 'DC230902202035_2km_bias.fits'
+                with fits.open(f'{data_dir}/{file}') as f:
+                    print('file:', f.info())
+                with fits.open(f'{data_dir}/{file_bias}') as fb:
+                    print('bias:', fb.info()
             else:
                 if item.startswith('DC2202') or item.startswith('DC2203') or item.startswith('DC2205') or item.startswith('DC2211'):
                     file_bias = 'DC221108182951_2km_bias.fits'
