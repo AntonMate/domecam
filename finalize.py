@@ -26,7 +26,7 @@ df = pd.DataFrame().reindex_like(df_tmp)
     
 for item in os.listdir(data_dir):
     if item.startswith('DC'):
-        df1 = pd.read_csv(f'{data_dir}/{item}.txt')
+        df1 = pd.read_csv(f'{data_dir}/{item}')
         df = pd.concat([df, df1])
 
 df.to_csv(f'{data_dir}/together/together.txt')
