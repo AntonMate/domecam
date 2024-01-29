@@ -6,8 +6,8 @@ import pandas as pd
 optlist, args = getopt.getopt(sys.argv[1:], 'infile', ['infile='])
 data_dir = optlist[0][1]
 
-if not os.path.isdir(f'{data_dir}/results/together'):
-    os.mkdir(f'{data_dir}/results/together')
+if not os.path.isdir(f'{data_dir}/together'):
+    os.mkdir(f'{data_dir}/together')
 
 for item in os.listdir(data_dir):
     if item.startswith('DC'):
