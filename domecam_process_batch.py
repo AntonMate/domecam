@@ -86,7 +86,9 @@ if new_path.endswith('.fits'):
                 with fits.open(f'{data_dir}/{file_bias}') as fb:
                     print('bias:', fb.info())
             else:
+                print('(!!!!!!!!!!!!!!!)')
                 if item.startswith('DC2202') or item.startswith('DC2203') or item.startswith('DC2205') or item.startswith('DC2211'):
+                    print('LOOOOOOL')
                     file_bias = 'DC221108182951_2km_bias.fits'
                     metka_bias = 'DC221108182951_2km_bias.fits'
         print(f' - {file} --> bias: not found, took bias: {file_bias}')
