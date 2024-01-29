@@ -29,4 +29,5 @@ for item in os.listdir(data_dir):
         df1 = pd.read_csv(f'{data_dir}/{item}')
         df = pd.concat([df, df1])
 
+df = df.tail(-1)
 df.to_csv(f'{data_dir}/together.txt', index=False)
