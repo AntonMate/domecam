@@ -84,7 +84,7 @@ if new_path.endswith('.fits'):
                 with fits.open(f'{data_dir}/{file}') as f:
                     print('file:', f.info())
                 with fits.open(f'{data_dir}/{file_bias}') as fb:
-                    print('bias:', fb.info()
+                    print('bias:', fb.info())
             else:
                 if item.startswith('DC2202') or item.startswith('DC2203') or item.startswith('DC2205') or item.startswith('DC2211'):
                     file_bias = 'DC221108182951_2km_bias.fits'
