@@ -17,12 +17,12 @@ for item in os.listdir(data_dir):
         df_res.to_csv(f'{data_dir}/together/{item}.txt')
 
 data_dir = f'{data_dir}/together'
-
 for item in os.listdir(data_dir):
     if item.startswith('DC'):
-        df_tmp = pd.read_csv(f'{data_dir}/{item}.txt')
-        df = pd.DataFrame().reindex_like(df_tmp)
+        df_tmp = pd.read_csv(f'{data_dir}/together/{item}.txt')
         break
+
+df = pd.DataFrame().reindex_like(df_tmp)
     
 for item in os.listdir(data_dir):
     if item.startswith('DC'):
