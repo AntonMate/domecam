@@ -79,7 +79,7 @@ if new_path.endswith('.fits'):
             file_bias = 'DC230902202035_2km_bias.fits'
             metka_bias = 'DC230902202035_2km_bias.fits'
         else:
-            if file.startswith('DC2202') or file.startswith('DC2203') or file.startswith('DC2205') or file.startswith('DC2211'):
+            if file.startswith('DC2201') or file.startswith('DC2202') or file.startswith('DC2203') or file.startswith('DC2205') or file.startswith('DC2211'):
                 file_bias = 'bias_246_329.fits'
                 metka_bias = 'bias_246_329.fits'
         print(f' - {file} --> bias: not found, took bias: {file_bias}')
@@ -131,7 +131,7 @@ else:
                     file_bias = 'DC230902202035_2km_bias.fits'
                     metka_bias = 'DC230902202035_2km_bias.fits'
                 else:
-                    if file.startswith('DC2202') or file.startswith('DC2203') or file.startswith('DC2205') or file.startswith('DC2211'):
+                    if file.startswith('DC2201') or file.startswith('DC2202') or file.startswith('DC2203') or file.startswith('DC2205') or file.startswith('DC2211'):
                         file_bias = 'bias_246_329.fits'
                         metka_bias = 'bias_246_329.fits'
                 print(f' - {file} --> bias: not found, took bias: {file_bias}')
