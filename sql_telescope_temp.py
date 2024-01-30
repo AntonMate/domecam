@@ -86,7 +86,7 @@ def all_info_from_sql(data_dir, file_name, file, file_time, file_time_ub):
         cur.close()
         conn.close()
         warnings.simplefilter("ignore")
-        return np.mean(ts_1), np.mean(ts_2), np.mean(ts_3), np.mean(ts_4), np.mean(ts_5), np.mean(ts_6), np.mean(ts_7), np.mean(ts_8), np.mean(ts_9), np.mean(ts_11), np.mean(ts_12), np.mean(ts_14), np.mean(ts_15), np.mean(ts_16), np.mean(ts_17), np.mean(ts_19)
+        return np.mean(ts_1)/10, np.mean(ts_2)/10, np.mean(ts_3)/10, np.mean(ts_4)/10, np.mean(ts_5)/10, np.mean(ts_6)/10, np.mean(ts_7)/10, np.mean(ts_8)/10, np.mean(ts_9)/10, np.mean(ts_11)/10, np.mean(ts_12)/10, np.mean(ts_14)/10, np.mean(ts_15)/10, np.mean(ts_16)/10, np.mean(ts_17)/10, np.mean(ts_19)/10
     
 #     def telescope_coords(file_time, ra, dec):
 #         observing_location = EarthLocation(lat='43 44 10', lon='42 40 03', height=2100*u.m)
