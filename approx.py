@@ -224,8 +224,8 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
 #        for i in range(len(popt)//4):
 #            fit += gamma_se(X, Y, *popt[i*4:i*4+4])
 
-#     #     errors = np.sqrt(np.diag(pcov))
-
+        errors = np.sqrt(np.diag(pcov))
+        print('curve fit errors:', errors)
         num_of_numbers = 4
         if use_windvar:
             popt = popt.reshape(len(popt)//5, 5)
@@ -254,7 +254,7 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
         df = df.round({'z, m': 0})
         df.drop(columns=['index'], inplace=True)   
         sum_cn2 = np.sum(df['Cn2'])        
-        r0 = pow(0.423 * pow((2*np.pi/lambda_), 2) * sum_cn2, -3/5)
+        r0 = pow(0.423 * pow((2*np.pi/lambda_), 2) * sum_cn2, -3.0/5.0)
         seeing_count = 206265 * 0.98 * lambda_/r0
         seeing_count = round(seeing_count, num_of_numbers)
         df = df.assign(seeing=[seeing_count])
