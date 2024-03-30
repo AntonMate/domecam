@@ -227,20 +227,21 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
         errors = np.sqrt(np.diag(pcov))
         print('curve fit errors:', errors)
         num_of_numbers = 4
+        
         if use_windvar:
             popt = popt.reshape(len(popt)//5, 5)
             popt[0][4] = round(popt[0][4], num_of_numbers)
             if dome_only != 0:
-                all_info_about_layers = [file, metka_bias, star_name, alt, az, 'dome', spectrum, latency_list, popt[0][0], popt[0][1], popt[0][2], popt[0][3], popt[0][4]]
-                df = pd.DataFrame([all_info_about_layers], columns = ['file', 'bias', 'star', 'alt', 'az', 'mode', 'spectrum', 'latency', 'Vx, m/s','Vy, m/s','Cn2', 'z, m', 'var, m/s'])     
+                all_info_about_layers = [file, metka_bias, star_name, alt, az, 'dome', spectrum, latency_list, popt[0][0], errors[0], popt[0][1], errors[1], popt[0][2], errors[2], popt[0][3], errors[3], popt[0][4], errors[4]]
+                df = pd.DataFrame([all_info_about_layers], columns = ['file', 'bias', 'star', 'alt', 'az', 'mode', 'spectrum', 'latency', 'Vx, m/s', 'Vx error, m/s', 'Vy, m/s', 'Vy error, m/s', 'Cn2', 'Cn2 error', 'z, m', 'z error, m', 'var, m/s', 'var error, m/s'])     
             else:
-                all_info_about_layers = [file, metka_bias, star_name, alt, az, spectrum, latency_list, popt[0][0], popt[0][1], popt[0][2], popt[0][3], popt[0][4]]
-                df = pd.DataFrame([all_info_about_layers], columns = ['file', 'bias', 'star', 'alt', 'az', 'spectrum', 'latency', 'Vx, m/s','Vy, m/s','Cn2', 'z, m', 'var, m/s'])     
+                all_info_about_layers = [file, metka_bias, star_name, alt, az, spectrum, latency_list, popt[0][0], errors[0], popt[0][1], errors[1], popt[0][2], errors[2], popt[0][3], errors[3], popt[0][4], errors[4]]
+                df = pd.DataFrame([all_info_about_layers], columns = ['file', 'bias', 'star', 'alt', 'az', 'spectrum', 'latency', 'Vx, m/s', 'Vx error, m/s', 'Vy, m/s', 'Vy error, m/s', 'Cn2', 'Cn2 error', 'z, m', 'z error, m', 'var, m/s', 'var error, m/s'])     
         else:
             popt = popt.reshape(len(popt)//4, 4)
             if dome_only != 0:
                 all_info_about_layers = [file, metka_bias, star_name, alt, az, 'dome', spectrum, latency_list, popt[0][0], popt[0][1], popt[0][2], popt[0][3]]
-                df = pd.DataFrame([all_info_about_layers], columns = ['file', 'bias', 'star', 'alt', 'az', 'mode', 'spectrum', 'latency', 'Vx, m/s','Vy, m/s','Cn2', 'z, m', 'var, m/s'])     
+                df = pd.DataFrame([all_info_about_layers], columns = ['file', 'bias', 'star', 'alt', 'az', 'mode', 'spectrum', 'latency', 'Vx, m/s','Vy, m/s','Cn2', 'z, m'])     
             else:
                 all_info_about_layers = [file, metka_bias, star_name, alt, az, spectrum, latency_list, popt[0][0], popt[0][1], popt[0][2], popt[0][3]]
                 df = pd.DataFrame([all_info_about_layers], columns = ['file', 'bias', 'star', 'alt', 'az', 'spectrum', 'latency', 'Vx, m/s','Vy, m/s','Cn2', 'z, m'])
@@ -248,7 +249,9 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
         df = df.sort_values(by=['z, m'])
         df = df.reset_index()
         df['Cn2'] = df['Cn2']*1e-13
+        df['Cn2 error'] = df['Cn2 error']*1e-13
         df['z, m'] = df['z, m']*1000
+        df['z error, m'] = df['z error, m']*1000
         df = df.round({'Vx, m/s': 2})
         df = df.round({'Vy, m/s': 2})
         df = df.round({'z, m': 0})
