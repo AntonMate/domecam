@@ -175,11 +175,11 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
         # более точные баунсы для начальных параметров
         if do_fitting:
             if use_windvar:
-                lb2 = np.zeros((len(p0)//5, 5), dtype=np.float32)
-                ub2 = np.zeros((len(p0)//5, 5), dtype=np.float32)
-            else:
                 lb2 = np.zeros((len(p0)//4, 4), dtype=np.float32)
                 ub2 = np.zeros((len(p0)//4, 4), dtype=np.float32)
+            else:
+                lb2 = np.zeros((len(p0)//3, 3), dtype=np.float32)
+                ub2 = np.zeros((len(p0)//3, 3), dtype=np.float32)
             for i in range(len(all_Vx)):
                 if  i == dome_index:
                     if use_windvar:

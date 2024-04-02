@@ -72,23 +72,21 @@ def processDomecam(file=None, file_name=None, file_bias=None, data_dir=None, D=N
             # all_Cn2_bounds - минимальное и максимальное значение интенсивонсти для каждого найденного пика
             # initial_params - начальные параметры для каждого пика
             
-            print(' - initial guess for the parameters:')
-            initial_params2 = initial_params.insert(3, 2000)
-            print('initial_params2:', initial_params2)
             if use_windvar:
-                df_ip = pd.DataFrame(initial_params2, columns = ['Vx, m/s','Vy, m/s','Cn2', 'z, m', 'var, m/s']) 
+                df_ip = pd.DataFrame(initial_params, columns = ['Vx, m/s','Vy, m/s','Cn2', 'var, m/s']) 
             else:
-                df_ip = pd.DataFrame(initial_params2, columns = ['Vx, m/s','Vy, m/s','Cn2', 'z, m']) 
+                df_ip = pd.DataFrame(initial_params, columns = ['Vx, m/s','Vy, m/s','Cn2']) 
+            print('initial_params:', df_ip)
 
-            df_ip = df_ip.sort_values(by=['z, m'])
-            df_ip = df_ip.reset_index()
-            df_ip['Cn2'] = df_ip['Cn2']*1e-13
-            df_ip['z, m'] = df_ip['z, m']*1000
-            df_ip = df_ip.round({'Vx, m/s': 2})
-            df_ip = df_ip.round({'Vy, m/s': 2})
-            df_ip = df_ip.round({'z, m': 0})
-            df_ip.drop(columns=['index'], inplace=True)
-            print(df_ip.to_string(index=False))
+#             df_ip = df_ip.sort_values(by=['z, m'])
+#             df_ip = df_ip.reset_index()
+#             df_ip['Cn2'] = df_ip['Cn2']*1e-13
+#             df_ip['z, m'] = df_ip['z, m']*1000
+#             df_ip = df_ip.round({'Vx, m/s': 2})
+#             df_ip = df_ip.round({'Vy, m/s': 2})
+#             df_ip = df_ip.round({'z, m': 0})
+#             df_ip.drop(columns=['index'], inplace=True)
+#             print(df_ip.to_string(index=False))
             
 #             fig, (ax, ax2, ax3) = plt.subplots(1, 3, figsize=(25, 5))
 #             ax.scatter(x, y, c='red', marker='x', s=1)
