@@ -181,15 +181,20 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
             for i in range(len(all_Vx)):
                 if  i == dome_index:
                     if use_windvar:
-                        lb2[i] = [all_Vx[i]-0.5, all_Vy[i]-0.5, all_Cn2_bounds[i][0]-0.005, conjugated_distance-(conjugated_distance*0.01), 0]
-                        ub2[i] = [all_Vx[i]+0.5, all_Vy[i]+0.5, all_Cn2_bounds[i][1]+0.005, conjugated_distance+(conjugated_distance*0.01), 2]
+#                         lb2[i] = [all_Vx[i]-0.5, all_Vy[i]-0.5, all_Cn2_bounds[i][0]-0.005, conjugated_distance-(conjugated_distance*0.01), 0]
+#                         ub2[i] = [all_Vx[i]+0.5, all_Vy[i]+0.5, all_Cn2_bounds[i][1]+0.005, conjugated_distance+(conjugated_distance*0.01), 2]
+                        lb2[i] = [-np.inf, -np.inf, 0, 0, 0]
+                        ub2[i] = [np.inf, np.inf, np.inf, np.inf, np.inf]
                     else:
                         lb2[i] = [all_Vx[i]-0.5, all_Vy[i]-0.5, all_Cn2_bounds[i][0]-0.005, conjugated_distance-(conjugated_distance*0.01)]
                         ub2[i] = [all_Vx[i]+0.5, all_Vy[i]+0.5, all_Cn2_bounds[i][1]+0.005, conjugated_distance+(conjugated_distance*0.01)]
                 else:
                     if use_windvar:
-                        lb2[i] = [all_Vx[i]-0.5, all_Vy[i]-0.5, all_Cn2_bounds[i][0]-0.005, conjugated_distance, 0]
-                        ub2[i] = [all_Vx[i]+0.5, all_Vy[i]+0.5, all_Cn2_bounds[i][1]+0.005, 50, 2]
+#                         lb2[i] = [all_Vx[i]-0.5, all_Vy[i]-0.5, all_Cn2_bounds[i][0]-0.005, conjugated_distance, 0]
+#                         ub2[i] = [all_Vx[i]+0.5, all_Vy[i]+0.5, all_Cn2_bounds[i][1]+0.005, 50, 2]
+
+                        lb2[i] = [-np.inf, -np.inf, 0, 0, 0]
+                        ub2[i] = [np.inf, np.inf, np.inf, np.inf, np.inf]
                     else:
                         lb2[i] = [all_Vx[i]-0.5, all_Vy[i]-0.5, all_Cn2_bounds[i][0]-0.005, conjugated_distance]
                         ub2[i] = [all_Vx[i]+0.5, all_Vy[i]+0.5, all_Cn2_bounds[i][1]+0.005, 50]
@@ -213,7 +218,7 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
         fit_p0 = fitconvert(_g.fitfun(xdata,*p0),data.shape)
         residual_p0 = np.sum(np.power(data-fit_p0,2))
         print(f' - residual for initial guess: {residual_p0:.4f}')
-
+    
         if do_fitting:
             popt, pcov = curve_fit(_g.fitfun, xdata, ydata, p0)   
 #             popt, pcov = curve_fit(_g.fitfun, xdata, ydata, p0, bounds=[lb2, ub2])   
