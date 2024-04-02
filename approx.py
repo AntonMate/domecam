@@ -147,8 +147,9 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
                     else:
                         arr = np.zeros(x.shape, dtype=np.float32)
                         if self.use_windvar: 
-                            for i in range(len(args)//5):
-                                arr += gamma_se(x, y, t_delta, args[i*5], args[i*5+1], args[i*5+2], args[i*5+3]).ravel()
+                            print('check fitting')
+                            for i in range(len(args)//4):
+                                arr += gamma_se(x, y, t_delta, args[i*4], args[i*4+1], args[i*4+2], args[i*4+3]).ravel()
                         else:
                             for i in range(len(args)//4):
                                 arr += gamma_se(x, y, t_delta, args[i*4], args[i*4+1], args[i*4+2], args[i*4+3]).ravel()
@@ -221,7 +222,7 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
         print(f' - residual for initial guess: {residual_p0:.4f}')
     
         if do_fitting:
-#             popt, pcov = curve_fit(_g.fitfun, xdata, ydata, p0)   
+            print('bounds:', lb2, ub2)
             popt, pcov = curve_fit(_g.fitfun, xdata, ydata, p0, bounds=[lb2, ub2])  
             print('Warning raw popt:', popt)
         else:
@@ -254,12 +255,9 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
                 all_info_about_layers = [file, metka_bias, star_name, alt, az, spectrum, latency_list, popt[0][0], popt[0][1], popt[0][2], popt[0][3]]
                 df = pd.DataFrame([all_info_about_layers], columns = ['file', 'bias', 'star', 'alt', 'az', 'spectrum', 'latency', 'Vx, m/s','Vy, m/s','Cn2', 'z, m'])
             
-        df = df.sort_values(by=['z, m'])
         df = df.reset_index()
         df['Cn2'] = df['Cn2']*1e-13
         df['Cn2 error'] = df['Cn2 error']*1e-13
-        df['z, m'] = df['z, m']*1000
-        df['z error, m'] = df['z error, m']*1000
         df = df.round({'Vx, m/s': 2})
         df = df.round({'Vy, m/s': 2})
         df = df.round({'z, m': 0})
