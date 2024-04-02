@@ -92,7 +92,8 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
     def gamma_se(X, Y, t_delta, Vx, Vy, Cn2, Vsigma=None): 
 #         z=z*1000
         z=2000
-
+        print('Cn2:', Cn2)
+    
         uv, lv = find_nearest(heights_of_layers, z)
         res = gammas[lv] + (z - heights_of_layers[lv])*((gammas[uv] - gammas[lv])/(heights_of_layers[uv] - heights_of_layers[lv]))
         
