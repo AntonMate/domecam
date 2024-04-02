@@ -237,10 +237,10 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
         num_of_numbers = 4
         
         if use_windvar:
-            popt = popt.reshape(len(popt)//5, 5)
-            popt[0][4] = round(popt[0][4], num_of_numbers)
+            popt = popt.reshape(len(popt)//4, 4)
+            popt[0][3] = round(popt[0][3], num_of_numbers)
             if dome_only != 0:
-                all_info_about_layers = [file, metka_bias, star_name, alt, az, 'dome', spectrum, latency_list, popt[0][0], errors[0], popt[0][1], errors[1], popt[0][2], errors[2], popt[0][3], errors[3], popt[0][4], errors[4]]
+                all_info_about_layers = [file, metka_bias, star_name, alt, az, 'dome', spectrum, latency_list, popt[0][0], errors[0], popt[0][1], errors[1], popt[0][2], errors[2], 2000, 0, popt[0][3], errors[3]]
                 df = pd.DataFrame([all_info_about_layers], columns = ['file', 'bias', 'star', 'alt', 'az', 'mode', 'spectrum', 'latency', 'Vx, m/s', 'Vx error, m/s', 'Vy, m/s', 'Vy error, m/s', 'Cn2', 'Cn2 error', 'z, m', 'z error, m', 'var, m/s', 'var error, m/s'])     
             else:
                 all_info_about_layers = [file, metka_bias, star_name, alt, az, spectrum, latency_list, popt[0][0], errors[0], popt[0][1], errors[1], popt[0][2], errors[2], popt[0][3], errors[3], popt[0][4], errors[4]]
