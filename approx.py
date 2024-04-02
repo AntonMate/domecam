@@ -92,7 +92,7 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
     def gamma_se(X, Y, t_delta, Vx, Vy, Cn2, Vsigma=None): 
 #         z=z*1000
         z=2000
-        print('WARNING!: z=2000, no approx for z')
+        Cn2=Cn2*1e-13
 
         uv, lv = find_nearest(heights_of_layers, z)
         res = gammas[lv] + (z - heights_of_layers[lv])*((gammas[uv] - gammas[lv])/(heights_of_layers[uv] - heights_of_layers[lv]))
@@ -147,12 +147,11 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
                     else:
                         arr = np.zeros(x.shape, dtype=np.float32)
                         if self.use_windvar: 
-                            print('check fitting')
                             for i in range(len(args)//4):
                                 arr += gamma_se(x, y, t_delta, args[i*4], args[i*4+1], args[i*4+2], args[i*4+3]).ravel()
                         else:
-                            for i in range(len(args)//4):
-                                arr += gamma_se(x, y, t_delta, args[i*4], args[i*4+1], args[i*4+2], args[i*4+3]).ravel()
+                            for i in range(len(args)//3):
+                                arr += gamma_se(x, y, t_delta, args[i*3], args[i*3+1], args[i*3+2]).ravel()
                     
                     total_cc[idx*n_elem:(idx+1)*n_elem] = arr
                 if hasattr(self,'mask'):
@@ -164,9 +163,6 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
         x = np.linspace(-data.shape[2]//2, data.shape[2]//2-1, data.shape[2], dtype=np.float32)
         y = np.linspace(-data.shape[1]//2, data.shape[1]//2-1, data.shape[1], dtype=np.float32)
         X, Y = np.meshgrid(x, y)
-        # mask = np.zeros(data.shape)
-        # mask[0] = (X>-10)*(X<10)*(Y<10)*(Y>-10)
-        # data *= mask
 
         xdata = np.vstack((X.ravel(), Y.ravel())) 
         ydata = data.ravel()
@@ -222,7 +218,6 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
         print(f' - residual for initial guess: {residual_p0:.4f}')
     
         if do_fitting:
-            print('bounds:', lb2, ub2)
             popt, pcov = curve_fit(_g.fitfun, xdata, ydata, p0, bounds=[lb2, ub2])  
             print('Warning raw popt:', popt)
         else:
