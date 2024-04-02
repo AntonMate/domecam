@@ -185,6 +185,7 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
 #                         ub2[i] = [all_Vx[i]+0.5, all_Vy[i]+0.5, all_Cn2_bounds[i][1]+0.005, conjugated_distance+(conjugated_distance*0.01), 2]
                         lb2[i] = [-np.inf, -np.inf, 0, 0, 0]
                         ub2[i] = [np.inf, np.inf, np.inf, np.inf, np.inf]
+                        print('check1')
                     else:
                         lb2[i] = [all_Vx[i]-0.5, all_Vy[i]-0.5, all_Cn2_bounds[i][0]-0.005, conjugated_distance-(conjugated_distance*0.01)]
                         ub2[i] = [all_Vx[i]+0.5, all_Vy[i]+0.5, all_Cn2_bounds[i][1]+0.005, conjugated_distance+(conjugated_distance*0.01)]
@@ -192,7 +193,7 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
                     if use_windvar:
 #                         lb2[i] = [all_Vx[i]-0.5, all_Vy[i]-0.5, all_Cn2_bounds[i][0]-0.005, conjugated_distance, 0]
 #                         ub2[i] = [all_Vx[i]+0.5, all_Vy[i]+0.5, all_Cn2_bounds[i][1]+0.005, 50, 2]
-
+                        print('check2')
                         lb2[i] = [-np.inf, -np.inf, 0, 0, 0]
                         ub2[i] = [np.inf, np.inf, np.inf, np.inf, np.inf]
                     else:

@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 from sql_telescope_temp import all_info_from_sql
 
 # ============================================================================
-latency = [4, 6] # задержка для кросс-корреляции, [кадр]
+latency = [4] # задержка для кросс-корреляции, [кадр]
 conjugated_distance = 2 # сопряженное расстояние, [километр]
 D = 2.5 # диаметр телескопа, [метр]
 spectrum = 'poly' # тип излучения
