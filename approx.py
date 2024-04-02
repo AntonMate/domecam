@@ -92,7 +92,6 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
     def gamma_se(X, Y, t_delta, Vx, Vy, Cn2, Vsigma=None): 
 #         z=z*1000
         z=2000
-        Cn2=Cn2*1e-13
 
         uv, lv = find_nearest(heights_of_layers, z)
         res = gammas[lv] + (z - heights_of_layers[lv])*((gammas[uv] - gammas[lv])/(heights_of_layers[uv] - heights_of_layers[lv]))
@@ -218,6 +217,8 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
         print(f' - residual for initial guess: {residual_p0:.4f}')
     
         if do_fitting:
+            print('p0:', p0)
+            print('bounds:', lb2, ub2)
             popt, pcov = curve_fit(_g.fitfun, xdata, ydata, p0, bounds=[lb2, ub2])  
             print('Warning raw popt:', popt)
         else:

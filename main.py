@@ -76,74 +76,8 @@ def processDomecam(file=None, file_name=None, file_bias=None, data_dir=None, D=N
                 df_ip = pd.DataFrame(initial_params, columns = ['Vx, m/s','Vy, m/s','Cn2', 'var, m/s']) 
             else:
                 df_ip = pd.DataFrame(initial_params, columns = ['Vx, m/s','Vy, m/s','Cn2']) 
-            print('initial_params:', df_ip)
+            print('initial_params:', df_ip.to_string(index=False))
 
-#             df_ip = df_ip.sort_values(by=['z, m'])
-#             df_ip = df_ip.reset_index()
-#             df_ip['Cn2'] = df_ip['Cn2']*1e-13
-#             df_ip['z, m'] = df_ip['z, m']*1000
-#             df_ip = df_ip.round({'Vx, m/s': 2})
-#             df_ip = df_ip.round({'Vy, m/s': 2})
-#             df_ip = df_ip.round({'z, m': 0})
-#             df_ip.drop(columns=['index'], inplace=True)
-#             print(df_ip.to_string(index=False))
-            
-#             fig, (ax, ax2, ax3) = plt.subplots(1, 3, figsize=(25, 5))
-#             ax.scatter(x, y, c='red', marker='x', s=1)
-#             fig.colorbar(ax.imshow(cc[latency_i]), ax=ax)
-#             fig.colorbar(ax2.imshow(cc[latency_i] * (cc[latency_i]>thresh)), ax=ax2)
-#             fig.colorbar(ax3.imshow(cjk), ax=ax3)
-#             ax.set_title('Найденные пики')
-#             ax2.set_title('Оптимальный трешхолд')
-#             ax3.set_title('Автокорреляция зрачка')
-#             fig.suptitle('Вспомогательные картинки')
-            
-#             xc=226
-#             if dome_only != 0:
-#                 wind_speed_step = 51
-#                 xs = 20
-#             if dome_only == 0:
-#                 wind_speed_step = 5
-#                 xs = 220
-            
-#             xlims=(xc-xs,xc+xs)
-#             ylims=(xc+xs,xc-xs)
-            
-#             v = (D / cjk.shape[0]) / (latency[latency_i] * sec_per_frame)
-#             x = np.round(v*np.linspace(-cjk.shape[0]//2+1, cjk.shape[0]//2, wind_speed_step), 2)
-#             y = np.round(v*np.linspace(-cjk.shape[0]//2+1, cjk.shape[0]//2, wind_speed_step), 2)
-#             y = np.flipud(y)
-#             ax.set_xticks(np.linspace(0, cjk.shape[1], wind_speed_step))
-#             ax.set_yticks(np.linspace(0, cjk.shape[0], wind_speed_step))
-#             ax.set_xticklabels(x)
-#             ax.set_yticklabels(y)
-#             ax.set_ylabel('Vy, m/s')
-#             ax.set_xlabel('Vx, m/s')
-            
-#             ax2.set_xticks(np.linspace(0, cjk.shape[1], wind_speed_step))
-#             ax2.set_yticks(np.linspace(0, cjk.shape[0], wind_speed_step))
-#             ax2.set_xticklabels(x)
-#             ax2.set_yticklabels(y)
-#             ax2.set_ylabel('Vy, m/s')
-#             ax2.set_xlabel('Vx, m/s')
-            
-#             x_cjk = np.round(v*np.linspace(-cjk.shape[0]//2+1, cjk.shape[0]//2, 5), 2)
-#             y_cjk = np.round(v*np.linspace(-cjk.shape[0]//2+1, cjk.shape[0]//2, 5), 2)
-#             y_cjk = np.flipud(y_cjk)
-#             ax3.set_xticks(np.linspace(0, cjk.shape[1], 5))
-#             ax3.set_yticks(np.linspace(0, cjk.shape[0], 5))
-#             ax3.set_xticklabels(x_cjk)
-#             ax3.set_yticklabels(y_cjk)
-#             ax3.set_ylabel('Vy, m/s')
-#             ax3.set_xlabel('Vx, m/s')
-
-#             ax2.set_xlim(xlims)
-#             ax2.set_ylim(ylims)
-#             ax.set_xlim(xlims)
-#             ax.set_ylim(ylims)
-            
-#             plt.savefig(f'{data_dir}/results/{file_name}/{file[:-5]}_tmp.png')
-            
     else:
         dome_index = 0
         all_Vx = None
