@@ -89,8 +89,10 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
             if array[idx] < value:
                 return idx+1, idx
 
-    def gamma_se(X, Y, t_delta, Vx, Vy, Cn2, z, Vsigma=None): 
-        z=z*1000
+    def gamma_se(X, Y, t_delta, Vx, Vy, Cn2, Vsigma=None): 
+#         z=z*1000
+        z=2000
+        print('WARNING!: z=2000, no approx for z')
 
         uv, lv = find_nearest(heights_of_layers, z)
         res = gammas[lv] + (z - heights_of_layers[lv])*((gammas[uv] - gammas[lv])/(heights_of_layers[uv] - heights_of_layers[lv]))
@@ -146,7 +148,7 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
                         arr = np.zeros(x.shape, dtype=np.float32)
                         if self.use_windvar: 
                             for i in range(len(args)//5):
-                                arr += gamma_se(x, y, t_delta, args[i*5], args[i*5+1], args[i*5+2], args[i*5+3], args[i*5+4]).ravel()
+                                arr += gamma_se(x, y, t_delta, args[i*5], args[i*5+1], args[i*5+2], args[i*5+3]).ravel()
                         else:
                             for i in range(len(args)//4):
                                 arr += gamma_se(x, y, t_delta, args[i*4], args[i*4+1], args[i*4+2], args[i*4+3]).ravel()
@@ -183,9 +185,8 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
                     if use_windvar:
 #                         lb2[i] = [all_Vx[i]-0.5, all_Vy[i]-0.5, all_Cn2_bounds[i][0]-0.005, conjugated_distance-(conjugated_distance*0.01), 0]
 #                         ub2[i] = [all_Vx[i]+0.5, all_Vy[i]+0.5, all_Cn2_bounds[i][1]+0.005, conjugated_distance+(conjugated_distance*0.01), 2]
-                        lb2[i] = [-np.inf, -np.inf, 0, 0, 0]
-                        ub2[i] = [np.inf, np.inf, np.inf, np.inf, np.inf]
-                        print('check1')
+                        lb2[i] = [-np.inf, -np.inf, 0, 0]
+                        ub2[i] = [np.inf, np.inf, np.inf, np.inf]
                     else:
                         lb2[i] = [all_Vx[i]-0.5, all_Vy[i]-0.5, all_Cn2_bounds[i][0]-0.005, conjugated_distance-(conjugated_distance*0.01)]
                         ub2[i] = [all_Vx[i]+0.5, all_Vy[i]+0.5, all_Cn2_bounds[i][1]+0.005, conjugated_distance+(conjugated_distance*0.01)]
@@ -193,9 +194,8 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
                     if use_windvar:
 #                         lb2[i] = [all_Vx[i]-0.5, all_Vy[i]-0.5, all_Cn2_bounds[i][0]-0.005, conjugated_distance, 0]
 #                         ub2[i] = [all_Vx[i]+0.5, all_Vy[i]+0.5, all_Cn2_bounds[i][1]+0.005, 50, 2]
-                        print('check2')
-                        lb2[i] = [-np.inf, -np.inf, 0, 0, 0]
-                        ub2[i] = [np.inf, np.inf, np.inf, np.inf, np.inf]
+                        lb2[i] = [-np.inf, -np.inf, 0, 0]
+                        ub2[i] = [np.inf, np.inf, np.inf, np.inf]
                     else:
                         lb2[i] = [all_Vx[i]-0.5, all_Vy[i]-0.5, all_Cn2_bounds[i][0]-0.005, conjugated_distance]
                         ub2[i] = [all_Vx[i]+0.5, all_Vy[i]+0.5, all_Cn2_bounds[i][1]+0.005, 50]
