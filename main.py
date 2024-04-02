@@ -73,10 +73,12 @@ def processDomecam(file=None, file_name=None, file_bias=None, data_dir=None, D=N
             # initial_params - начальные параметры для каждого пика
             
             print(' - initial guess for the parameters:')
+            initial_params2 = initial_params.insert(3, 2000)
+            print('initial_params2:', initial_params2)
             if use_windvar:
-                df_ip = pd.DataFrame(initial_params, columns = ['Vx, m/s','Vy, m/s','Cn2', 'z, m', 'var, m/s']) 
+                df_ip = pd.DataFrame(initial_params2, columns = ['Vx, m/s','Vy, m/s','Cn2', 'z, m', 'var, m/s']) 
             else:
-                df_ip = pd.DataFrame(initial_params, columns = ['Vx, m/s','Vy, m/s','Cn2', 'z, m']) 
+                df_ip = pd.DataFrame(initial_params2, columns = ['Vx, m/s','Vy, m/s','Cn2', 'z, m']) 
 
             df_ip = df_ip.sort_values(by=['z, m'])
             df_ip = df_ip.reset_index()
