@@ -51,7 +51,8 @@ def processDomecam(file=None, file_name=None, file_bias=None, data_dir=None, D=N
                     if int(all_Vx[i])==0 or int(all_Vy[i])==0: # это неверное условие, но оно нужно, чтобы обойти ошибку DC221108144644_2km.fits
                         # тут можно для Cn2 брать значение Cn2 для conjugated_distance, а не Cn2_mean
                         print(' - WARNING: 51ая строчка main.py условие if потом исправить')
-                        initial_params[i] = [all_Vx[i], all_Vy[i], all_Cn2_bounds[i][1], conjugated_distance, 1]
+#                         initial_params[i] = [all_Vx[i], all_Vy[i], all_Cn2_bounds[i][1], conjugated_distance, 1]
+                        initial_params[i] = [all_Vx[i], all_Vy[i], all_Cn2_bounds[i][1], 1]
                         dome_index = i
                     else:
                         initial_params[i] = [all_Vx[i], all_Vy[i], all_Cn2_mean[i], 10, 1]
