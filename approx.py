@@ -220,7 +220,7 @@ def processApprox(cc=None, gammas=None, lambda_=None, D=None, latency=None, sec_
         if do_fitting:
             print('p0:', p0)
             print('bounds:', lb2, ub2)
-            popt, pcov = curve_fit(_g.fitfun, xdata, ydata, p0, bounds=[lb2, ub2])  
+            popt, pcov = curve_fit(_g.fitfun, xdata, ydata, p0, bounds=[lb2, ub2], diff_step=0.3)  
             print('Warning raw popt:', popt)
         else:
             popt = np.array(p0)
