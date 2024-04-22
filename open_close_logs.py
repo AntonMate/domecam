@@ -35,8 +35,8 @@ def telescope_temperature(file_time=None, file_time_ub=None):
     conn.close()
     warnings.simplefilter("ignore")
     
-    mirror_temperature = (np.mean(ts_1)/10 + np.mean(ts_2)/10 + np.mean(ts_3)/10)/3
-    indoor_temperuature = (np.mean(ts_17)/10 + np.mean(ts_19)/10)/2
+    mirror_temperature = (np.asarray(ts_1)/10 + np.asarray(ts_2)/10 + np.asarray(ts_3)/10)/3
+    indoor_temperuature = (np.asarray(ts_17)/10 + np.asarray(ts_19)/10)/2
     return mirror_temperature, indoor_temperuature
 
 df = pd.read_csv("logs_open_close.csv")
