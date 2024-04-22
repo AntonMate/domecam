@@ -40,8 +40,8 @@ def telescope_temerarute(file_time=None, file_time_ub=None):
     return mirror_temperature, indoor_temperuature
 
 df = pd.read_csv("logs_open_close.csv")
-lb = df['open']
-ub = df['close']
+lb = df['open'][1]
+ub = df['close'][1]
 
 all_mirror_temperature = []
 all_indoor_temperuature = []
