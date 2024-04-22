@@ -40,17 +40,17 @@ def telescope_temerarute(file_time=None, file_time_ub=None):
     return mirror_temperature, indoor_temperuature
 
 df = pd.read_csv("logs_open_close.csv")
-lb = df['open'][1]
-ub = df['close'][1]
+lb = df['open']
+ub = df['close']
 
 all_mirror_temperature = []
 all_indoor_temperuature = []
 
-for i in range(len(df)):
-    print('doing:', lb[i], ub[i])
-    a,b = telescope_temerarute(file_time=lb[i], file_time_ub=ub[i])
-    all_mirror_temperature.append(a)
-    all_indoor_temperuature.append(b)
+# for i in range(len(df)):
+print('doing:', lb[1], ub[1])
+a,b = telescope_temerarute(file_time=lb[1], file_time_ub=ub[1])
+all_mirror_temperature.append(a)
+all_indoor_temperuature.append(b)
 
 with open('all_mirror_temperature', 'w') as f:
     print(all_mirror_temperature, file=f)
