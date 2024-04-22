@@ -5,7 +5,7 @@ import os
 import warnings
 import psycopg2
 
-def telescope_temerarute(file_time=None, file_time_ub=None):
+def telescope_temperature(file_time=None, file_time_ub=None):
     conn = psycopg2.connect(
         host="192.168.10.87",
         database="enviroment",
@@ -44,16 +44,16 @@ lb = df['open']
 ub = df['close']
 
 all_mirror_temperature = []
-all_indoor_temperuature = []
+all_indoor_temperature = []
 
 # for i in range(len(df)):
 print('doing:', lb[1], ub[1])
-a,b = telescope_temerarute(file_time=lb[1], file_time_ub=ub[1])
+a,b = telescope_temperature(file_time=lb[1], file_time_ub=ub[1])
 all_mirror_temperature.append(a)
-all_indoor_temperuature.append(b)
+all_indoor_temperature.append(b)
 
-with open('all_mirror_temperature', 'w') as f:
+with open('all_mirror_temperature.txt', 'w') as f:
     print(all_mirror_temperature, file=f)
 
-with open('all_indoor_temperuature', 'w') as f:
-    print(all_indoor_temperuature, file=f)
+with open('all_indoor_temperature.txt', 'w') as f:
+    print(all_indoor_temperature, file=f)
