@@ -46,7 +46,7 @@ ub = df['close']
 all_mirror_temperature = []
 all_indoor_temperature = []
 
-for i in range(len(df)):
+for i in range(4):
     print('doing:', lb[i], ub[i])
     a,b = telescope_temperature(file_time=lb[i], file_time_ub=ub[i])
     print(a, b)
