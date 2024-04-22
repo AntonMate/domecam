@@ -46,11 +46,11 @@ ub = df['close']
 all_mirror_temperature = []
 all_indoor_temperature = []
 
-# for i in range(len(df)):
-print('doing:', lb[1], ub[1])
-a,b = telescope_temperature(file_time=lb[1], file_time_ub=ub[1])
-all_mirror_temperature.append(a)
-all_indoor_temperature.append(b)
+for i in range(len(df)):
+    print('doing:', lb[i], ub[i])
+    a,b = telescope_temperature(file_time=lb[i], file_time_ub=ub[i])
+    all_mirror_temperature.append(a)
+    all_indoor_temperature.append(b)
 
 with open('all_mirror_temperature.txt', 'w') as f:
     print(all_mirror_temperature, file=f)
