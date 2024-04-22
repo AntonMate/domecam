@@ -55,5 +55,5 @@ all_indoor_temperuature.append(b)
 with open('all_mirror_temperature', 'w') as f:
     print(all_mirror_temperature, file=f)
 
-with open('all_indoor_temperature', 'w') as f:
-    print(all_indoor_temperature, file=f)
+with open('all_indoor_temperuature', 'w') as f:
+    print(all_indoor_temperuature, file=f)
