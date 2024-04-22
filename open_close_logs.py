@@ -1,3 +1,10 @@
+import pandas as pd
+import numpy as np
+import json
+import os
+import warnings
+import psycopg2
+
 def telescope_temerarute(file_time=None, file_time_ub=None):
     conn = psycopg2.connect(
         host="192.168.10.87",
