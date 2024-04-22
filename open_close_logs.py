@@ -21,40 +21,53 @@ def telescope_temperature(file_time=None, file_time_ub=None):
 
     for item in data:
         if item[0] == 1:
-            ts_1.append(item[2])
+            ts_1.append(item) # item[2]
         if item[0] == 2:
-            ts_2.append(item[2])
+            ts_2.append(item)
         if item[0] == 3:
-            ts_3.append(item[2])
+            ts_3.append(item)
         if item[0] == 17:
-            ts_17.append(item[2])
+            ts_17.append(item)
         if item[0] == 19:
-            ts_19.append(item[2])
+            ts_19.append(item)
 
     cur.close()
     conn.close()
     warnings.simplefilter("ignore")
-    
-    mirror_temperature = (np.asarray(ts_1)/10 + np.asarray(ts_2)/10 + np.asarray(ts_3)/10)/3
-    indoor_temperuature = (np.asarray(ts_17)/10 + np.asarray(ts_19)/10)/2
-    return mirror_temperature, indoor_temperuature
+
+    return ts_1, ts_2, ts_3, ts_17, ts_19
 
 df = pd.read_csv("logs_open_close.csv")
 lb = df['open']
 ub = df['close']
 
-all_mirror_temperature = []
-all_indoor_temperature = []
+all_ts1 = []
+all_ts2 = []
+all_ts3 = []
+all_ts17 = []
+all_ts19 = []
 
 for i in range(4):
     print('doing:', lb[i], ub[i])
-    a,b = telescope_temperature(file_time=lb[i], file_time_ub=ub[i])
-    print(a, b)
-    all_mirror_temperature.append(a)
-    all_indoor_temperature.append(b)
+    ts1, ts2, ts3, ts17, ts19 = telescope_temperature(file_time=lb[i], file_time_ub=ub[i])
+    print(ts1, ts2, ts3, ts17, ts19)
+    all_ts1.append(ts1)
+    all_ts2.append(ts2)
+    all_ts3.append(ts3)
+    all_ts17.append(ts17)
+    all_ts19.append(ts19)
 
-with open('all_mirror_temperature.txt', 'w') as f:
-    print(all_mirror_temperature, file=f)
+with open('all_ts1.txt', 'w') as f:
+    print(all_ts1, file=f)
 
-with open('all_indoor_temperature.txt', 'w') as f:
-    print(all_indoor_temperature, file=f)
+with open('all_ts2.txt', 'w') as f:
+    print(all_ts2, file=f)
+
+with open('all_ts3.txt', 'w') as f:
+    print(all_ts3, file=f)
+
+with open('all_ts17.txt', 'w') as f:
+    print(all_ts17, file=f)
+    
+with open('all_ts19.txt', 'w') as f:
+    print(all_ts19, file=f)
