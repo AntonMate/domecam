@@ -18,56 +18,52 @@ def telescope_temperature(file_time=None, file_time_ub=None):
     data = cur.fetchall()
 
     ts_1, ts_2, ts_3, ts_17, ts_19 = [], [], [], [], []
+    date_mirror_temperature, date_indoor_temperature = [], []
 
     for item in data:
         if item[0] == 1:
-            ts_1.append(item) # item[2]
+            ts_1.append(item[2]) # item[2]
+            date_mirror_temperature.append(item[1])
         if item[0] == 2:
-            ts_2.append(item)
+            ts_2.append(item[2])
         if item[0] == 3:
-            ts_3.append(item)
+            ts_3.append(item[2])
         if item[0] == 17:
-            ts_17.append(item)
+            ts_17.append(item[2])
+            date_indoor_temperature.append(item[1])
         if item[0] == 19:
-            ts_19.append(item)
+            ts_19.append(item[2])
 
     cur.close()
     conn.close()
     warnings.simplefilter("ignore")
-
-    return ts_1, ts_2, ts_3, ts_17, ts_19
+    mirror_temperature = (np.asarray(ts_1) + np.asarray(ts_2) + np.asarray(ts_3))/30
+    indoor_temperature = (np.asarray(ts_17) + np.asarray(ts_19))/20
+    return mirror_temperature, date_mirror_temperature, indoor_temperature, date_indoor_temperature
 
 df = pd.read_csv("logs_open_close.csv")
 lb = df['open']
 ub = df['close']
 
-all_ts1 = []
-all_ts2 = []
-all_ts3 = []
-all_ts17 = []
-all_ts19 = []
+all_mirror_temperature, all_date_mirror_temperature, all_indoor_temperature, all_date_indoor_temperature = [], [], [], []
 
 for i in range(4):
     print('doing:', lb[i], ub[i])
-    ts1, ts2, ts3, ts17, ts19 = telescope_temperature(file_time=lb[i], file_time_ub=ub[i])
-    print(ts1, ts2, ts3, ts17, ts19)
-    all_ts1.append(ts1)
-    all_ts2.append(ts2)
-    all_ts3.append(ts3)
-    all_ts17.append(ts17)
-    all_ts19.append(ts19)
+    mirror_temperature, date_mirror_temperature, indoor_temperature, date_indoor_temperature = telescope_temperature(file_time=lb[i], file_time_ub=ub[i])
+    print(mirror_temperature, date_mirror_temperature, indoor_temperature, date_indoor_temperature)
+    all_mirror_temperature.append(mirror_temperature)
+    all_date_mirror_temperature.append(date_mirror_temperature)
+    all_indoor_temperature.append(indoor_temperature)
+    all_date_indoor_temperature.append(date_indoor_temperature)
 
-with open('all_ts1.txt', 'w') as f:
-    print(all_ts1, file=f)
+with open('mirror_temperature.txt', 'w') as f:
+    print(all_mirror_temperature, file=f)
 
-with open('all_ts2.txt', 'w') as f:
-    print(all_ts2, file=f)
+with open('date_mirror_temperature.txt', 'w') as f:
+    print(all_date_mirror_temperature, file=f)
 
-with open('all_ts3.txt', 'w') as f:
-    print(all_ts3, file=f)
+with open('indoor_temperature.txt', 'w') as f:
+    print(all_indoor_temperature, file=f)
 
-with open('all_ts17.txt', 'w') as f:
-    print(all_ts17, file=f)
-    
-with open('all_ts19.txt', 'w') as f:
-    print(all_ts19, file=f)
+with open('date_indoor_temperature.txt', 'w') as f:
+    print(all_date_indoor_temperature, file=f)
