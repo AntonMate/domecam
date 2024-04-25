@@ -40,7 +40,7 @@ def telescope_temperature(file_time=None, file_time_ub=None):
     mirror_temperature = (np.asarray(ts_1) + np.asarray(ts_2) + np.asarray(ts_3))/3
     indoor_temperature = (np.asarray(ts_17) + np.asarray(ts_19))/2
     for i in range(len(mirror_temperature)):
-        print(mirror_temperature[i], date_mirror_temperature[i])
+        print(np.round(mirror_temperature[i], 2), date_mirror_temperature[i], indoor_temperature[i], date_indoor_temperature[i])
     
     return mirror_temperature, date_mirror_temperature, indoor_temperature, date_indoor_temperature
 
