@@ -55,8 +55,7 @@ ub_lb = df['close_open']
 if os.path.isfile('all_temperature.txt'):
     os.remove('all_temperature.txt')
     
-# for i in range(len(df)):
-for i in range(3):
+for i in range(len(df)):
     print(' - doing:', lb[i], '|', ub[i], '|', ub_lb[i])
     telescope_temperature(file_time=lb[i], file_time_ub=ub[i])
     print(' - done!')
