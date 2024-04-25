@@ -39,8 +39,11 @@ def telescope_temperature(file_time=None, file_time_ub=None):
     warnings.simplefilter("ignore")
     mirror_temperature = (np.asarray(ts_1) + np.asarray(ts_2) + np.asarray(ts_3))/3
     indoor_temperature = (np.asarray(ts_17) + np.asarray(ts_19))/2
-    for i in range(len(mirror_temperature)):
-        print(np.round(mirror_temperature[i], 2), date_mirror_temperature[i], indoor_temperature[i], date_indoor_temperature[i])
+    
+    tmp = [len(mirror_temperature), len(date_mirror_temperature), len(indoor_temperature), len(date_indoor_temperature)]
+    print(' - checkpoint:', tmp, 'iter: ', np.min(tmp))
+    for i in range(np.min(tmp)):
+        print(np.round(mirror_temperature[i], 2), date_mirror_temperature[i], np.round(indoor_temperature[i], 2), date_indoor_temperature[i])
     
     return mirror_temperature, date_mirror_temperature, indoor_temperature, date_indoor_temperature
 
@@ -55,8 +58,6 @@ all_mirror_temperature, all_date_mirror_temperature, all_indoor_temperature, all
 for i in range(3):
     print(' - doing:', lb[i], '|', ub[i], '|', ub_lb[i])
     mirror_temperature, date_mirror_temperature, indoor_temperature, date_indoor_temperature = telescope_temperature(file_time=lb[i], file_time_ub=ub[i])
-    #print(mirror_temperature, date_mirror_temperature, indoor_temperature, date_indoor_temperature)
-    print(' - checkpoint:', len(mirror_temperature), len(date_mirror_temperature), len(indoor_temperature), len(date_indoor_temperature))
     print(' - done!')
     print()
     all_mirror_temperature.append(mirror_temperature)
