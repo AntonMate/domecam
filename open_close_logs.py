@@ -40,41 +40,25 @@ def telescope_temperature(file_time=None, file_time_ub=None):
     mirror_temperature = (np.asarray(ts_1) + np.asarray(ts_2) + np.asarray(ts_3))/3
     indoor_temperature = (np.asarray(ts_17) + np.asarray(ts_19))/2
     
-    tmp = [len(mirror_temperature), len(date_mirror_temperature), len(indoor_temperature), len(date_indoor_temperature)]
+    tmp = [len(mirror_temperature), len(date_mirror_temperature), len(indoor_temperature), len(date_indoor_temperature)]    
+    with open('all_temperature.txt', 'a') as f:
+        for i in range(np.min(tmp)):
+            print(np.round(mirror_temperature[i], 2), date_mirror_temperature[i], np.round(indoor_temperature[i], 2), date_indoor_temperature[i], file=f)
     print(' - checkpoint:', tmp, 'iter: ', np.min(tmp))
-    for i in range(np.min(tmp)):
-        print(np.round(mirror_temperature[i], 2), date_mirror_temperature[i], np.round(indoor_temperature[i], 2), date_indoor_temperature[i])
-    
-    return mirror_temperature, date_mirror_temperature, indoor_temperature, date_indoor_temperature
+    return 1
 
 df = pd.read_csv("logs_open_close.csv")
 lb = df['open']
 ub = df['close']
 ub_lb = df['close_open']
 
-all_mirror_temperature, all_date_mirror_temperature, all_indoor_temperature, all_date_indoor_temperature = [], [], [], []
-
+if os.path.isfile('all_temperature.txt'):
+    os.remove('all_temperature.txt')
+    
 # for i in range(len(df)):
 for i in range(3):
     print(' - doing:', lb[i], '|', ub[i], '|', ub_lb[i])
-    mirror_temperature, date_mirror_temperature, indoor_temperature, date_indoor_temperature = telescope_temperature(file_time=lb[i], file_time_ub=ub[i])
+    telescope_temperature(file_time=lb[i], file_time_ub=ub[i])
     print(' - done!')
     print()
-    all_mirror_temperature.append(mirror_temperature)
-    all_date_mirror_temperature.append(date_mirror_temperature)
-    all_indoor_temperature.append(indoor_temperature)
-    all_date_indoor_temperature.append(date_indoor_temperature)
-
-with open('mirror_temperature.txt', 'w') as f:
-    print(all_mirror_temperature, file=f)
-
-with open('date_mirror_temperature.txt', 'w') as f:
-    print(all_date_mirror_temperature, file=f)
-
-with open('indoor_temperature.txt', 'w') as f:
-    print(all_indoor_temperature, file=f)
-
-with open('date_indoor_temperature.txt', 'w') as f:
-    print(all_date_indoor_temperature, file=f)
-
 print('ALL DONE')
