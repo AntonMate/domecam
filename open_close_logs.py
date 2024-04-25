@@ -43,7 +43,7 @@ def telescope_temperature(file_time=None, file_time_ub=None):
     tmp = [len(mirror_temperature), len(date_mirror_temperature), len(indoor_temperature), len(date_indoor_temperature)]    
     with open('all_temperature.txt', 'a') as f:
         for i in range(np.min(tmp)):
-            print(np.round(mirror_temperature[i], 2), date_mirror_temperature[i], np.round(indoor_temperature[i], 2), date_indoor_temperature[i], file=f)
+            print(date_mirror_temperature[i], np.round(mirror_temperature[i], 2), np.round(indoor_temperature[i], 2), file=f)
     print(' - checkpoint:', tmp, 'iter: ', np.min(tmp))
     return 1
 
