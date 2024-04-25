@@ -21,26 +21,25 @@ def telescope_temperature(file_time=None, file_time_ub=None):
     date_mirror_temperature, date_indoor_temperature = [], []
 
     for item in data:
-        if item[0] == 1 or item[0] == 2 or item[0] == 3:
-#             print(item)
-            print(item[0], item[1].replace(microsecond=0), item[2]/10)
-            ts_1.append(item[2]) # item[2]
-            date_mirror_temperature.append(item[1])
+        if item[0] == 1:
+            ts_1.append(item[2]/10) # item[2]
+            date_mirror_temperature.append(item[1].replace(microsecond=0))
         if item[0] == 2:
-            ts_2.append(item[2])
+            ts_2.append(item[2]/10)
         if item[0] == 3:
-            ts_3.append(item[2])
+            ts_3.append(item[2]/10)
         if item[0] == 17:
-            ts_17.append(item[2])
-            date_indoor_temperature.append(item[1])
+            ts_17.append(item[2]/10)
+            date_indoor_temperature.append(item[1].replace(microsecond=0))
         if item[0] == 19:
-            ts_19.append(item[2])
+            ts_19.append(item[2]/10)
 
     cur.close()
     conn.close()
     warnings.simplefilter("ignore")
-    mirror_temperature = (np.asarray(ts_1) + np.asarray(ts_2) + np.asarray(ts_3))/30
-    indoor_temperature = (np.asarray(ts_17) + np.asarray(ts_19))/20
+    mirror_temperature = (np.asarray(ts_1) + np.asarray(ts_2) + np.asarray(ts_3))/3
+    indoor_temperature = (np.asarray(ts_17) + np.asarray(ts_19))/2
+    print(mirror_temperature, date_mirror_temperature)
     return mirror_temperature, date_mirror_temperature, indoor_temperature, date_indoor_temperature
 
 df = pd.read_csv("logs_open_close.csv")
