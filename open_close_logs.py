@@ -23,7 +23,7 @@ def telescope_temperature(file_time=None, file_time_ub=None):
     for item in data:
         if item[0] == 1:
 #             print(item)
-            print(item[1].replace(microsecond=0), item[2])
+            print(item[1].replace(microsecond=0), item[2]/10)
             ts_1.append(item[2]) # item[2]
             date_mirror_temperature.append(item[1])
         if item[0] == 2:
