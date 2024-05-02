@@ -12,7 +12,7 @@ def telescope_temperature(file_time=None, file_time_ub=None):
         user="tdsuser",
         password="?tdsuser=")
     cur = conn.cursor()
-    cmd_sql_execute = f"SELECT ts_id,meas_time,value from \"sai2p5_temp\" WHERE ( meas_time>'{file_time}' and meas_time<'{file_time_ub}') AND ((ts_id=1) or (ts_id=2) or (ts_id=3) or (ts_id=17) or (ts_id=19));"
+    cmd_sql_execute = f"SELECT ts_id,meas_time,value from \"sai2p5_temp\" WHERE ( meas_time>'{j}' and meas_time<'{file_time_ub}') AND ((ts_id=1) or (ts_id=2) or (ts_id=3) or (ts_id=17) or (ts_id=19));"
     cur.execute(cmd_sql_execute)
 
     data = cur.fetchall()
@@ -47,16 +47,15 @@ def telescope_temperature(file_time=None, file_time_ub=None):
     print(' - checkpoint:', tmp, 'iter: ', np.min(tmp))
     return 1
 
-df = pd.read_csv("logs_open_close2.csv")
+df = pd.read_csv("logs_open_close_main.csv")
 lb = df['open']
 ub = df['close']
-ub_lb = df['close_open']
 
 if os.path.isfile('all_temperature.txt'):
     os.remove('all_temperature.txt')
     
 for i in range(len(df)):
-    print(' - doing:', lb[i], '|', ub[i], '|', ub_lb[i])
+    print(' - doing:', lb[i], '|', ub[i])
     telescope_temperature(file_time=lb[i], file_time_ub=ub[i])
     print(' - done!')
     print()
