@@ -12,7 +12,7 @@ def telescope_temperature(file_time=None, file_time_ub=None):
         user="tdsuser",
         password="?tdsuser=")
     cur = conn.cursor()
-    cmd_sql_execute = f"SELECT ts_id,meas_time,value from \"sai2p5_temp\" WHERE ( meas_time>'{j}' and meas_time<'{file_time_ub}') AND ((ts_id=1) or (ts_id=2) or (ts_id=3) or (ts_id=17) or (ts_id=19));"
+    cmd_sql_execute = f"SELECT ts_id,meas_time,value from \"sai2p5_temp\" WHERE ( meas_time>'{file_time}' and meas_time<'{file_time_ub}') AND ((ts_id=1) or (ts_id=2) or (ts_id=3) or (ts_id=17) or (ts_id=19));"
     cur.execute(cmd_sql_execute)
 
     data = cur.fetchall()
