@@ -47,7 +47,7 @@ def telescope_temperature(file_time=None, file_time_ub=None):
     print(' - checkpoint:', tmp, 'iter: ', np.min(tmp))
     return 1
 
-df = pd.read_csv("logs_open_close_main.csv")
+df = pd.read_csv("logs_open_close.csv")
 lb = df['open']
 ub = df['close']
 
